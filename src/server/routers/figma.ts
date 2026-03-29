@@ -32,13 +32,13 @@ export const figmaRouter = router({
       }
 
       const code = await figmaMCP.generateReactCode(component);
-      const tailwindConfig = await figmaMCP.generateTailwindConfig(design.tokens);
+      const tailwindConfig = await figmaMCP.generateTailwindConfig(design.designTokens);
 
       return {
         component: component.name,
         code,
         tailwindConfig,
-        designTokens: design.tokens,
+        designTokens: design.designTokens,
       };
     }),
 
@@ -62,13 +62,13 @@ export const figmaRouter = router({
         })
       );
 
-      const tailwindConfig = await figmaMCP.generateTailwindConfig(design.tokens);
+      const tailwindConfig = await figmaMCP.generateTailwindConfig(design.designTokens);
 
       return {
         designName: design.name,
         components: generatedComponents,
         tailwindConfig,
-        designTokens: design.tokens,
+        designTokens: design.designTokens,
       };
     }),
 });

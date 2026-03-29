@@ -45,3 +45,5 @@ next-env.d.ts
 /playwright-report/
 /playwright/.cache/
 /tests/screenshots/
+
+/src/generated/prisma

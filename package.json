@@ -9,11 +9,19 @@
     "lint": "eslint",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
-    "test:e2e:debug": "playwright test --debug"
+    "test:e2e:debug": "playwright test --debug",
+    "db:push": "prisma db push",
+    "db:migrate": "prisma migrate dev",
+    "db:studio": "prisma studio",
+    "db:generate": "prisma generate",
+    "eval": "promptfoo eval",
+    "eval:view": "promptfoo view"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.80.0",
     "@base-ui/react": "^1.3.0",
+    "@prisma/client": "^6.19.2",
+    "@qdrant/js-client-rest": "^1.17.0",
     "@tanstack/react-query": "^5.95.2",
     "@trpc/client": "^11.13.0",
     "@trpc/next": "^11.13.0",
@@ -23,6 +31,7 @@
     "clsx": "^2.1.1",
     "lucide-react": "^1.7.0",
     "next": "16.2.1",
+    "prisma": "^6.19.2",
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "shadcn": "^4.1.1",
@@ -39,6 +48,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.2.1",
+    "promptfoo": "^0.121.3",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

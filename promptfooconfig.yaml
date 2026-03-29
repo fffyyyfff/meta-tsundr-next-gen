@@ -1,0 +1,97 @@
+description: "Meta Tsundr Agent Evals"
+
+providers:
+  - id: anthropic:messages:claude-sonnet-4-5-20250514
+    config:
+      max_tokens: 2048
+
+prompts:
+  - id: design-agent
+    raw: |
+      あなたはDesign Agentです。Figmaデザインからフロントエンドコンポーネントを生成する専門家です。
+      React + TypeScript + Tailwind CSSでコンポーネントを生成してください。
+
+      タスク: {{task}}
+
+  - id: code-review-agent
+    raw: |
+      あなたはCode Review Agentです。コードの品質、セキュリティ、パフォーマンスをレビューする専門家です。
+
+      コード: {{code}}
+
+  - id: test-gen-agent
+    raw: |
+      あなたはTest Generation Agentです。Playwright E2Eテストを自動生成する専門家です。
+
+      テスト対象: {{component}}
+
+  - id: task-mgmt-agent
+    raw: |
+      あなたはTask Management Agentです。開発タスクの分解、見積もり、優先順位付けを行う専門家です。
+
+      要件: {{requirement}}
+
+tests:
+  # Design Agent Evals
+  - description: "Design Agent - ボタンコンポーネント生成"
+    vars:
+      task: "プライマリボタンコンポーネントを生成してください。variant: primary, secondary, destructive。サイズ: sm, md, lg。"
+    assert:
+      - type: contains
+        value: "interface"
+      - type: contains
+        value: "className"
+      - type: llm-rubric
+        value: "生成されたコードはReact + TypeScriptのコンポーネントで、Tailwind CSSを使用している"
+
+  - description: "Design Agent - フォームコンポーネント生成"
+    vars:
+      task: "ログインフォームを生成してください。メール、パスワード、送信ボタンを含む。バリデーション付き。"
+    assert:
+      - type: contains
+        value: "form"
+      - type: llm-rubric
+        value: "フォームにはメール入力、パスワード入力、送信ボタンが含まれている"
+
+  # Code Review Agent Evals
+  - description: "Code Review Agent - セキュリティ問題検出"
+    vars:
+      code: |
+        function search(query) {
+          const html = `<div>${query}</div>`;
+          document.innerHTML = html;
+          fetch(`/api/search?q=${query}`);
+        }
+    assert:
+      - type: contains-any
+        value: ["XSS", "injection", "セキュリティ", "sanitize"]
+      - type: llm-rubric
+        value: "XSSの脆弱性が指摘されている"
+
+  # Test Gen Agent Evals
+  - description: "Test Gen Agent - テスト生成品質"
+    vars:
+      component: "ユーザー一覧ページ。テーブル表示、検索フィルター、ページネーション付き。"
+    assert:
+      - type: contains
+        value: "test("
+      - type: contains
+        value: "expect"
+      - type: llm-rubric
+        value: "Playwrightのテストコードが含まれ、複数のテストケースがある"
+
+  # Task Mgmt Agent Evals
+  - description: "Task Mgmt Agent - タスク分解品質"
+    vars:
+      requirement: "ECサイトのショッピングカート機能を実装する"
+    assert:
+      - type: llm-rubric
+        value: "タスクが適切な粒度に分解され、優先順位が設定されている"
+
+# Eval settings
+defaultTest:
+  options:
+    provider:
+      id: anthropic:messages:claude-sonnet-4-5-20250514
+      config:
+        max_tokens: 2048
