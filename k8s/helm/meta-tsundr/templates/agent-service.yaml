@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-agent-service
+  labels:
+    app: agent-service
+    app.kubernetes.io/name: agent-service
+    app.kubernetes.io/instance: {{ .Release.Name }}
+spec:
+  replicas: {{ .Values.agentService.replicaCount }}
+  selector:
+    matchLabels:
+      app: agent-service
+  template:
+    metadata:
+      labels:
+        app: agent-service
+    spec:
+      containers:
+        - name: agent-service
+          image: "{{ .Values.agentService.image.repository }}:{{ .Values.agentService.image.tag }}"
+          imagePullPolicy: {{ .Values.agentService.image.pullPolicy }}
+          ports:
+            - containerPort: 3001
+          envFrom:
+            - secretRef:
+                name: {{ .Values.secrets.existingSecret }}
+          resources:
+            {{- toYaml .Values.agentService.resources | nindent 12 }}
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3001
+            initialDelaySeconds: 10
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 3001
+            initialDelaySeconds: 5
+            periodSeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-agent-service
+spec:
+  selector:
+    app: agent-service
+  ports:
+    - port: 80
+      targetPort: 3001
+  type: ClusterIP

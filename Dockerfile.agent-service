@@ -1,0 +1,32 @@
+# Agent Service - Standalone microservice
+FROM node:22-alpine AS base
+RUN apk add --no-cache libc6-compat
+WORKDIR /app
+
+FROM base AS deps
+COPY package.json package-lock.json ./
+COPY prisma ./prisma/
+COPY prisma.config.ts ./
+RUN npm ci --ignore-scripts
+RUN npx prisma generate
+
+FROM base AS builder
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+RUN npx tsc --project tsconfig.agent-service.json
+
+FROM base AS runner
+ENV NODE_ENV=production
+
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 agent
+
+COPY --from=deps /app/node_modules ./node_modules
+COPY --from=builder /app/dist/agent-service ./
+
+USER agent
+
+EXPOSE 3001
+ENV PORT=3001
+
+CMD ["node", "index.js"]

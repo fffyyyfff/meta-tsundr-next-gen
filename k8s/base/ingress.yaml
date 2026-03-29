@@ -1,0 +1,33 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: meta-tsundr
+  namespace: meta-tsundr
+  annotations:
+    nginx.ingress.kubernetes.io/rate-limit: "60"
+    nginx.ingress.kubernetes.io/rate-limit-window: "1m"
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - meta-tsundr.example.com
+      secretName: meta-tsundr-tls
+  rules:
+    - host: meta-tsundr.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: web
+                port:
+                  number: 80
+          - path: /api/agent
+            pathType: Prefix
+            backend:
+              service:
+                name: agent-service
+                port:
+                  number: 80

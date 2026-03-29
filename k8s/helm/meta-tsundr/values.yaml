@@ -1,0 +1,56 @@
+web:
+  replicaCount: 2
+  image:
+    repository: ghcr.io/fffyyyfff/meta-tsundr-next-gen
+    tag: latest
+    pullPolicy: IfNotPresent
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 10
+    targetCPU: 70
+
+agentService:
+  replicaCount: 2
+  image:
+    repository: ghcr.io/fffyyyfff/meta-tsundr-agent-service
+    tag: latest
+    pullPolicy: IfNotPresent
+  resources:
+    requests:
+      cpu: 200m
+      memory: 512Mi
+    limits:
+      cpu: "1"
+      memory: 1Gi
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 8
+    targetCPU: 60
+
+ingress:
+  enabled: true
+  className: nginx
+  host: meta-tsundr.example.com
+  tls: true
+  clusterIssuer: letsencrypt-prod
+
+postgresql:
+  enabled: true
+  auth:
+    database: meta_tsundr
+    username: meta_tsundr
+
+qdrant:
+  enabled: true
+
+secrets:
+  existingSecret: meta-tsundr-secrets
