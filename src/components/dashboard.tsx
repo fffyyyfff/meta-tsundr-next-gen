@@ -1,8 +1,8 @@
 'use client';
 
-import { useEffect, useCallback } from 'react';
-import { useAgentStore } from '@/stores/agentStore';
+import { useState, useCallback } from 'react';
 import { trpcReact } from '@/lib/trpc-provider';
+import { usePagination } from '@/hooks/usePagination';
 import {
   Card,
   CardContent,
@@ -39,6 +39,26 @@ const AGENT_LABELS: Record<string, string> = {
   'task-mgmt': 'Task Mgmt',
 };
 
+type AgentTypeFilter = 'all' | 'design' | 'code-review' | 'test-gen' | 'task-mgmt';
+type StatusFilter = 'all' | 'completed' | 'error' | 'running';
+
+const AGENT_TYPE_OPTIONS: { value: AgentTypeFilter; label: string }[] = [
+  { value: 'all', label: 'All Agents' },
+  { value: 'design', label: 'Design' },
+  { value: 'code-review', label: 'CodeReview' },
+  { value: 'test-gen', label: 'TestGen' },
+  { value: 'task-mgmt', label: 'TaskMgmt' },
+];
+
+const STATUS_OPTIONS: { value: StatusFilter; label: string }[] = [
+  { value: 'all', label: 'All Status' },
+  { value: 'completed', label: 'Success' },
+  { value: 'error', label: 'Failed' },
+  { value: 'running', label: 'Running' },
+];
+
+const ITEMS_PER_PAGE = 10;
+
 function StatusBadge({ status }: { status: string }) {
   const config = STATUS_CONFIG[status as keyof typeof STATUS_CONFIG] ?? STATUS_CONFIG.pending;
   return (
@@ -73,74 +93,64 @@ interface DashboardProps {
 }
 
 export function Dashboard({ userId = 'default-user' }: DashboardProps) {
-  const {
-    executions,
-    executionsLoading,
-    executionsCursor,
-    setExecutions,
-    appendExecutions,
-    setExecutionsLoading,
-    setExecutionsCursor,
-  } = useAgentStore();
+  const [agentTypeFilter, setAgentTypeFilter] = useState<AgentTypeFilter>('all');
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
+  const [page, setPage] = useState(1);
 
-  const listQuery = trpcReact.history.listExecutions.useQuery(
-    { userId, limit: 20 },
-    { enabled: executions.length === 0 },
+  const queryInput = {
+    userId,
+    limit: ITEMS_PER_PAGE,
+    page,
+    ...(agentTypeFilter !== 'all' && { agentType: agentTypeFilter as 'design' | 'code-review' | 'test-gen' | 'task-mgmt' }),
+    ...(statusFilter !== 'all' && { status: statusFilter as 'completed' | 'error' | 'running' }),
+  };
+
+  const listQuery = trpcReact.history.listExecutions.useQuery(queryInput);
+
+  const totalCount = listQuery.data?.totalCount ?? 0;
+  const executions = (listQuery.data?.items ?? []).map((item) => ({
+    id: item.id,
+    agentType: item.agentType,
+    task: item.task,
+    result: item.result,
+    status: item.status,
+    duration: item.duration,
+    createdAt: item.createdAt.toString(),
+    project: item.project,
+  }));
+
+  const { currentPage, totalPages, hasNext, hasPrev } = usePagination({
+    totalItems: totalCount,
+    itemsPerPage: ITEMS_PER_PAGE,
+    initialPage: page,
+  });
+
+  const handleAgentTypeChange = useCallback(
+    (value: AgentTypeFilter) => {
+      setAgentTypeFilter(value);
+      setPage(1);
+    },
+    [],
   );
 
-  const loadMoreQuery = trpcReact.history.listExecutions.useQuery(
-    { userId, limit: 20, cursor: executionsCursor },
-    { enabled: false },
+  const handleStatusChange = useCallback(
+    (value: StatusFilter) => {
+      setStatusFilter(value);
+      setPage(1);
+    },
+    [],
   );
 
-  useEffect(() => {
-    if (listQuery.data) {
-      setExecutions(
-        listQuery.data.items.map((item) => ({
-          id: item.id,
-          agentType: item.agentType,
-          task: item.task,
-          result: item.result,
-          status: item.status,
-          duration: item.duration,
-          createdAt: item.createdAt.toString(),
-          project: item.project,
-        })),
-      );
-      setExecutionsCursor(listQuery.data.nextCursor ?? undefined);
-    }
-  }, [listQuery.data, setExecutions, setExecutionsCursor]);
+  const handlePrev = useCallback(() => {
+    setPage((p) => Math.max(1, p - 1));
+  }, []);
 
-  const handleLoadMore = useCallback(async () => {
-    if (!executionsCursor) return;
-    setExecutionsLoading(true);
-    const result = await loadMoreQuery.refetch();
-    if (result.data) {
-      appendExecutions(
-        result.data.items.map((item) => ({
-          id: item.id,
-          agentType: item.agentType,
-          task: item.task,
-          result: item.result,
-          status: item.status,
-          duration: item.duration,
-          createdAt: item.createdAt.toString(),
-          project: item.project,
-        })),
-      );
-      setExecutionsCursor(result.data.nextCursor ?? undefined);
-    }
-    setExecutionsLoading(false);
-  }, [executionsCursor, loadMoreQuery, appendExecutions, setExecutionsCursor, setExecutionsLoading]);
-
-  const handleRefresh = useCallback(() => {
-    setExecutions([]);
-    setExecutionsCursor(undefined);
-    listQuery.refetch();
-  }, [listQuery, setExecutions, setExecutionsCursor]);
+  const handleNext = useCallback(() => {
+    setPage((p) => Math.min(p + 1, Math.max(1, Math.ceil(totalCount / ITEMS_PER_PAGE))));
+  }, [totalCount]);
 
   const stats = {
-    total: executions.length,
+    total: totalCount,
     success: executions.filter((e) => e.status === 'completed').length,
     failed: executions.filter((e) => e.status === 'error').length,
     running: executions.filter((e) => e.status === 'running').length,
@@ -153,7 +163,12 @@ export function Dashboard({ userId = 'default-user' }: DashboardProps) {
           <h2 className="text-2xl font-bold tracking-tight">Execution History</h2>
           <p className="text-muted-foreground">Agent execution logs and performance metrics</p>
         </div>
-        <Button variant="outline" size="sm" onClick={handleRefresh} disabled={listQuery.isLoading}>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => listQuery.refetch()}
+          disabled={listQuery.isLoading}
+        >
           Refresh
         </Button>
       </div>
@@ -175,9 +190,50 @@ export function Dashboard({ userId = 'default-user' }: DashboardProps) {
         ))}
       </div>
 
+      {/* Filters */}
+      <div className="flex flex-wrap items-center gap-3">
+        <div className="flex items-center gap-2">
+          <label htmlFor="agent-type-filter" className="text-sm font-medium text-muted-foreground">
+            Agent:
+          </label>
+          <select
+            id="agent-type-filter"
+            value={agentTypeFilter}
+            onChange={(e) => handleAgentTypeChange(e.target.value as AgentTypeFilter)}
+            className="rounded-md border border-input bg-background px-3 py-1.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-ring"
+          >
+            {AGENT_TYPE_OPTIONS.map((opt) => (
+              <option key={opt.value} value={opt.value}>
+                {opt.label}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="flex items-center gap-2">
+          <label htmlFor="status-filter" className="text-sm font-medium text-muted-foreground">
+            Status:
+          </label>
+          <select
+            id="status-filter"
+            value={statusFilter}
+            onChange={(e) => handleStatusChange(e.target.value as StatusFilter)}
+            className="rounded-md border border-input bg-background px-3 py-1.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-ring"
+          >
+            {STATUS_OPTIONS.map((opt) => (
+              <option key={opt.value} value={opt.value}>
+                {opt.label}
+              </option>
+            ))}
+          </select>
+        </div>
+        <span className="text-xs text-muted-foreground ml-auto">
+          {totalCount} results
+        </span>
+      </div>
+
       {/* Execution list */}
       <div className="space-y-3">
-        {listQuery.isLoading && executions.length === 0 ? (
+        {listQuery.isLoading ? (
           <Card>
             <CardContent className="py-8 text-center text-muted-foreground">
               Loading execution history...
@@ -186,7 +242,7 @@ export function Dashboard({ userId = 'default-user' }: DashboardProps) {
         ) : executions.length === 0 ? (
           <Card>
             <CardContent className="py-8 text-center text-muted-foreground">
-              No executions yet. Run an agent to see history here.
+              No executions found.
             </CardContent>
           </Card>
         ) : (
@@ -230,11 +286,27 @@ export function Dashboard({ userId = 'default-user' }: DashboardProps) {
         )}
       </div>
 
-      {/* Load more */}
-      {executionsCursor && (
-        <div className="flex justify-center">
-          <Button variant="outline" onClick={handleLoadMore} disabled={executionsLoading}>
-            {executionsLoading ? 'Loading...' : 'Load More'}
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center gap-3">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handlePrev}
+            disabled={!hasPrev || listQuery.isLoading}
+          >
+            Prev
+          </Button>
+          <span className="text-sm text-muted-foreground">
+            {currentPage} / {totalPages}
+          </span>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleNext}
+            disabled={!hasNext || listQuery.isLoading}
+          >
+            Next
           </Button>
         </div>
       )}

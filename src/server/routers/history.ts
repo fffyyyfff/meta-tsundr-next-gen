@@ -10,33 +10,43 @@ export const historyRouter = router({
         projectId: z.string().optional(),
         agentType: z.enum(['design', 'code-review', 'test-gen', 'task-mgmt']).optional(),
         status: z.enum(['pending', 'running', 'completed', 'error']).optional(),
-        limit: z.number().min(1).max(100).default(20),
+        limit: z.number().min(1).max(100).default(10),
+        page: z.number().min(1).default(1),
         cursor: z.string().optional(),
       }),
     )
     .query(async ({ input }) => {
-      const { userId, projectId, agentType, status, limit, cursor } = input;
+      const { userId, projectId, agentType, status, limit, page, cursor } = input;
 
-      const executions = await prisma.agentExecution.findMany({
-        where: {
-          userId,
-          ...(projectId && { projectId }),
-          ...(agentType && { agentType }),
-          ...(status && { status }),
-        },
-        orderBy: { createdAt: 'desc' },
-        take: limit + 1,
-        ...(cursor && { cursor: { id: cursor }, skip: 1 }),
-        include: {
-          project: { select: { id: true, name: true } },
-        },
-      });
+      const where = {
+        userId,
+        ...(projectId && { projectId }),
+        ...(agentType && { agentType }),
+        ...(status && { status }),
+      };
 
-      const hasMore = executions.length > limit;
-      const items = hasMore ? executions.slice(0, limit) : executions;
-      const nextCursor = hasMore ? items[items.length - 1]?.id : undefined;
+      const [totalCount, executions] = await Promise.all([
+        prisma.agentExecution.count({ where }),
+        prisma.agentExecution.findMany({
+          where,
+          orderBy: { createdAt: 'desc' },
+          ...(cursor
+            ? { take: limit + 1, cursor: { id: cursor }, skip: 1 }
+            : { take: limit, skip: (page - 1) * limit }),
+          include: {
+            project: { select: { id: true, name: true } },
+          },
+        }),
+      ]);
 
-      return { items, nextCursor };
+      if (cursor) {
+        const hasMore = executions.length > limit;
+        const items = hasMore ? executions.slice(0, limit) : executions;
+        const nextCursor = hasMore ? items[items.length - 1]?.id : undefined;
+        return { items, nextCursor, totalCount };
+      }
+
+      return { items: executions, nextCursor: undefined, totalCount };
     }),
 
   getExecution: publicProcedure
