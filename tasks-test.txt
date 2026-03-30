@@ -1,0 +1,2 @@
+Worker1: src/components/ui/badge.tsx を新規作成して。shadcn/ui風のBadgeコンポーネント。variant: default, success, warning, error, outline。className propで拡張可能。
+Worker2: src/lib/utils.ts を新規作成して。cn()関数(clsx+tailwind-merge)とformatDate()関数(日本語フォーマット)とformatDuration(ms: number)関数を実装。

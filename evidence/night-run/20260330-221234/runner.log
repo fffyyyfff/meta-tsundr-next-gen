@@ -1,0 +1,20 @@
+🌙 Night Runner starting at Mon Mar 30 22:12:34 JST 2026
+   Tasks file: /Users/user/workspace/AI_work/meta-tsundr-next-gen/tasks-test.txt
+   Work dir: /Users/user/workspace/AI_work/meta-tsundr-next-gen
+   Timeout/task: 300s
+   Auto-commit: true
+---
+⏳ Waiting for Claude Code to start...
+📋 2 tasks to execute
+
+━━━ Task 1/2 ━━━
+🔄 [Worker1] src/components/ui/badge.tsx を新規作成して。shadcn/ui風のBadgeコンポーネント。variant: default, success, warning, error, outline。className propで拡張可能。
+✅ [Worker1] Completed (40s)
+
+━━━ Task 2/2 ━━━
+🔄 [Worker2] src/lib/utils.ts を新規作成して。cn()関数(clsx+tailwind-merge)とformatDate()関数(日本語フォーマット)とformatDuration(ms: number)関数を実装。
+⏰ [Worker2] Timeout after 300s
+
+━━━ Post-processing ━━━
+Running tsc...
+✅ TypeScript: PASS
