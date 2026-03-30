@@ -1,4 +1,5 @@
 // Figma MCP Service - Real Figma REST API integration with mock fallback
+import { withRetry, RetryableError } from './retry';
 
 export interface FigmaDesign {
   name: string;
@@ -82,16 +83,29 @@ export class FigmaMCPService {
     const fileKey = this.extractFileKey(figmaUrl);
     if (!fileKey) throw new Error('Invalid Figma URL');
 
-    const response = await fetch(`${this.baseUrl}/files/${fileKey}`, {
-      headers: { 'X-Figma-Token': this.accessToken! },
-    });
+    return withRetry(
+      async () => {
+        const response = await fetch(`${this.baseUrl}/files/${fileKey}`, {
+          headers: { 'X-Figma-Token': this.accessToken! },
+        });
 
-    if (!response.ok) {
-      throw new Error(`Figma API error: ${response.status} ${response.statusText}`);
-    }
+        if (!response.ok) {
+          throw new RetryableError(
+            `Figma API error: ${response.status} ${response.statusText}`,
+            response.status,
+          );
+        }
 
-    const data = (await response.json()) as FigmaAPIFile;
-    return this.parseFileToDesign(data);
+        const data = (await response.json()) as FigmaAPIFile;
+        return this.parseFileToDesign(data);
+      },
+      {
+        maxRetries: 3,
+        initialDelay: 1000,
+        backoffMultiplier: 2,
+        retryableErrors: [429, 500, 503],
+      },
+    );
   }
 
   private extractFileKey(url: string): string | null {

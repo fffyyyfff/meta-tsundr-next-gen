@@ -3,6 +3,8 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { TRPCProvider } from "@/lib/trpc-provider";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { SkipNav } from "@/components/skip-nav";
+import { KeyboardShortcutsHelp } from "@/components/keyboard-shortcuts-help";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -38,11 +40,17 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-full flex flex-col">
-        <header className="flex items-center justify-between border-b border-border px-6 py-3">
+        <SkipNav />
+        <header className="flex items-center justify-between border-b border-border px-6 py-3" role="banner">
           <span className="text-lg font-semibold text-foreground">Meta-tsundr</span>
           <ThemeToggle />
         </header>
-        <TRPCProvider>{children}</TRPCProvider>
+        <TRPCProvider>
+          <main id="main-content" className="flex-1">
+            {children}
+          </main>
+          <KeyboardShortcutsHelp />
+        </TRPCProvider>
       </body>
     </html>
   );

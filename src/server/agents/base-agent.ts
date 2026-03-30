@@ -1,4 +1,5 @@
 import Anthropic from '@anthropic-ai/sdk';
+import { withRetry } from '../services/retry';
 
 export interface AgentResult {
   success: boolean;
@@ -52,12 +53,21 @@ export abstract class BaseAgent {
   protected abstract run(task: string): Promise<Omit<AgentResult, 'agentType' | 'duration'>>;
 
   protected async callClaude(userMessage: string): Promise<{ text: string; tokenUsage: number }> {
-    const message = await this.anthropic.messages.create({
-      model: this.config.model || 'claude-sonnet-4-5-20250514',
-      max_tokens: this.config.maxTokens || 2048,
-      system: this.config.systemPrompt,
-      messages: [{ role: 'user', content: userMessage }],
-    });
+    const message = await withRetry(
+      () =>
+        this.anthropic.messages.create({
+          model: this.config.model || 'claude-sonnet-4-5-20250514',
+          max_tokens: this.config.maxTokens || 2048,
+          system: this.config.systemPrompt,
+          messages: [{ role: 'user', content: userMessage }],
+        }),
+      {
+        maxRetries: 3,
+        initialDelay: 1000,
+        backoffMultiplier: 2,
+        retryableErrors: [429, 500, 503],
+      },
+    );
 
     const content = message.content[0];
     const text = content.type === 'text' ? content.text : '';

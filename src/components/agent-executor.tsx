@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { useAgentStore } from '@/stores/agentStore';
 import { useAgentStream } from '@/hooks/useAgentStream';
+import { useKeyboardShortcut } from '@/hooks/useKeyboardShortcut';
 import { trpcReact } from '@/lib/trpc-provider';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -36,6 +37,8 @@ export function AgentExecutor() {
   const [agentType, setAgentType] = useState<AgentType>('design');
   const [useStream, setUseStream] = useState(true);
   const { addAgent, updateAgent } = useAgentStore();
+  const formRef = useRef<HTMLFormElement>(null);
+  const taskInputRef = useRef<HTMLInputElement>(null);
 
   const {
     connect,
@@ -143,8 +146,20 @@ export function AgentExecutor() {
     }
   }, [disconnect, updateAgent]);
 
+  // Ctrl+Enter: submit form
+  useKeyboardShortcut('Enter', () => {
+    if (task.trim() && !isRunning) {
+      formRef.current?.requestSubmit();
+    }
+  }, { ctrl: true, allowInInput: true });
+
+  // Ctrl+K: focus task input
+  useKeyboardShortcut('k', () => {
+    taskInputRef.current?.focus();
+  }, { ctrl: true });
+
   return (
-    <Card className="w-full max-w-2xl mx-auto">
+    <Card className="w-full max-w-2xl mx-auto" role="region" aria-label="Agent task executor">
       <CardHeader>
         <CardTitle>Execute AI Agent Task</CardTitle>
         <CardDescription>
@@ -152,7 +167,7 @@ export function AgentExecutor() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form ref={formRef} onSubmit={handleSubmit} className="space-y-4" aria-label="Agent execution form">
           <div className="space-y-2">
             <Label htmlFor="agent-type">Agent Type</Label>
             <select
@@ -161,6 +176,7 @@ export function AgentExecutor() {
               onChange={(e) => setAgentType(e.target.value as AgentType)}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-600"
               disabled={isRunning}
+              aria-label="Select agent type"
             >
               <option value="design">Design Agent (Figma → Code)</option>
               <option value="code-review">Code Review Agent</option>
@@ -172,12 +188,14 @@ export function AgentExecutor() {
           <div className="space-y-2">
             <Label htmlFor="task">Task Description</Label>
             <Input
+              ref={taskInputRef}
               id="task"
               type="text"
               value={task}
               onChange={(e) => setTask(e.target.value)}
-              placeholder="Describe your task..."
+              placeholder="Describe your task... (Ctrl+K to focus)"
               disabled={isRunning}
+              aria-label="Task description"
             />
           </div>
 
@@ -236,11 +254,12 @@ export function AgentExecutor() {
               type="submit"
               disabled={isRunning || !task.trim()}
               className="flex-1"
+              aria-label={isRunning ? 'Task executing' : 'Execute task (Ctrl+Enter)'}
             >
               {isRunning ? 'Executing...' : 'Execute Task'}
             </Button>
             {isRunning && useStream && (
-              <Button type="button" variant="outline" onClick={handleCancel}>
+              <Button type="button" variant="outline" onClick={handleCancel} aria-label="Cancel execution">
                 Cancel
               </Button>
             )}
