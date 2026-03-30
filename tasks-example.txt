@@ -1,0 +1,8 @@
+# Night Runner タスクファイル例
+# フォーマット: Worker1: タスク内容 / Worker2: タスク内容
+# Worker指定なしの場合は交互に振り分け
+
+Worker1: src/components にダークモード切り替えボタンを追加して。Zustandでthemeストアを作り、html要素にdark classをトグルする
+Worker2: src/server/routers/agent.ts のexecuteTaskにリトライロジックを追加して。最大3回、exponential backoff。エラー時はAgentExecutionのstatusをretryingに更新
+Worker1: tests/e2e/ に認証フローのE2Eテストを追加して。/loginページ表示、GitHubボタン存在確認、未認証時のリダイレクト確認
+Worker2: src/components/dashboard.tsx にページネーションを追加して。1ページ10件、前へ/次へボタン、現在のページ番号表示

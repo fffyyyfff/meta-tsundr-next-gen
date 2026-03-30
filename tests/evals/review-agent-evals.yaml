@@ -1,0 +1,154 @@
+# Code Review Agent — Extended Evaluation Cases
+# These tests verify review quality against the Code Review Agent system prompt:
+#   - Security: XSS, SQL injection, CSRF, auth issues
+#   - Performance: N+1 queries, unnecessary re-renders, memory leaks
+#   - Code quality: SOLID, DRY, readability, testability
+#   - Output format: 🔴 Critical, 🟡 Warning, 🟢 Info
+
+tests:
+  # ---- CSRF vulnerability ----
+  - description: "Code Review Agent - CSRF脆弱性検出"
+    vars:
+      code: |
+        app.post('/api/transfer', (req, res) => {
+          const { to, amount } = req.body;
+          db.query('UPDATE accounts SET balance = balance - $1 WHERE user_id = $2', [amount, req.session.userId]);
+          db.query('UPDATE accounts SET balance = balance + $1 WHERE user_id = $2', [amount, to]);
+          res.json({ success: true });
+        });
+    assert:
+      - type: contains-any
+        value: ["CSRF", "csrf", "token", "トークン"]
+      - type: llm-rubric
+        value: |
+          CSRFトークンの欠如を指摘し、以下を含むレビューであるか:
+          1. CSRFの脆弱性を明確に指摘
+          2. トークン検証やSameSite Cookieなどの対策を推奨
+          3. 金融取引におけるリスクの深刻度を示している
+
+  # ---- N+1 query problem ----
+  - description: "Code Review Agent - N+1クエリ問題検出"
+    vars:
+      code: |
+        async function getPostsWithAuthors() {
+          const posts = await prisma.post.findMany();
+          const result = [];
+          for (const post of posts) {
+            const author = await prisma.user.findUnique({ where: { id: post.authorId } });
+            result.push({ ...post, author });
+          }
+          return result;
+        }
+    assert:
+      - type: contains-any
+        value: ["N+1", "n+1", "パフォーマンス", "include", "join"]
+      - type: llm-rubric
+        value: |
+          N+1クエリ問題を検出し、以下を含むレビューであるか:
+          1. ループ内の個別クエリがN+1問題であると指摘
+          2. Prismaのincludeやjoinを使った一括取得を推奨
+          3. パフォーマンスへの影響を説明
+
+  # ---- React re-render issue ----
+  - description: "Code Review Agent - 不必要な再レンダリング検出"
+    vars:
+      code: |
+        function UserList() {
+          const [users, setUsers] = useState([]);
+          const [search, setSearch] = useState('');
+
+          useEffect(() => {
+            fetch('/api/users').then(r => r.json()).then(setUsers);
+          }, []);
+
+          const filtered = users.filter(u => u.name.includes(search));
+          const stats = { total: users.length, filtered: filtered.length };
+
+          return (
+            <div>
+              <input value={search} onChange={e => setSearch(e.target.value)} />
+              <Stats data={stats} />
+              {filtered.map(u => <UserCard key={u.id} user={u} onClick={() => alert(u.name)} />)}
+            </div>
+          );
+        }
+    assert:
+      - type: contains-any
+        value: ["useMemo", "useCallback", "memo", "再レンダリング", "re-render"]
+      - type: llm-rubric
+        value: |
+          以下の問題を指摘しているか:
+          1. statsオブジェクトが毎回新規作成されStatsコンポーネントの再レンダリングを引き起こす
+          2. onClickのインラインアロー関数が毎回新規作成される
+          3. useMemo/useCallback/React.memoによる最適化を推奨
+
+  # ---- Auth/authorization issue ----
+  - description: "Code Review Agent - 認可チェック不備検出"
+    vars:
+      code: |
+        app.delete('/api/users/:id', async (req, res) => {
+          const { id } = req.params;
+          await prisma.user.delete({ where: { id } });
+          res.json({ message: 'User deleted' });
+        });
+
+        app.get('/api/admin/reports', async (req, res) => {
+          const reports = await prisma.report.findMany();
+          res.json(reports);
+        });
+    assert:
+      - type: contains-any
+        value: ["認証", "認可", "auth", "authorization", "middleware", "ミドルウェア"]
+      - type: contains-any
+        value: ["🔴", "Critical", "critical"]
+      - type: llm-rubric
+        value: |
+          以下のセキュリティ問題を指摘しているか:
+          1. DELETE /api/users/:id に認証・認可チェックがない（任意のユーザーを削除可能）
+          2. /api/admin/reports に管理者権限チェックがない
+          3. 認証ミドルウェアの導入を推奨
+
+  # ---- Memory leak ----
+  - description: "Code Review Agent - メモリリーク検出"
+    vars:
+      code: |
+        function LiveChart({ dataUrl }: { dataUrl: string }) {
+          const [data, setData] = useState([]);
+
+          useEffect(() => {
+            const interval = setInterval(async () => {
+              const res = await fetch(dataUrl);
+              const newData = await res.json();
+              setData(prev => [...prev, ...newData]);
+            }, 1000);
+          }, [dataUrl]);
+
+          return <Chart data={data} />;
+        }
+    assert:
+      - type: contains-any
+        value: ["メモリ", "memory", "leak", "リーク", "clearInterval", "cleanup"]
+      - type: llm-rubric
+        value: |
+          以下の問題を指摘しているか:
+          1. useEffect内のsetIntervalにクリーンアップ(clearInterval)がない
+          2. データ配列が無限に成長しメモリリークを引き起こす
+          3. コンポーネントアンマウント時のクリーンアップ関数を推奨
+
+  # ---- Severity format compliance ----
+  - description: "Code Review Agent - 出力フォーマット準拠確認"
+    vars:
+      code: |
+        export default function Page({ params }) {
+          const data = use(fetch(`/api/data/${params.id}`));
+          return <div dangerouslySetInnerHTML={{ __html: data.content }} />;
+        }
+    assert:
+      - type: contains-any
+        value: ["🔴", "🟡", "🟢"]
+      - type: contains-any
+        value: ["XSS", "dangerouslySetInnerHTML"]
+      - type: llm-rubric
+        value: |
+          レビュー出力が指定フォーマット(🔴 Critical / 🟡 Warning / 🟢 Info)に従い、
+          dangerouslySetInnerHTMLのXSSリスクを🔴 Criticalとして報告しているか

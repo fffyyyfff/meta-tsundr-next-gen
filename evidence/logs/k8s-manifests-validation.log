@@ -1,0 +1,35 @@
+=== K8s Manifest Validation ===
+Date: 2026-03-30T13:03:54Z
+kubectl client: Client Version: v1.33.3
+Method: YAML parse + schema field validation (no cluster required)
+
+--- Validating: k8s/base/namespace.yaml ---
+ Namespace/meta-tsundr [ns=(default)] apiVersion=v1 ... OK
+RESULT: PASS
+
+--- Validating: k8s/base/secrets.yaml.example ---
+ Secret/meta-tsundr-secrets [ns=meta-tsundr] apiVersion=v1 ... OK
+RESULT: PASS
+
+--- Validating: k8s/base/web-deployment.yaml ---
+doc[0] Deployment/web [ns=meta-tsundr] apiVersion=apps/v1 ... OK
+doc[1] Service/web [ns=meta-tsundr] apiVersion=v1 ... OK
+RESULT: PASS
+
+--- Validating: k8s/base/agent-service-deployment.yaml ---
+doc[0] Deployment/agent-service [ns=meta-tsundr] apiVersion=apps/v1 ... OK
+doc[1] Service/agent-service [ns=meta-tsundr] apiVersion=v1 ... OK
+RESULT: PASS
+
+--- Validating: k8s/base/ingress.yaml ---
+ Ingress/meta-tsundr [ns=meta-tsundr] apiVersion=networking.k8s.io/v1 ... OK
+RESULT: PASS
+
+--- Validating: k8s/base/hpa.yaml ---
+doc[0] HorizontalPodAutoscaler/web-hpa [ns=meta-tsundr] apiVersion=autoscaling/v2 ... OK
+doc[1] HorizontalPodAutoscaler/agent-service-hpa [ns=meta-tsundr] apiVersion=autoscaling/v2 ... OK
+RESULT: PASS
+
+=== Summary ===
+All manifests passed YAML structure validation.
+Note: Full API schema validation requires a running cluster (kubectl apply --dry-run=server).

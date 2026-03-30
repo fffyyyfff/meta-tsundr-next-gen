@@ -3,36 +3,67 @@ description: "Meta Tsundr Agent Evals"
 providers:
   - id: anthropic:messages:claude-sonnet-4-5-20250514
     config:
-      max_tokens: 2048
+      max_tokens: 4096
 
 prompts:
+  # ---- Design Agent ----
+  # System prompt mirrors src/server/agents/design-agent.ts
   - id: design-agent
     raw: |
       あなたはDesign Agentです。Figmaデザインからフロントエンドコンポーネントを生成する専門家です。
-      React + TypeScript + Tailwind CSSでコンポーネントを生成してください。
+      - React + TypeScript + Tailwind CSSでコンポーネントを生成
+      - shadcn/uiのパターンに準拠
+      - アクセシビリティ（WCAG 2.1 AA）を考慮
+      - レスポンシブデザインを実装
+      - コンポーネントのpropsはTypeScript interfaceで定義
 
       タスク: {{task}}
 
+  # ---- Code Review Agent ----
+  # System prompt mirrors src/server/agents/code-review-agent.ts
   - id: code-review-agent
     raw: |
       あなたはCode Review Agentです。コードの品質、セキュリティ、パフォーマンスをレビューする専門家です。
+      - セキュリティ: XSS, SQLインジェクション, CSRF, 認証/認可の問題
+      - パフォーマンス: N+1クエリ, 不必要な再レンダリング, メモリリーク
+      - コード品質: SOLID原則, DRY, 可読性, テスタビリティ
+      - TypeScript/React/アクセシビリティ専門知識
+      出力: 🔴 Critical, 🟡 Warning, 🟢 Info
 
       コード: {{code}}
 
+  # ---- Test Gen Agent ----
+  # System prompt mirrors src/server/agents/test-gen-agent.ts
   - id: test-gen-agent
     raw: |
-      あなたはTest Generation Agentです。Playwright E2Eテストを自動生成する専門家です。
+      あなたはTest Generation Agentです。Playwright E2Eテストとユニットテストを自動生成する専門家です。
+      テスト生成ルール:
+      1. E2Eテスト: Playwright Test (TypeScript)
+      2. ユニットテスト: Vitest
+      3. テスト構造: Arrange-Act-Assert
+      4. カバレッジ: 正常系、異常系、境界値
+      5. セレクタ: data-testid優先、role/labelで補完
+      6. アサーション: 具体的で信頼性の高いアサーション
 
       テスト対象: {{component}}
 
+  # ---- Task Mgmt Agent ----
+  # System prompt mirrors src/server/agents/task-mgmt-agent.ts
   - id: task-mgmt-agent
     raw: |
       あなたはTask Management Agentです。開発タスクの分解、見積もり、優先順位付けを行う専門家です。
+      タスク生成ルール:
+      1. 分解: 大きなタスクを1-3日で完了可能な粒度に分解
+      2. 優先順位: P0(緊急) > P1(高) > P2(中) > P3(低)
+      3. 見積もり: ストーリーポイント (1,2,3,5,8,13)
+      4. ラベル: frontend, backend, design, testing, infra, docs
+      5. 依存関係: タスク間の依存を明示
 
       要件: {{requirement}}
 
+# ---- Inline Test Cases ----
 tests:
-  # Design Agent Evals
+  # Design Agent
   - description: "Design Agent - ボタンコンポーネント生成"
     vars:
       task: "プライマリボタンコンポーネントを生成してください。variant: primary, secondary, destructive。サイズ: sm, md, lg。"
@@ -41,8 +72,10 @@ tests:
         value: "interface"
       - type: contains
         value: "className"
+      - type: contains-any
+        value: ["variant", "Variant"]
       - type: llm-rubric
-        value: "生成されたコードはReact + TypeScriptのコンポーネントで、Tailwind CSSを使用している"
+        value: "React + TypeScriptのコンポーネントで、Tailwind CSSクラスを使用し、propsがinterfaceで型定義されている"
 
   - description: "Design Agent - フォームコンポーネント生成"
     vars:
@@ -50,48 +83,80 @@ tests:
     assert:
       - type: contains
         value: "form"
+      - type: contains-any
+        value: ["email", "Email", "mail"]
+      - type: contains-any
+        value: ["password", "Password"]
       - type: llm-rubric
-        value: "フォームにはメール入力、パスワード入力、送信ボタンが含まれている"
+        value: "フォームにはメール入力、パスワード入力、送信ボタンが含まれ、バリデーションロジックがある"
 
-  # Code Review Agent Evals
-  - description: "Code Review Agent - セキュリティ問題検出"
+  # Code Review Agent
+  - description: "Code Review Agent - XSS脆弱性検出"
     vars:
       code: |
-        function search(query) {
+        function search(query: string) {
           const html = `<div>${query}</div>`;
           document.innerHTML = html;
           fetch(`/api/search?q=${query}`);
         }
     assert:
       - type: contains-any
-        value: ["XSS", "injection", "セキュリティ", "sanitize"]
+        value: ["XSS", "injection", "セキュリティ", "sanitize", "エスケープ"]
+      - type: contains-any
+        value: ["🔴", "Critical", "critical", "危険"]
       - type: llm-rubric
-        value: "XSSの脆弱性が指摘されている"
+        value: "XSSの脆弱性を正しく指摘し、dangerouslySetInnerHTMLやDOM直接操作のリスクを説明している"
 
-  # Test Gen Agent Evals
+  - description: "Code Review Agent - SQLインジェクション検出"
+    vars:
+      code: |
+        async function getUser(userId: string) {
+          const result = await db.query(`SELECT * FROM users WHERE id = '${userId}'`);
+          return result.rows[0];
+        }
+    assert:
+      - type: contains-any
+        value: ["SQL", "injection", "インジェクション", "パラメータ"]
+      - type: llm-rubric
+        value: "SQLインジェクションの脆弱性を指摘し、パラメータ化クエリやプリペアドステートメントの使用を推奨している"
+
+  # Test Gen Agent
   - description: "Test Gen Agent - テスト生成品質"
     vars:
       component: "ユーザー一覧ページ。テーブル表示、検索フィルター、ページネーション付き。"
     assert:
-      - type: contains
-        value: "test("
+      - type: contains-any
+        value: ["test(", "test.describe("]
       - type: contains
         value: "expect"
+      - type: contains-any
+        value: ["page.", "getBy", "locator"]
       - type: llm-rubric
-        value: "Playwrightのテストコードが含まれ、複数のテストケースがある"
+        value: "Playwrightの正しい構文でテストが書かれ、正常系・異常系を含む複数のテストケースがある"
 
-  # Task Mgmt Agent Evals
+  # Task Mgmt Agent
   - description: "Task Mgmt Agent - タスク分解品質"
     vars:
       requirement: "ECサイトのショッピングカート機能を実装する"
     assert:
+      - type: contains-any
+        value: ["P0", "P1", "P2", "P3"]
+      - type: contains-any
+        value: ["frontend", "backend"]
       - type: llm-rubric
-        value: "タスクが適切な粒度に分解され、優先順位が設定されている"
+        value: "タスクが適切な粒度に分解され、優先順位・ストーリーポイント・ラベルが設定されている"
 
-# Eval settings
+# ---- External Test Case Files ----
+testSuites:
+  - file://tests/evals/design-agent-evals.yaml
+  - file://tests/evals/review-agent-evals.yaml
+
+# ---- Default Settings ----
 defaultTest:
   options:
     provider:
       id: anthropic:messages:claude-sonnet-4-5-20250514
       config:
-        max_tokens: 2048
+        max_tokens: 4096
+
+outputPath: evidence/evals/eval-results.json

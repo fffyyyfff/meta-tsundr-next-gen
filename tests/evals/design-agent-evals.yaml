@@ -1,0 +1,106 @@
+# Design Agent — Extended Evaluation Cases
+# These tests verify component generation quality against the Design Agent system prompt:
+#   - React + TypeScript + Tailwind CSS
+#   - shadcn/ui patterns
+#   - WCAG 2.1 AA accessibility
+#   - Responsive design
+#   - Props typed via TypeScript interface
+
+tests:
+  # ---- shadcn/ui pattern compliance ----
+  - description: "Design Agent - shadcn/ui Card コンポーネント生成"
+    vars:
+      task: |
+        shadcn/uiのCardパターンに準拠したプロフィールカードを生成してください。
+        アバター画像、ユーザー名、肩書き、フォローボタンを含む。
+    assert:
+      - type: contains
+        value: "interface"
+      - type: contains-any
+        value: ["Card", "card"]
+      - type: contains-any
+        value: ["className", "cn("]
+      - type: llm-rubric
+        value: |
+          生成されたコードが以下を満たすか:
+          1. React + TypeScriptのコンポーネントである
+          2. Tailwind CSSクラスを使用している
+          3. CardまたはCard系サブコンポーネント(CardHeader, CardContent等)のパターンに準拠している
+          4. propsがTypeScript interfaceで定義されている
+
+  # ---- Accessibility (WCAG 2.1 AA) ----
+  - description: "Design Agent - アクセシビリティ対応ナビゲーション"
+    vars:
+      task: |
+        メインナビゲーションバーを生成してください。
+        ロゴ、ナビリンク(Home, Dashboard, Settings)、ユーザーメニュー。
+        WCAG 2.1 AAに準拠し、キーボードナビゲーション対応。
+    assert:
+      - type: contains-any
+        value: ["aria-", "role=", "role=\""]
+      - type: contains-any
+        value: ["nav", "<nav"]
+      - type: llm-rubric
+        value: |
+          以下のアクセシビリティ要件が満たされているか:
+          1. セマンティックHTML(nav要素)の使用
+          2. aria属性の適切な使用
+          3. キーボードナビゲーションへの考慮(tabIndex, onKeyDown等)
+
+  # ---- Responsive design ----
+  - description: "Design Agent - レスポンシブグリッドレイアウト"
+    vars:
+      task: |
+        ダッシュボードの統計カードグリッドを生成してください。
+        4つのカード: Total Users, Revenue, Active Sessions, Conversion Rate。
+        モバイル: 1列、タブレット: 2列、デスクトップ: 4列。
+    assert:
+      - type: contains-any
+        value: ["md:", "lg:", "sm:"]
+      - type: contains-any
+        value: ["grid", "grid-cols"]
+      - type: llm-rubric
+        value: |
+          Tailwind CSSのレスポンシブブレークポイント(sm:, md:, lg:)を使用して
+          モバイル/タブレット/デスクトップでカラム数が変化するグリッドレイアウトである
+
+  # ---- Complex component ----
+  - description: "Design Agent - データテーブルコンポーネント"
+    vars:
+      task: |
+        ソート・フィルター付きデータテーブルコンポーネントを生成してください。
+        カラム: Name, Email, Role, Status, Actions。
+        ステータスはバッジで表示(Active=緑, Inactive=灰色)。
+    assert:
+      - type: contains-any
+        value: ["table", "Table", "<table"]
+      - type: contains
+        value: "interface"
+      - type: contains-any
+        value: ["sort", "Sort", "filter", "Filter"]
+      - type: llm-rubric
+        value: |
+          テーブルコンポーネントが以下を含むか:
+          1. カラムヘッダーにソート機能
+          2. フィルターまたは検索機能
+          3. ステータス表示にバッジ/色分け
+          4. 型安全なprops定義
+
+  # ---- Design token usage ----
+  - description: "Design Agent - テーマ対応コンポーネント"
+    vars:
+      task: |
+        ダークモード対応のアラートコンポーネントを生成してください。
+        タイプ: info, success, warning, error。
+        アイコン、タイトル、メッセージ、閉じるボタンを含む。
+    assert:
+      - type: contains-any
+        value: ["dark:", "dark:bg-", "dark:text-"]
+      - type: contains-any
+        value: ["variant", "type"]
+      - type: llm-rubric
+        value: |
+          ダークモード対応のアラートコンポーネントで:
+          1. Tailwind CSSのdark:修飾子を使用
+          2. 4つのバリアント(info/success/warning/error)を持つ
+          3. 各バリアントで異なる色を使用
