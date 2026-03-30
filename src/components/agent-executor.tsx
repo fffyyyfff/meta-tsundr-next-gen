@@ -52,6 +52,7 @@ export function AgentExecutor() {
     await executeTask.mutateAsync({
       task,
       agentType,
+      userId: 'dev-user',
     });
 
     setTask('');

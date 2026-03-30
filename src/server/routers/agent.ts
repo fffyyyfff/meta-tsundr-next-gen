@@ -2,6 +2,7 @@ import { router, publicProcedure } from '../trpc';
 import { z } from 'zod';
 import { orchestrator } from '../agents/orchestrator';
 import type { AgentType } from '../agents/orchestrator';
+import { prisma } from '../../lib/prisma';
 
 export const agentRouter = router({
   executeTask: publicProcedure
@@ -9,14 +10,55 @@ export const agentRouter = router({
       z.object({
         task: z.string(),
         agentType: z.enum(['design', 'code-review', 'test-gen', 'task-mgmt']),
+        userId: z.string(),
+        projectId: z.string().optional(),
       }),
     )
     .mutation(async ({ input }) => {
-      const result = await orchestrator.executeAgent(
-        input.agentType as AgentType,
-        input.task,
-      );
-      return result;
+      const execution = await prisma.agentExecution.create({
+        data: {
+          agentType: input.agentType,
+          task: input.task,
+          status: 'running',
+          userId: input.userId,
+          projectId: input.projectId,
+        },
+      });
+
+      const startTime = Date.now();
+
+      try {
+        const result = await orchestrator.executeAgent(
+          input.agentType as AgentType,
+          input.task,
+        );
+
+        const duration = Date.now() - startTime;
+
+        const updated = await prisma.agentExecution.update({
+          where: { id: execution.id },
+          data: {
+            status: 'completed',
+            result: typeof result === 'string' ? result : JSON.stringify(result),
+            duration,
+          },
+        });
+
+        return { ...result, executionId: updated.id };
+      } catch (error) {
+        const duration = Date.now() - startTime;
+
+        await prisma.agentExecution.update({
+          where: { id: execution.id },
+          data: {
+            status: 'error',
+            result: error instanceof Error ? error.message : String(error),
+            duration,
+          },
+        });
+
+        throw error;
+      }
     }),
 
   executeWorkflow: publicProcedure
