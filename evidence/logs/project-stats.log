@@ -1,0 +1,23 @@
+=== Project Stats ===
+Date: Mon Mar 30 21:33:57 JST 2026
+---
+Git commits:
+dc51e42 docs: README rewrite + Docker dev environment + Makefile
+688570e feat: SSE realtime streaming + data visualization + error handling
+dd0d71f feat: E2E tests + OAuth2 login flow (parallel workers)
+1a8f13d feat: dashboard UI + DB persistence (parallel worker output)
+e3ba0ac feat: complete Phase 3 - scalability, auth, observability, K8s, CI/CD
+bee60a0 feat: complete Phase 1 & Phase 2 - MCP services, agents, orchestrator
+9e141dd docs: add ADR-001 next-gen architecture design document
+6f6da44 feat: implement Phase 1 - AI Agent Platform with tRPC, Claude SDK, Figma MCP
+a408684 feat: initial commit
+1135613 Initial commit from Create Next App
+
+File count:
+      65
+
+Total lines (src/):
+   14606
+
+Dependencies:
+50
