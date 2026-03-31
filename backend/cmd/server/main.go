@@ -37,6 +37,10 @@ func main() {
 	jwtSecret := getEnv("JWT_SECRET", "dev-secret")
 	env := getEnv("ENVIRONMENT", "development")
 
+	if env == "production" && jwtSecret == "dev-secret" {
+		log.Fatal("FATAL: JWT_SECRET must be set in production environment")
+	}
+
 	log.Println("Starting meta-tsundr gRPC server...")
 	log.Printf("Environment: %s, Port: %s", env, port)
 
@@ -93,8 +97,18 @@ func main() {
 	sig := <-sigChan
 	log.Printf("Received signal: %v, shutting down...", sig)
 
-	grpcServer.GracefulStop()
-	log.Println("gRPC server stopped")
+	stopped := make(chan struct{})
+	go func() {
+		grpcServer.GracefulStop()
+		close(stopped)
+	}()
+	select {
+	case <-stopped:
+		log.Println("gRPC server stopped gracefully")
+	case <-time.After(30 * time.Second):
+		log.Println("gRPC graceful stop timed out, forcing stop")
+		grpcServer.Stop()
+	}
 
 	if err := db.Close(); err != nil {
 		log.Printf("Error closing database: %v", err)

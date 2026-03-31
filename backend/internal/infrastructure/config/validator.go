@@ -161,7 +161,7 @@ func (j *JWTConfig) Validate() error {
 
 // Validate ストレージ設定の検証
 func (s *StorageConfig) Validate() error {
-	validProviders := []string{"s3", "gcs"}
+	validProviders := []string{"s3", "gcs", "local"}
 	if !contains(validProviders, s.Provider) {
 		return fmt.Errorf("ストレージプロバイダーは %v のいずれかを指定してください", validProviders)
 	}
@@ -171,6 +171,8 @@ func (s *StorageConfig) Validate() error {
 		return s.S3.Validate()
 	case "gcs":
 		return s.GCS.Validate()
+	case "local":
+		// local provider needs no additional validation
 	}
 
 	return nil
