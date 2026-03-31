@@ -1,3 +1,21 @@
+# Night Runner Report
+
+**Date**: Mon Mar 30 22:18:41 JST 2026
+**Duration**: ~10 min max
+**Tasks file**: /Users/user/workspace/AI_work/meta-tsundr-next-gen/tasks-test.txt
+
+## Results
+
+| Metric | Value |
+|--------|-------|
+| Total tasks | 2 |
+| Succeeded | 1 |
+| Failed/Timeout | 1 |
+| TypeScript | PASS |
+| Auto-committed | true |
+
+## Task Log
+
 🌙 Night Runner starting at Mon Mar 30 22:12:34 JST 2026
    Tasks file: /Users/user/workspace/AI_work/meta-tsundr-next-gen/tasks-test.txt
    Work dir: /Users/user/workspace/AI_work/meta-tsundr-next-gen
@@ -19,7 +37,3 @@
 Running tsc...
 ✅ TypeScript: PASS
 ✅ Committed 9 files
-
-🌙 Night Runner finished at Mon Mar 30 22:18:41 JST 2026
-   Results: 1/2 succeeded
-   Summary: /Users/user/workspace/AI_work/meta-tsundr-next-gen/evidence/night-run/20260330-221234/summary.md
