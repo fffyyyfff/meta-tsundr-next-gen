@@ -1,0 +1,34 @@
+
+ RUN  v3.2.4 /Users/user/workspace/AI_work/meta-tsundr-next-gen
+
+stdout | tests/unit/server/services/retry.test.ts > withRetry > should retry on RetryableError with matching status
+[retry] Attempt 1/3 failed (status: 429). Retrying in 10ms...
+
+ ✓ tests/unit/stores/themeStore.test.ts (7 tests) 4ms
+ ✓ tests/unit/stores/favoritesStore.test.ts (7 tests) 3ms
+stdout | tests/unit/server/services/retry.test.ts > withRetry > should retry on error with status property
+[retry] Attempt 1/2 failed (status: 500). Retrying in 10ms...
+
+stdout | tests/unit/server/services/retry.test.ts > withRetry > should throw after exhausting max retries
+[retry] Attempt 1/2 failed (status: 503). Retrying in 1ms...
+
+stdout | tests/unit/server/services/retry.test.ts > withRetry > should throw after exhausting max retries
+[retry] Attempt 2/2 failed (status: 503). Retrying in 1ms...
+
+ ✓ tests/unit/stores/bookStore.test.ts (7 tests) 4ms
+ ✓ tests/unit/server/services/usage-tracker.test.ts (8 tests) 10ms
+stdout | tests/unit/server/services/retry.test.ts > withRetry > should apply exponential backoff
+[retry] Attempt 1/3 failed (status: 429). Retrying in 100ms...
+
+stdout | tests/unit/server/services/retry.test.ts > withRetry > should apply exponential backoff
+[retry] Attempt 2/3 failed (status: 429). Retrying in 200ms...
+
+ ✓ tests/unit/server/services/retry.test.ts (10 tests) 22ms
+ ✓ tests/unit/hooks/useKeyboardShortcut.test.ts (11 tests) 21ms
+ ✓ tests/unit/hooks/usePagination.test.ts (10 tests) 20ms
+
+ Test Files  7 passed (7)
+      Tests  60 passed (60)
+   Start at  22:48:03
+   Duration  1.30s (transform 200ms, setup 593ms, collect 443ms, tests 84ms, environment 5.43s, prepare 653ms)
+
