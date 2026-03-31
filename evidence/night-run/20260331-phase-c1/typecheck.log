@@ -1,0 +1,8 @@
+src/components/ai-book-features.tsx(43,36): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'SetStateAction<string | null>'.
+  Type 'undefined' is not assignable to type 'SetStateAction<string | null>'.
+src/components/ai-book-features.tsx(57,44): error TS2345: Argument of type '{}' is not assignable to parameter of type 'void'.
+src/components/ai-book-features.tsx(92,36): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'SetStateAction<string | null>'.
+  Type 'undefined' is not assignable to type 'SetStateAction<string | null>'.
+src/components/ai-book-features.tsx(137,36): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'SetStateAction<string | null>'.
+  Type 'undefined' is not assignable to type 'SetStateAction<string | null>'.
+src/components/ai-book-features.tsx(151,44): error TS2345: Argument of type '{}' is not assignable to parameter of type 'void'.

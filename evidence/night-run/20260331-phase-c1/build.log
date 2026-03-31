@@ -1,0 +1,20 @@
+▲ Next.js 16.2.1 (Turbopack)
+- Environments: .env.local, .env
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 3.2s
+  Running TypeScript ...
+Failed to type check.
+
+./src/components/ai-book-features.tsx:43:36
+Type error: Argument of type 'string | undefined' is not assignable to parameter of type 'SetStateAction<string | null>'.
+  Type 'undefined' is not assignable to type 'SetStateAction<string | null>'.
+
+  [90m41 |[0m
+  [90m42 |[0m   [36mconst[0m mutation = trpcReact.book.getAiRecommendation.useMutation({
+[31m[1m>[0m [90m43 |[0m     onSuccess: (data) => setResult(data.recommendation),
+  [90m   |[0m                                    [31m[1m^[0m
+  [90m44 |[0m   });
+  [90m45 |[0m
+  [90m46 |[0m   [36mreturn[0m (
+Next.js build worker exited with code: 1 and signal: null
