@@ -1,0 +1,55 @@
+syntax = "proto3";
+
+package tsundoku.auth.v1;
+
+option go_package = "meta-tsundr-backend/api/proto/tsundoku/auth/v1;authv1";
+
+import "google/api/annotations.proto";
+import "api/proto/tsundoku/user/v1/user.proto";
+
+// Authentication Response
+message AuthResponse {
+  string token = 1;
+  tsundoku.user.v1.User user = 2;
+  int64 expires_at = 3;
+}
+
+// Request Messages
+message RegisterRequest {
+  string email = 1;
+  string name = 2;
+  string password = 3;
+}
+
+message LoginRequest {
+  string email = 1;
+  string password = 2;
+}
+
+message RefreshTokenRequest {
+  string token = 1;
+}
+
+// Auth Service Definition
+service AuthService {
+  rpc Register(RegisterRequest) returns (AuthResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/auth/register"
+      body: "*"
+    };
+  }
+  
+  rpc Login(LoginRequest) returns (AuthResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/auth/login"
+      body: "*"
+    };
+  }
+  
+  rpc RefreshToken(RefreshTokenRequest) returns (AuthResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/auth/refresh"
+      body: "*"
+    };
+  }
+}
