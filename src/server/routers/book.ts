@@ -19,7 +19,7 @@ import { readingPlanAgent } from '../agents/reading-plan-agent';
 export const bookRouter = router({
   list: protectedProcedure
     .input(bookListInput)
-    .query(async ({ input }) => {
+    .query(async ({ input, ctx }) => {
       const { status, search, sortBy, sortOrder, limit, cursor } = input;
 
       const res = await bookClient.getBooks({
@@ -29,20 +29,20 @@ export const bookRouter = router({
         sortOrder,
         limit,
         cursor: cursor ?? undefined,
-      });
+      }, ctx.token ?? undefined);
 
       return { items: res.books, nextCursor: res.nextCursor || undefined };
     }),
 
   getById: protectedProcedure
     .input(z.object({ id: z.string() }))
-    .query(async ({ input }) => {
-      return bookClient.getBook(input.id);
+    .query(async ({ input, ctx }) => {
+      return bookClient.getBook(input.id, ctx.token ?? undefined);
     }),
 
   create: protectedProcedure
     .input(bookCreateInput)
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
       return bookClient.createBook({
         title: input.title,
         author: input.author,
@@ -51,12 +51,12 @@ export const bookRouter = router({
         imageUrl: input.imageUrl,
         notes: input.notes,
         rating: input.rating,
-      });
+      }, ctx.token ?? undefined);
     }),
 
   update: protectedProcedure
     .input(bookUpdateInput)
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
       const { id, ...data } = input;
       return bookClient.updateBook({
         id,
@@ -67,32 +67,32 @@ export const bookRouter = router({
         imageUrl: data.imageUrl,
         notes: data.notes,
         rating: data.rating ?? undefined,
-      });
+      }, ctx.token ?? undefined);
     }),
 
   delete: protectedProcedure
     .input(z.object({ id: z.string() }))
-    .mutation(async ({ input }) => {
-      await bookClient.deleteBook(input.id);
+    .mutation(async ({ input, ctx }) => {
+      await bookClient.deleteBook(input.id, ctx.token ?? undefined);
       return { success: true };
     }),
 
   restore: protectedProcedure
     .input(z.object({ id: z.string() }))
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
       // Restore = update with status change back; Go backend handles soft-delete restore
-      return bookClient.updateBook({ id: input.id });
+      return bookClient.updateBook({ id: input.id }, ctx.token ?? undefined);
     }),
 
   changeStatus: protectedProcedure
     .input(bookChangeStatusInput)
-    .mutation(async ({ input }) => {
-      return bookClient.updateBookStatus(input.id, input.status);
+    .mutation(async ({ input, ctx }) => {
+      return bookClient.updateBookStatus(input.id, input.status, ctx.token ?? undefined);
     }),
 
-  stats: protectedProcedure.query(async () => {
+  stats: protectedProcedure.query(async ({ ctx }) => {
     // Fetch all books via gRPC and compute stats client-side
-    const allBooks = await bookClient.getBooks({ limit: 1000 });
+    const allBooks = await bookClient.getBooks({ limit: 1000 }, ctx.token ?? undefined);
     const books = allBooks.books;
 
     const now = new Date();
@@ -118,8 +118,8 @@ export const bookRouter = router({
     };
   }),
 
-  readingAnalytics: protectedProcedure.query(async () => {
-    const allBooks = await bookClient.getBooks({ limit: 1000 });
+  readingAnalytics: protectedProcedure.query(async ({ ctx }) => {
+    const allBooks = await bookClient.getBooks({ limit: 1000 }, ctx.token ?? undefined);
     const books = allBooks.books;
 
     const sixMonthsAgo = new Date();
@@ -175,13 +175,13 @@ export const bookRouter = router({
       };
     }),
 
-  getAiRecommendation: protectedProcedure.mutation(async () => {
+  getAiRecommendation: protectedProcedure.mutation(async ({ ctx }) => {
     const res = await bookClient.getBooks({
       status: ProtoBookStatus.FINISHED,
       limit: 30,
       sortBy: 'createdAt',
       sortOrder: 'desc',
-    });
+    }, ctx.token ?? undefined);
 
     if (res.books.length === 0) {
       throw new TRPCError({
@@ -210,8 +210,8 @@ export const bookRouter = router({
 
   generateReview: protectedProcedure
     .input(z.object({ bookId: z.string() }))
-    .mutation(async ({ input }) => {
-      const book = await bookClient.getBook(input.bookId);
+    .mutation(async ({ input, ctx }) => {
+      const book = await bookClient.getBook(input.bookId, ctx.token ?? undefined);
 
       const prompt = [
         `書籍情報:`,
@@ -235,13 +235,13 @@ export const bookRouter = router({
       return { review: result.result, tokenUsage: result.tokenUsage };
     }),
 
-  createReadingPlan: protectedProcedure.mutation(async () => {
+  createReadingPlan: protectedProcedure.mutation(async ({ ctx }) => {
     const res = await bookClient.getBooks({
       status: ProtoBookStatus.UNREAD,
       limit: 20,
       sortBy: 'createdAt',
       sortOrder: 'asc',
-    });
+    }, ctx.token ?? undefined);
 
     if (res.books.length === 0) {
       throw new TRPCError({
