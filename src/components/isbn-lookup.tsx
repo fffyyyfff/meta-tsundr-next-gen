@@ -1,75 +1,132 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { SearchIcon, Loader2Icon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { trpcReact } from '@/lib/trpc-provider';
 
-interface IsbnResult {
-  title: string | null;
-  author: string | null;
-  coverUrl: string | null;
+type SearchMode = 'isbn' | 'title';
+
+interface BookCandidate {
+  title: string;
+  author: string;
+  isbn?: string;
+  imageUrl: string | null;
+  publisher?: string;
+  description?: string;
 }
 
 interface IsbnLookupProps {
-  onSelect: (data: { title: string; author: string; imageUrl: string | null }) => void;
+  onSelect: (data: { title: string; author: string; imageUrl: string | null; isbn?: string }) => void;
 }
 
 export function IsbnLookup({ onSelect }: IsbnLookupProps) {
-  const [isbn, setIsbn] = useState('');
-  const [result, setResult] = useState<IsbnResult | null>(null);
+  const [mode, setMode] = useState<SearchMode>('isbn');
+  const [query, setQuery] = useState('');
+  const [candidates, setCandidates] = useState<BookCandidate[]>([]);
   const [notFound, setNotFound] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const lookupQuery = trpcReact.book.lookupIsbn.useQuery(
-    { isbn: isbn.replace(/[-\s]/g, '') },
-    {
-      enabled: false,
-    },
-  );
+  const utils = trpcReact.useUtils();
 
-  const handleSearch = async () => {
-    const cleaned = isbn.replace(/[-\s]/g, '');
-    if (cleaned.length < 10) return;
+  const handleSearch = useCallback(async () => {
+    const trimmed = query.trim();
+    if (!trimmed) return;
 
-    setNotFound(false);
-    setResult(null);
+    if (mode === 'isbn') {
+      const cleaned = trimmed.replace(/[-\s]/g, '');
+      if (cleaned.length < 10) return;
 
-    const res = await lookupQuery.refetch();
-    if (res.data) {
-      setResult(res.data);
+      setLoading(true);
+      setNotFound(false);
+      setCandidates([]);
+
+      try {
+        const res = await utils.book.lookupIsbn.fetch({ isbn: cleaned });
+        if (res) {
+          setCandidates([{
+            title: res.title ?? '',
+            author: res.author ?? '',
+            imageUrl: res.coverUrl ?? null,
+          }]);
+        } else {
+          setNotFound(true);
+        }
+      } catch {
+        setNotFound(true);
+      } finally {
+        setLoading(false);
+      }
     } else {
-      setNotFound(true);
-    }
-  };
+      setLoading(true);
+      setNotFound(false);
+      setCandidates([]);
 
-  const handleSelect = () => {
-    if (!result?.title) return;
+      try {
+        const res = await utils.book.searchExternal.fetch({ title: trimmed });
+        if (res.length > 0) {
+          setCandidates(res);
+        } else {
+          setNotFound(true);
+        }
+      } catch {
+        setNotFound(true);
+      } finally {
+        setLoading(false);
+      }
+    }
+  }, [mode, query, utils]);
+
+  const handleSelect = useCallback((candidate: BookCandidate) => {
     onSelect({
-      title: result.title,
-      author: result.author ?? '',
-      imageUrl: result.coverUrl ?? null,
+      title: candidate.title,
+      author: candidate.author,
+      imageUrl: candidate.imageUrl,
+      isbn: candidate.isbn,
     });
-  };
+    setCandidates([]);
+    setQuery('');
+  }, [onSelect]);
 
   return (
     <div className="space-y-3">
+      {/* Mode tabs */}
+      <div className="flex gap-1 rounded-md bg-muted p-0.5">
+        {([['isbn', 'ISBN'], ['title', 'タイトル']] as const).map(([value, label]) => (
+          <button
+            key={value}
+            type="button"
+            onClick={() => { setMode(value); setCandidates([]); setNotFound(false); }}
+            className={`flex-1 rounded px-3 py-1 text-xs font-medium transition-colors ${
+              mode === value
+                ? 'bg-background text-foreground shadow-sm'
+                : 'text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+
+      {/* Search input */}
       <div className="flex gap-2">
         <Input
-          value={isbn}
-          onChange={(e) => setIsbn(e.target.value)}
-          placeholder="ISBN (10桁 or 13桁)"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder={mode === 'isbn' ? 'ISBN (10桁 or 13桁)' : 'タイトルで検索...'}
           className="flex-1"
-          aria-label="ISBN入力"
+          aria-label={mode === 'isbn' ? 'ISBN入力' : 'タイトル検索'}
+          onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleSearch(); } }}
         />
         <Button
           type="button"
           variant="outline"
           size="sm"
           onClick={handleSearch}
-          disabled={lookupQuery.isFetching || isbn.replace(/[-\s]/g, '').length < 10}
+          disabled={loading || !query.trim()}
         >
-          {lookupQuery.isFetching ? (
+          {loading ? (
             <Loader2Icon className="size-4 animate-spin" />
           ) : (
             <SearchIcon className="size-4 mr-1" />
@@ -82,24 +139,36 @@ export function IsbnLookup({ onSelect }: IsbnLookupProps) {
         <p className="text-sm text-muted-foreground">書籍が見つかりませんでした</p>
       )}
 
-      {result?.title && (
-        <div className="flex gap-3 rounded-lg border border-border p-3">
-          {result.coverUrl && (
-            <img
-              src={result.coverUrl}
-              alt={result.title}
-              className="h-20 w-14 rounded object-cover"
-            />
-          )}
-          <div className="min-w-0 flex-1 space-y-1">
-            <p className="truncate text-sm font-medium">{result.title}</p>
-            {result.author && (
-              <p className="truncate text-xs text-muted-foreground">{result.author}</p>
-            )}
-            <Button type="button" size="sm" variant="outline" onClick={handleSelect}>
-              この情報を使う
-            </Button>
-          </div>
+      {/* Results */}
+      {candidates.length > 0 && (
+        <div className="max-h-64 space-y-2 overflow-y-auto rounded-lg border border-border p-2">
+          {candidates.map((c, i) => (
+            <button
+              key={`${c.isbn ?? ''}-${i}`}
+              type="button"
+              onClick={() => handleSelect(c)}
+              className="flex w-full gap-3 rounded-md p-2 text-left transition-colors hover:bg-accent"
+            >
+              {c.imageUrl ? (
+                <img
+                  src={c.imageUrl}
+                  alt={c.title}
+                  className="h-16 w-11 shrink-0 rounded object-cover"
+                />
+              ) : (
+                <div className="flex h-16 w-11 shrink-0 items-center justify-center rounded bg-muted text-xs text-muted-foreground">
+                  No img
+                </div>
+              )}
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-medium">{c.title}</p>
+                <p className="truncate text-xs text-muted-foreground">{c.author}</p>
+                {c.publisher && (
+                  <p className="truncate text-xs text-muted-foreground">{c.publisher}</p>
+                )}
+              </div>
+            </button>
+          ))}
         </div>
       )}
     </div>

@@ -1,8 +1,10 @@
 'use client';
 
+import { useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { trpcReact } from '@/lib/trpc-provider';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -89,19 +91,23 @@ export function BookForm({ defaultValues, onSubmit, isSubmitting, submitLabel = 
   });
 
   const isbn = watch('isbn');
+  const [lookupLoading, setLookupLoading] = useState(false);
+  const utils = trpcReact.useUtils();
 
   const handleIsbnLookup = async () => {
-    if (!isbn?.trim()) return;
+    const trimmed = isbn?.trim();
+    if (!trimmed || trimmed.length < 10) return;
+    setLookupLoading(true);
     try {
-      const res = await fetch(`https://www.googleapis.com/books/v1/volumes?q=isbn:${isbn.trim()}&maxResults=1`);
-      const data = await res.json();
-      const info = data.items?.[0]?.volumeInfo;
-      if (info) {
-        if (info.title) setValue('title', info.title);
-        if (info.authors?.[0]) setValue('author', info.authors[0]);
+      const result = await utils.book.lookupIsbn.fetch({ isbn: trimmed });
+      if (result) {
+        if (result.title) setValue('title', result.title);
+        if (result.author) setValue('author', result.author);
       }
     } catch {
       // ISBNルックアップ失敗は無視
+    } finally {
+      setLookupLoading(false);
     }
   };
 
@@ -122,9 +128,9 @@ export function BookForm({ defaultValues, onSubmit, isSubmitting, submitLabel = 
                 placeholder="978-..."
                 className="flex-1"
               />
-              <Button type="button" variant="outline" size="sm" onClick={handleIsbnLookup} aria-label="ISBNで検索">
+              <Button type="button" variant="outline" size="sm" onClick={handleIsbnLookup} disabled={lookupLoading} aria-label="ISBNで検索">
                 <SearchIcon className="size-4 mr-1" />
-                検索
+                {lookupLoading ? '検索中...' : '検索'}
               </Button>
             </div>
           </div>

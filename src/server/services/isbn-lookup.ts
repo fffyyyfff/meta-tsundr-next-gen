@@ -1,3 +1,5 @@
+import { searchByIsbn as rakutenSearchByIsbn } from './rakuten-books';
+
 interface OpenLibraryBook {
   title?: string;
   authors?: Array<{ name: string }>;
@@ -11,6 +13,21 @@ export interface IsbnLookupResult {
 }
 
 export async function lookupByIsbn(isbn: string): Promise<IsbnLookupResult | null> {
+  // Try Rakuten Books API first (better for Japanese books)
+  const rakutenResult = await rakutenSearchByIsbn(isbn);
+  if (rakutenResult) {
+    return {
+      title: rakutenResult.title,
+      author: rakutenResult.author,
+      imageUrl: rakutenResult.imageUrl,
+    };
+  }
+
+  // Fallback to Open Library API
+  return lookupByIsbnOpenLibrary(isbn);
+}
+
+async function lookupByIsbnOpenLibrary(isbn: string): Promise<IsbnLookupResult | null> {
   try {
     const url = `https://openlibrary.org/api/books?bibkeys=ISBN:${encodeURIComponent(isbn)}&format=json&jscmd=data`;
     const response = await fetch(url);

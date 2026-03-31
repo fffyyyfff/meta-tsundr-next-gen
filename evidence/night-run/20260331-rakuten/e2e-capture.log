@@ -1,0 +1,14 @@
+
+Running 9 tests using 5 workers
+
+  ✓  5 [chromium] › tests/e2e/evidence-capture.spec.ts:19:7 › Evidence Capture › 03 - Health API endpoint (1.3s)
+  ✓  6 [chromium] › tests/e2e/evidence-capture.spec.ts:47:7 › Evidence Capture › 06 - Login page (mobile viewport) (1.2s)
+  ✓  3 [chromium] › tests/e2e/evidence-capture.spec.ts:7:7 › Evidence Capture › 01 - Home / Dashboard page (2.6s)
+  ✓  4 [chromium] › tests/e2e/evidence-capture.spec.ts:13:7 › Evidence Capture › 02 - Login page (2.6s)
+  ✓  2 [chromium] › tests/e2e/evidence-capture.spec.ts:25:7 › Evidence Capture › 04 - Agent executor form (2.6s)
+  ✓  1 [chromium] › tests/e2e/evidence-capture.spec.ts:36:7 › Evidence Capture › 05 - Dark mode home page (3.1s)
+  ✓  9 [chromium] › tests/e2e/evidence-capture.spec.ts:80:7 › Evidence Capture › 09 - Books stats page (2.3s)
+  ✓  8 [chromium] › tests/e2e/evidence-capture.spec.ts:69:7 › Evidence Capture › 08 - Books new page (4.5s)
+  ✓  7 [chromium] › tests/e2e/evidence-capture.spec.ts:58:7 › Evidence Capture › 07 - Books list page (4.6s)
+
+  9 passed (11.9s)

@@ -9,6 +9,7 @@ import {
   bookChangeStatusInput,
 } from './book.schemas';
 import { lookupByIsbn } from '../services/isbn-lookup';
+import { searchByTitle } from '../services/rakuten-books';
 import { bookRecommendAgent } from '../agents/book-recommend-agent';
 import { bookReviewAgent } from '../agents/book-review-agent';
 import { readingPlanAgent } from '../agents/reading-plan-agent';
@@ -345,4 +346,18 @@ export const bookRouter = router({
 
     return { plan: result.result, tokenUsage: result.tokenUsage };
   }),
+
+  searchExternal: publicProcedure
+    .input(z.object({ title: z.string().min(1).max(200) }))
+    .query(async ({ input }) => {
+      const results = await searchByTitle(input.title, 10);
+      return results.map((r) => ({
+        title: r.title,
+        author: r.author,
+        isbn: r.isbn,
+        imageUrl: r.imageUrl,
+        publisher: r.publisher,
+        description: r.description,
+      }));
+    }),
 });
