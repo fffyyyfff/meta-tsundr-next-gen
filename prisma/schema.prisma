@@ -8,14 +8,44 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum BookStatus {
+  UNREAD
+  READING
+  FINISHED
+}
+
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  name      String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  agents    AgentExecution[]
-  projects  Project[]
+  id           String   @id @default(cuid())
+  email        String   @unique
+  name         String?
+  passwordHash String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  agents       AgentExecution[]
+  projects     Project[]
+  books        Book[]
+}
+
+model Book {
+  id         String      @id @default(cuid())
+  userId     String
+  user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title      String
+  author     String
+  isbn       String?
+  status     BookStatus  @default(UNREAD)
+  imageUrl   String?
+  notes      String?     @db.Text
+  rating     Int?
+  startedAt  DateTime?
+  finishedAt DateTime?
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  deletedAt  DateTime?
+
+  @@index([userId, status])
+  @@index([userId, deletedAt])
+  @@index([isbn])
 }
 
 model Project {

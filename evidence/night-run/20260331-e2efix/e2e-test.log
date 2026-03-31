@@ -1,0 +1,14 @@
+
+Running 9 tests using 5 workers
+
+  ✓  5 [chromium] › tests/e2e/workflow.spec.ts:19:7 › Workflow Runner › should have task input field (833ms)
+  ✓  4 [chromium] › tests/e2e/workflow.spec.ts:13:7 › Workflow Runner › should display workflow description (816ms)
+  ✓  2 [chromium] › tests/e2e/agent.spec.ts:13:7 › Agent Functionality › should show empty state when no agents are running (821ms)
+  ✓  1 [chromium] › tests/e2e/agent.spec.ts:8:7 › Agent Functionality › should display agent dashboard (837ms)
+  ✓  3 [chromium] › tests/e2e/workflow.spec.ts:8:7 › Workflow Runner › should display Design-to-Code workflow card (823ms)
+  ✓  8 [chromium] › tests/e2e/workflow.spec.ts:39:7 › Workflow Runner › should show placeholder text in input (539ms)
+  ✓  9 [chromium] › tests/e2e/workflow.spec.ts:47:7 › Workflow Runner › should not show step progress before running (540ms)
+  ✓  6 [chromium] › tests/e2e/workflow.spec.ts:25:7 › Workflow Runner › should have run button disabled when input is empty (572ms)
+  ✓  7 [chromium] › tests/e2e/workflow.spec.ts:31:7 › Workflow Runner › should enable run button when task is entered (588ms)
+
+  9 passed (4.2s)

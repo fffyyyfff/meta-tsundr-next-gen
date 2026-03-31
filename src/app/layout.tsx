@@ -44,7 +44,15 @@ export default function RootLayout({
         <SkipNav />
         <TRPCProvider>
           <header className="flex items-center justify-between border-b border-border px-6 py-3" role="banner">
-            <span className="text-lg font-semibold text-foreground">Meta-tsundr</span>
+            <div className="flex items-center gap-4">
+              <span className="text-lg font-semibold text-foreground">Meta-tsundr</span>
+              <nav className="flex items-center gap-2" aria-label="Main navigation">
+                <a href="/books" className="inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-sm text-muted-foreground transition-colors hover:text-foreground hover:bg-muted">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20"/></svg>
+                  積読管理
+                </a>
+              </nav>
+            </div>
             <div className="flex items-center gap-1">
               <NotificationBell />
               <ThemeToggle />
