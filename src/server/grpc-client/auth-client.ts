@@ -6,22 +6,10 @@ import type {
   RefreshTokenRequest,
   RefreshTokenResponse,
 } from '@/generated/proto/tsundoku/auth/v1/types';
-import { GRPC_BACKEND_URL } from './index';
+import { grpcRpc } from './index';
 import { grpcToTrpcError } from './errors';
 
-async function rpc<TReq, TRes>(method: string, request: TReq): Promise<TRes> {
-  const url = `${GRPC_BACKEND_URL}/tsundoku.auth.v1.AuthService/${method}`;
-  const res = await fetch(url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(request),
-  });
-  if (!res.ok) {
-    const body = await res.text();
-    throw new Error(`gRPC ${method} failed: ${res.status} ${body}`);
-  }
-  return res.json() as Promise<TRes>;
-}
+const SERVICE = 'tsundoku.auth.v1.AuthService';
 
 export interface AuthTokens {
   accessToken: string;
@@ -33,10 +21,17 @@ export interface AuthResult extends AuthTokens {
   user?: { id: string; email: string; name: string };
 }
 
+/**
+ * gRPC auth service client.
+ * Auth endpoints (login/register/refresh) are unauthenticated —
+ * they do NOT send the service Authorization header.
+ */
 export const authClient = {
   async login(email: string, password: string): Promise<AuthResult> {
     try {
-      const res = await rpc<LoginRequest, LoginResponse>('Login', { email, password });
+      const res = await grpcRpc<LoginRequest, LoginResponse>(
+        SERVICE, 'Login', { email, password }, { authenticated: false },
+      );
       return {
         accessToken: res.accessToken,
         refreshToken: res.refreshToken,
@@ -50,11 +45,9 @@ export const authClient = {
 
   async register(email: string, password: string, name?: string): Promise<AuthResult> {
     try {
-      const res = await rpc<RegisterRequest, RegisterResponse>('Register', {
-        email,
-        password,
-        name,
-      });
+      const res = await grpcRpc<RegisterRequest, RegisterResponse>(
+        SERVICE, 'Register', { email, password, name }, { authenticated: false },
+      );
       return {
         accessToken: res.accessToken,
         refreshToken: res.refreshToken,
@@ -68,9 +61,9 @@ export const authClient = {
 
   async refreshToken(refreshToken: string): Promise<AuthTokens> {
     try {
-      const res = await rpc<RefreshTokenRequest, RefreshTokenResponse>('RefreshToken', {
-        refreshToken,
-      });
+      const res = await grpcRpc<RefreshTokenRequest, RefreshTokenResponse>(
+        SERVICE, 'RefreshToken', { refreshToken }, { authenticated: false },
+      );
       return {
         accessToken: res.accessToken,
         refreshToken: res.refreshToken,
