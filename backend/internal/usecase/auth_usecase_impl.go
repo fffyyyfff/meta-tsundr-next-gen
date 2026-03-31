@@ -9,11 +9,17 @@ import (
 	"meta-tsundr-backend/internal/domain/entity"
 	domainrepo "meta-tsundr-backend/internal/domain/repository"
 	domainusecase "meta-tsundr-backend/internal/domain/usecase"
-	"meta-tsundr-backend/internal/infrastructure/config"
 	infrarepo "meta-tsundr-backend/internal/infrastructure/repository"
 
 	"github.com/golang-jwt/jwt/v5"
 )
+
+// JWTConfig holds JWT configuration
+type JWTConfig struct {
+	Secret     string
+	Expiration time.Duration
+	Issuer     string
+}
 
 // tokenGenerator is a function type for generating tokens (used for testing)
 type tokenGenerator func(user *entity.User) (string, int64, error)
@@ -21,12 +27,18 @@ type tokenGenerator func(user *entity.User) (string, int64, error)
 // authUseCase implements the AuthUseCase interface
 type authUseCase struct {
 	userRepo        domainrepo.UserRepository
-	config          *config.JWTConfig
+	config          *JWTConfig
 	generateTokenFn tokenGenerator // For testing: allows injecting error-generating token function
 }
 
 // NewAuthUseCase creates a new AuthUseCase instance
-func NewAuthUseCase(userRepo domainrepo.UserRepository, jwtConfig *config.JWTConfig) domainusecase.AuthUseCase {
+func NewAuthUseCase(userRepo domainrepo.UserRepository, jwtConfig *JWTConfig) domainusecase.AuthUseCase {
+	if jwtConfig.Expiration == 0 {
+		jwtConfig.Expiration = 24 * time.Hour
+	}
+	if jwtConfig.Issuer == "" {
+		jwtConfig.Issuer = "meta-tsundr"
+	}
 	uc := &authUseCase{
 		userRepo: userRepo,
 		config:   jwtConfig,
@@ -155,13 +167,8 @@ func (uc *authUseCase) ValidateToken(ctx context.Context, tokenString string) (*
 		return nil, errors.New("invalid token: user_id not found")
 	}
 
-	userID, err := uuid.Parse(userIDStr)
-	if err != nil {
-		return nil, fmt.Errorf("invalid token: invalid user_id format: %w", err)
-	}
-
 	// Get user from repository
-	user, err := uc.userRepo.GetByID(ctx, userID)
+	user, err := uc.userRepo.GetByID(ctx, userIDStr)
 	if err != nil {
 		return nil, fmt.Errorf("user not found: %w", err)
 	}
@@ -195,12 +202,12 @@ func (uc *authUseCase) generateToken(user *entity.User) (tokenString string, exp
 	expiresAt = time.Now().Add(uc.config.Expiration).Unix()
 
 	claims := jwt.MapClaims{
-		"user_id": user.ID.String(),
+		"user_id": user.ID,
 		"email":   user.Email,
 		"exp":     expiresAt,
 		"iat":     time.Now().Unix(),
 		"iss":     uc.config.Issuer,
-		"sub":     user.ID.String(),
+		"sub":     user.ID,
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
