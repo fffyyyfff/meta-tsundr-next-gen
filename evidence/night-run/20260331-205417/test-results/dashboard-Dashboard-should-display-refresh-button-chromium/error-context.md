@@ -1,0 +1,89 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - link "Skip to main content" [ref=e2] [cursor=pointer]:
+    - /url: "#main-content"
+  - banner [ref=e3]:
+    - generic [ref=e4]: Meta-tsundr
+    - button "Toggle dark mode" [ref=e5]:
+      - img [ref=e6]
+  - main [ref=e8]:
+    - main [ref=e10]:
+      - generic [ref=e11]:
+        - heading "Meta-tsundr Next Gen" [level=1] [ref=e12]
+        - paragraph [ref=e13]: AI Agent Platform with Claude SDK & MCP Integration
+      - generic [ref=e14]:
+        - region "Agent task executor" [ref=e16]:
+          - generic [ref=e17]:
+            - generic [ref=e18]: Execute AI Agent Task
+            - generic [ref=e19]: Select an agent type and describe your task
+          - form "Agent execution form" [ref=e21]:
+            - generic [ref=e22]:
+              - generic [ref=e23]: Agent Type
+              - combobox "Select agent type" [ref=e24]:
+                - option "Design Agent (Figma → Code)" [selected]
+                - option "Code Review Agent"
+                - option "Test Generation Agent"
+                - option "Task Management Agent"
+            - generic [ref=e25]:
+              - generic [ref=e26]: Task Description
+              - textbox "Task description" [ref=e27]:
+                - /placeholder: Describe your task... (Ctrl+K to focus)
+            - generic [ref=e28]:
+              - checkbox "Real-time streaming (SSE)" [checked] [ref=e29]
+              - generic [ref=e30] [cursor=pointer]: Real-time streaming (SSE)
+            - generic [ref=e31]:
+              - button "Execute task (Ctrl+Enter)" [disabled]: Execute Task
+        - generic [ref=e35]: No agent results yet. Execute a task to see results here.
+      - generic [ref=e38]:
+        - generic [ref=e39]:
+          - generic [ref=e40]: Design-to-Code Workflow
+          - generic [ref=e41]: "Run the full pipeline: Figma extraction, component generation, code review, and test creation"
+        - generic [ref=e43]:
+          - generic [ref=e44]:
+            - generic [ref=e45]: Task Description
+            - textbox "Task Description" [ref=e46]:
+              - /placeholder: e.g. Convert the login page design from Figma...
+          - button "Run Design-to-Code" [disabled]
+      - generic [ref=e48]:
+        - generic [ref=e49]:
+          - generic [ref=e50]:
+            - heading "Execution History" [level=2] [ref=e51]
+            - paragraph [ref=e52]: Agent execution logs and performance metrics
+          - button "Refresh" [disabled]
+        - generic [ref=e53]:
+          - generic [ref=e55]:
+            - paragraph [ref=e56]: Total
+            - paragraph [ref=e57]: "0"
+          - generic [ref=e59]:
+            - paragraph [ref=e60]: Success
+            - paragraph [ref=e61]: "0"
+          - generic [ref=e63]:
+            - paragraph [ref=e64]: Failed
+            - paragraph [ref=e65]: "0"
+          - generic [ref=e67]:
+            - paragraph [ref=e68]: Running
+            - paragraph [ref=e69]: "0"
+        - generic [ref=e70]:
+          - generic [ref=e71]:
+            - generic [ref=e72]: "Agent:"
+            - combobox "Agent:" [ref=e73]:
+              - option "All Agents" [selected]
+              - option "Design"
+              - option "CodeReview"
+              - option "TestGen"
+              - option "TaskMgmt"
+          - generic [ref=e74]:
+            - generic [ref=e75]: "Status:"
+            - combobox "Status:" [ref=e76]:
+              - option "All Status" [selected]
+              - option "Success"
+              - option "Failed"
+              - option "Running"
+          - generic [ref=e77]: 0 results
+        - generic [ref=e80]: Loading execution history...
+  - button "Open Next.js Dev Tools" [ref=e86] [cursor=pointer]:
+    - img [ref=e87]
+  - alert [ref=e90]
+```

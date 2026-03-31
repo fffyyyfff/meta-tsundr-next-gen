@@ -22,16 +22,22 @@
 |-----|-----------|
 | `f87a65d` | feat: dark mode + dashboard pagination & filters |
 | `1e9314d` | feat: API retry logic + keyboard shortcuts & accessibility |
-| (unstaged) | feat: usage monitoring + comparison & favorites |
+| `8abf9f3` | feat: usage monitoring + agent comparison & favorites |
+| `ce5f887` | docs: add night-run evidence report (6 tasks, all succeeded) |
 
-## 差分統計（未コミット分）
+## 検証結果（2026-03-31 実施）
 
-- **変更ファイル (M)**: `prisma/schema.prisma`, `src/components/agent-results.tsx`, `src/server/routers/_app.ts`
-- **新規ファイル**: `src/components/agent-comparison.tsx`, `src/components/favorites-list.tsx`, `src/components/usage-monitor.tsx`, `src/server/routers/usage.ts`, `src/server/services/usage-tracker.ts`, `src/stores/favoritesStore.ts`
+| 検証項目 | 結果 | ログ |
+|----------|------|------|
+| 型チェック (`tsc --noEmit`) | **PASS** — エラー0 | `typecheck.log` |
+| ビルド (`next build`) | **PASS** — 全7ページ生成 | `build.log` |
+| E2Eテスト (`playwright test`) | **20 passed / 11 failed** | `e2e.log` |
 
-## ビルド状況
-- タスク #1〜#4: ビルド成功確認済み（各ワーカーが `next build` 実施）
-- タスク #5〜#6: ワーカー報告ベース（未コミット）
+### E2Eテスト失敗について
+- 失敗11件はUI改修（ダークモード、ダッシュボードページネーション等）によるセレクタ不一致
+- 対象: `home.spec.ts`, `agent.spec.ts`, `dashboard.spec.ts`, `workflow.spec.ts`
+- スクリーンショット・エラーコンテキスト: `test-results/` に保存済み
+- **対応**: E2Eテストの更新が必要
 
 ## 次回推奨タスク
 1. **ユニットテスト基盤（Vitest）** — 現在E2Eのみ、単体テスト0

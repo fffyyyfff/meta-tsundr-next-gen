@@ -1,0 +1,360 @@
+
+Running 31 tests using 5 workers
+
+[1A[2K[1/31] [chromium] › tests/e2e/agent-api.spec.ts:4:7 › tRPC agent.listAgents › should return list of available agents
+[1A[2K[2/31] [chromium] › tests/e2e/agent-api.spec.ts:54:7 › tRPC agent.listAgents › should have correct agent names
+[1A[2K[3/31] [chromium] › tests/e2e/agent-api.spec.ts:35:7 › tRPC agent.listAgents › should return agents with required fields
+[1A[2K[4/31] [chromium] › tests/e2e/agent.spec.ts:8:7 › Agent Functionality › should display agent dashboard
+[1A[2K[5/31] [chromium] › tests/e2e/agent-api.spec.ts:21:7 › tRPC agent.listAgents › should include all expected agent types
+[1A[2K[2m[WebServer] [22mFailed to obtain server version. Unable to check client-server compatibility. Set checkCompatibility=false to skip version check.
+
+[1A[2K[2m[WebServer] [22mFailed to obtain server version. Unable to check client-server compatibility. Set checkCompatibility=false to skip version check.
+
+[1A[2K[6/31] [chromium] › tests/e2e/agent.spec.ts:13:7 › Agent Functionality › should show empty state when no agents are running
+[1A[2K[7/31] [chromium] › tests/e2e/dashboard.spec.ts:8:7 › Dashboard › should display execution history section
+[1A[2K[8/31] [chromium] › tests/e2e/dashboard.spec.ts:13:7 › Dashboard › should display stats summary cards
+[1A[2K[9/31] [chromium] › tests/e2e/dashboard.spec.ts:21:7 › Dashboard › should show empty state when no executions exist
+[1A[2K[2m[WebServer] [22mFailed to obtain server version. Unable to check client-server compatibility. Set checkCompatibility=false to skip version check.
+
+[1A[2K[10/31] [chromium] › tests/e2e/dashboard.spec.ts:26:7 › Dashboard › should display refresh button
+[1A[2K  1) [chromium] › tests/e2e/dashboard.spec.ts:13:7 › Dashboard › should display stats summary cards 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m([22m[2m)[22m failed
+
+    Locator: getByText('Success')
+    Expected: visible
+    Error: strict mode violation: getByText('Success') resolved to 2 elements:
+        1) <p class="text-xs text-muted-foreground">Success</p> aka getByRole('paragraph').filter({ hasText: 'Success' })
+        2) <option value="completed">Success</option> aka getByLabel('Status:')
+
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 5000ms[22m
+    [2m  - waiting for getByText('Success')[22m
+
+
+      14 |     // 4つの統計カード: Total, Success, Failed, Running
+      15 |     await expect(page.getByText('Total')).toBeVisible();
+    > 16 |     await expect(page.getByText('Success')).toBeVisible();
+         |                                             ^
+      17 |     await expect(page.getByText('Failed')).toBeVisible();
+      18 |     await expect(page.getByText('Running')).toBeVisible();
+      19 |   });
+        at /Users/user/workspace/AI_work/meta-tsundr-next-gen/tests/e2e/dashboard.spec.ts:16:45
+
+    Error Context: evidence/night-run/20260331-205417/test-results/dashboard-Dashboard-should-display-stats-summary-cards-chromium/error-context.md
+
+
+[1A[2K[2m[WebServer] [22mFailed to obtain server version. Unable to check client-server compatibility. Set checkCompatibility=false to skip version check.
+
+[1A[2K[11/31] [chromium] › tests/e2e/dashboard.spec.ts:32:7 › Dashboard › should display status badges with correct labels
+[1A[2K  2) [chromium] › tests/e2e/dashboard.spec.ts:32:7 › Dashboard › should display status badges with correct labels 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m([22m[2m)[22m failed
+
+    Locator: locator('.grid')
+    Expected: visible
+    Error: strict mode violation: locator('.grid') resolved to 5 elements:
+        1) <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">…</div> aka locator('div').nth(3)
+        2) <div data-slot="card-header" class="group/card-header @container/card-header grid auto-rows-min items-start gap-1 rounded-t-xl px-4 group-data-[size=sm]/card:px-3 has-data-[slot=card-action]:grid-cols-[1fr_auto] has-data-[slot=card-description]:grid-rows-[auto_auto] [.border-b]:pb-4 group-data-[size=sm]/card:[.border-b]:pb-3">…</div> aka getByText('Execute AI Agent TaskSelect')
+        3) <div class="grid grid-cols-1 gap-4"></div> aka locator('.grid.grid-cols-1.gap-4')
+        4) <div data-slot="card-header" class="group/card-header @container/card-header grid auto-rows-min items-start gap-1 rounded-t-xl px-4 group-data-[size=sm]/card:px-3 has-data-[slot=card-action]:grid-cols-[1fr_auto] has-data-[slot=card-description]:grid-rows-[auto_auto] [.border-b]:pb-4 group-data-[size=sm]/card:[.border-b]:pb-3">…</div> aka getByText('Design-to-Code WorkflowRun')
+        5) <div class="grid grid-cols-2 md:grid-cols-4 gap-4">…</div> aka getByText('Total0Success0Failed0Running0')
+
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 5000ms[22m
+    [2m  - waiting for locator('.grid')[22m
+
+
+      34 |     // 空の状態ではバッジは表示されないが、Stats カードのラベルは表示される
+      35 |     const statsSection = page.locator('.grid');
+    > 36 |     await expect(statsSection).toBeVisible();
+         |                                ^
+      37 |
+      38 |     // 各統計値が0で表示されること
+      39 |     const statValues = statsSection.locator('.text-2xl');
+        at /Users/user/workspace/AI_work/meta-tsundr-next-gen/tests/e2e/dashboard.spec.ts:36:32
+
+    Error Context: evidence/night-run/20260331-205417/test-results/dashboard-Dashboard-should-ec3ce--badges-with-correct-labels-chromium/error-context.md
+
+
+[1A[2K[2m[WebServer] [22mFailed to obtain server version. Unable to check client-server compatibility. Set checkCompatibility=false to skip version check.
+
+[1A[2K[12/31] [chromium] › tests/e2e/dashboard.spec.ts:44:7 › Dashboard › should display description text
+[1A[2K[13/31] [chromium] › tests/e2e/evidence-capture.spec.ts:7:7 › Evidence Capture › 01 - Home / Dashboard page
+[1A[2K[2m[WebServer] [22mFailed to obtain server version. Unable to check client-server compatibility. Set checkCompatibility=false to skip version check.
+
+[1A[2K[14/31] [chromium] › tests/e2e/evidence-capture.spec.ts:13:7 › Evidence Capture › 02 - Login page
+[1A[2K[2m[WebServer] [22mFailed to obtain server version. Unable to check client-server compatibility. Set checkCompatibility=false to skip version check.
+
+[1A[2K[15/31] [chromium] › tests/e2e/evidence-capture.spec.ts:19:7 › Evidence Capture › 03 - Health API endpoint
+[1A[2K  3) [chromium] › tests/e2e/agent.spec.ts:8:7 › Agent Functionality › should display agent dashboard 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m([22m[2m)[22m failed
+
+    Locator: locator('text=AI Agent Dashboard')
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 5000ms[22m
+    [2m  - waiting for locator('text=AI Agent Dashboard')[22m
+
+
+       8 |   test('should display agent dashboard', async ({ page }) => {
+       9 |     const dashboard = page.locator('text=AI Agent Dashboard');
+    > 10 |     await expect(dashboard).toBeVisible();
+         |                             ^
+      11 |   });
+      12 |
+      13 |   test('should show empty state when no agents are running', async ({ page }) => {
+        at /Users/user/workspace/AI_work/meta-tsundr-next-gen/tests/e2e/agent.spec.ts:10:29
+
+    Error Context: evidence/night-run/20260331-205417/test-results/agent-Agent-Functionality-should-display-agent-dashboard-chromium/error-context.md
+
+
+[1A[2K[16/31] [chromium] › tests/e2e/evidence-capture.spec.ts:25:7 › Evidence Capture › 04 - Agent executor form
+[1A[2K[17/31] [chromium] › tests/e2e/health.spec.ts:4:7 › /api/health endpoint › should return valid health response
+[1A[2K[18/31] [chromium] › tests/e2e/health.spec.ts:18:7 › /api/health endpoint › should return valid status value
+[1A[2K[19/31] [chromium] › tests/e2e/health.spec.ts:25:7 › /api/health endpoint › should return version string
+[1A[2K[20/31] [chromium] › tests/e2e/health.spec.ts:33:7 › /api/health endpoint › should return uptime as number
+[1A[2K[21/31] [chromium] › tests/e2e/health.spec.ts:41:7 › /api/health endpoint › should include service checks
+[1A[2K[22/31] [chromium] › tests/e2e/health.spec.ts:55:7 › /api/health endpoint › should have status field in each check
+[1A[2K[23/31] [chromium] › tests/e2e/home.spec.ts:4:7 › Home Page › should display the main heading
+[1A[2K  4) [chromium] › tests/e2e/agent.spec.ts:13:7 › Agent Functionality › should show empty state when no agents are running 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m([22m[2m)[22m failed
+
+    Locator: locator('text=No agents running')
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 5000ms[22m
+    [2m  - waiting for locator('text=No agents running')[22m
+
+
+      13 |   test('should show empty state when no agents are running', async ({ page }) => {
+      14 |     const emptyState = page.locator('text=No agents running');
+    > 15 |     await expect(emptyState).toBeVisible();
+         |                              ^
+      16 |   });
+      17 | });
+      18 |
+        at /Users/user/workspace/AI_work/meta-tsundr-next-gen/tests/e2e/agent.spec.ts:15:30
+
+    Error Context: evidence/night-run/20260331-205417/test-results/agent-Agent-Functionality--fd0d5--when-no-agents-are-running-chromium/error-context.md
+
+
+[1A[2K  5) [chromium] › tests/e2e/dashboard.spec.ts:21:7 › Dashboard › should show empty state when no executions exist 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m([22m[2m)[22m failed
+
+    Locator: getByText('No executions yet')
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 5000ms[22m
+    [2m  - waiting for getByText('No executions yet')[22m
+
+
+      21 |   test('should show empty state when no executions exist', async ({ page }) => {
+      22 |     const emptyMessage = page.getByText('No executions yet');
+    > 23 |     await expect(emptyMessage).toBeVisible();
+         |                                ^
+      24 |   });
+      25 |
+      26 |   test('should display refresh button', async ({ page }) => {
+        at /Users/user/workspace/AI_work/meta-tsundr-next-gen/tests/e2e/dashboard.spec.ts:23:32
+
+    Error Context: evidence/night-run/20260331-205417/test-results/dashboard-Dashboard-should-29605-te-when-no-executions-exist-chromium/error-context.md
+
+
+[1A[2K[24/31] [chromium] › tests/e2e/workflow.spec.ts:13:7 › Workflow Runner › should display workflow description
+[1A[2K  6) [chromium] › tests/e2e/dashboard.spec.ts:26:7 › Dashboard › should display refresh button ─────
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeEnabled[2m([22m[2m)[22m failed
+
+    Locator:  getByRole('button', { name: 'Refresh' })
+    Expected: enabled
+    Received: disabled
+    Timeout:  5000ms
+
+    Call log:
+    [2m  - Expect "toBeEnabled" with timeout 5000ms[22m
+    [2m  - waiting for getByRole('button', { name: 'Refresh' })[22m
+    [2m    9 × locator resolved to <button disabled tabindex="0" type="button" data-disabled="" data-slot="button" class="group/button inline-flex shrink-0 items-center justify-center border bg-clip-padding font-medium whitespace-nowrap transition-all outline-none select-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 active:not-aria-[haspopup]:translate-y-px disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 dark:aria-inva…>Refresh</button>[22m
+    [2m      - unexpected value "disabled"[22m
+
+
+      27 |     const refreshButton = page.getByRole('button', { name: 'Refresh' });
+      28 |     await expect(refreshButton).toBeVisible();
+    > 29 |     await expect(refreshButton).toBeEnabled();
+         |                                 ^
+      30 |   });
+      31 |
+      32 |   test('should display status badges with correct labels', async ({ page }) => {
+        at /Users/user/workspace/AI_work/meta-tsundr-next-gen/tests/e2e/dashboard.spec.ts:29:33
+
+    Error Context: evidence/night-run/20260331-205417/test-results/dashboard-Dashboard-should-display-refresh-button-chromium/error-context.md
+
+
+[1A[2K[25/31] [chromium] › tests/e2e/workflow.spec.ts:25:7 › Workflow Runner › should have run button disabled when input is empty
+[1A[2K[26/31] [chromium] › tests/e2e/workflow.spec.ts:31:7 › Workflow Runner › should enable run button when task is entered
+[1A[2K[27/31] [chromium] › tests/e2e/workflow.spec.ts:8:7 › Workflow Runner › should display Design-to-Code workflow card
+[1A[2K[28/31] [chromium] › tests/e2e/home.spec.ts:11:7 › Home Page › should have AI Agent Dashboard
+[1A[2K  7) [chromium] › tests/e2e/workflow.spec.ts:31:7 › Workflow Runner › should enable run button when task is entered 
+
+    Error: locator.fill: Error: strict mode violation: getByLabel('Task Description') resolved to 2 elements:
+        1) <input value="" id="task" type="text" data-slot="input" aria-label="Task description" placeholder="Describe your task... (Ctrl+K to focus)" class="h-8 w-full min-w-0 rounded-lg border border-input bg-transparent px-2.5 py-1 text-base transition-colors outline-none file:inline-flex file:h-6 file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-even…/> aka getByRole('textbox', { name: 'Task description', exact: true })
+        2) <input value="" data-slot="input" id="workflow-task" placeholder="e.g. Convert the login page design from Figma..." class="h-8 w-full min-w-0 rounded-lg border border-input bg-transparent px-2.5 py-1 text-base transition-colors outline-none file:inline-flex file:h-6 file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:cursor-…/> aka getByRole('textbox', { name: 'Task Description', exact: true })
+
+    Call log:
+    [2m  - waiting for getByLabel('Task Description')[22m
+
+
+      31 |   test('should enable run button when task is entered', async ({ page }) => {
+      32 |     const input = page.getByLabel('Task Description');
+    > 33 |     await input.fill('Convert the login page design from Figma');
+         |                 ^
+      34 |
+      35 |     const runButton = page.getByRole('button', { name: 'Run Design-to-Code' });
+      36 |     await expect(runButton).toBeEnabled();
+        at /Users/user/workspace/AI_work/meta-tsundr-next-gen/tests/e2e/workflow.spec.ts:33:17
+
+    Error Context: evidence/night-run/20260331-205417/test-results/workflow-Workflow-Runner-s-27c52-button-when-task-is-entered-chromium/error-context.md
+
+
+[1A[2K[2m[WebServer] [22mFailed to obtain server version. Unable to check client-server compatibility. Set checkCompatibility=false to skip version check.
+
+[1A[2K[29/31] [chromium] › tests/e2e/workflow.spec.ts:47:7 › Workflow Runner › should not show step progress before running
+[1A[2K[30/31] [chromium] › tests/e2e/workflow.spec.ts:19:7 › Workflow Runner › should have task input field
+[1A[2K[31/31] [chromium] › tests/e2e/workflow.spec.ts:39:7 › Workflow Runner › should show placeholder text in input
+[1A[2K  8) [chromium] › tests/e2e/workflow.spec.ts:19:7 › Workflow Runner › should have task input field ─
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m([22m[2m)[22m failed
+
+    Locator: getByLabel('Task Description')
+    Expected: visible
+    Error: strict mode violation: getByLabel('Task Description') resolved to 2 elements:
+        1) <input value="" id="task" type="text" data-slot="input" aria-label="Task description" placeholder="Describe your task... (Ctrl+K to focus)" class="h-8 w-full min-w-0 rounded-lg border border-input bg-transparent px-2.5 py-1 text-base transition-colors outline-none file:inline-flex file:h-6 file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-even…/> aka getByRole('textbox', { name: 'Task description', exact: true })
+        2) <input value="" data-slot="input" id="workflow-task" placeholder="e.g. Convert the login page design from Figma..." class="h-8 w-full min-w-0 rounded-lg border border-input bg-transparent px-2.5 py-1 text-base transition-colors outline-none file:inline-flex file:h-6 file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:cursor-…/> aka getByRole('textbox', { name: 'Task Description', exact: true })
+
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 5000ms[22m
+    [2m  - waiting for getByLabel('Task Description')[22m
+
+
+      19 |   test('should have task input field', async ({ page }) => {
+      20 |     const input = page.getByLabel('Task Description');
+    > 21 |     await expect(input).toBeVisible();
+         |                         ^
+      22 |     await expect(input).toBeEditable();
+      23 |   });
+      24 |
+        at /Users/user/workspace/AI_work/meta-tsundr-next-gen/tests/e2e/workflow.spec.ts:21:25
+
+    Error Context: evidence/night-run/20260331-205417/test-results/workflow-Workflow-Runner-should-have-task-input-field-chromium/error-context.md
+
+
+[1A[2K[2m[WebServer] [22mFailed to obtain server version. Unable to check client-server compatibility. Set checkCompatibility=false to skip version check.
+
+[1A[2K  9) [chromium] › tests/e2e/workflow.spec.ts:39:7 › Workflow Runner › should show placeholder text in input 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoHaveAttribute[2m([22m[32mexpected[39m[2m)[22m failed
+
+    Locator: getByLabel('Task Description')
+    Expected: [32m"e.g. Convert the login page design from Figma..."[39m
+    Error: strict mode violation: getByLabel('Task Description') resolved to 2 elements:
+        1) <input value="" id="task" type="text" data-slot="input" aria-label="Task description" placeholder="Describe your task... (Ctrl+K to focus)" class="h-8 w-full min-w-0 rounded-lg border border-input bg-transparent px-2.5 py-1 text-base transition-colors outline-none file:inline-flex file:h-6 file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-even…/> aka getByRole('textbox', { name: 'Task description', exact: true })
+        2) <input value="" data-slot="input" id="workflow-task" placeholder="e.g. Convert the login page design from Figma..." class="h-8 w-full min-w-0 rounded-lg border border-input bg-transparent px-2.5 py-1 text-base transition-colors outline-none file:inline-flex file:h-6 file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:cursor-…/> aka getByRole('textbox', { name: 'Task Description', exact: true })
+
+    Call log:
+    [2m  - Expect "toHaveAttribute" with timeout 5000ms[22m
+    [2m  - waiting for getByLabel('Task Description')[22m
+
+
+      39 |   test('should show placeholder text in input', async ({ page }) => {
+      40 |     const input = page.getByLabel('Task Description');
+    > 41 |     await expect(input).toHaveAttribute(
+         |                         ^
+      42 |       'placeholder',
+      43 |       'e.g. Convert the login page design from Figma...',
+      44 |     );
+        at /Users/user/workspace/AI_work/meta-tsundr-next-gen/tests/e2e/workflow.spec.ts:41:25
+
+    Error Context: evidence/night-run/20260331-205417/test-results/workflow-Workflow-Runner-s-51304-w-placeholder-text-in-input-chromium/error-context.md
+
+
+[1A[2K[2m[WebServer] [22mFailed to obtain server version. Unable to check client-server compatibility. Set checkCompatibility=false to skip version check.
+
+[1A[2K[2m[WebServer] [22mFailed to obtain server version. Unable to check client-server compatibility. Set checkCompatibility=false to skip version check.
+
+[1A[2K  10) [chromium] › tests/e2e/workflow.spec.ts:8:7 › Workflow Runner › should display Design-to-Code workflow card 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m([22m[2m)[22m failed
+
+    Locator: getByRole('heading', { name: 'Design-to-Code Workflow' })
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 5000ms[22m
+    [2m  - waiting for getByRole('heading', { name: 'Design-to-Code Workflow' })[22m
+
+
+       8 |   test('should display Design-to-Code workflow card', async ({ page }) => {
+       9 |     const title = page.getByRole('heading', { name: 'Design-to-Code Workflow' });
+    > 10 |     await expect(title).toBeVisible();
+         |                         ^
+      11 |   });
+      12 |
+      13 |   test('should display workflow description', async ({ page }) => {
+        at /Users/user/workspace/AI_work/meta-tsundr-next-gen/tests/e2e/workflow.spec.ts:10:25
+
+    Error Context: evidence/night-run/20260331-205417/test-results/workflow-Workflow-Runner-s-1ebff-esign-to-Code-workflow-card-chromium/error-context.md
+
+
+[1A[2K  11) [chromium] › tests/e2e/home.spec.ts:11:7 › Home Page › should have AI Agent Dashboard ────────
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m([22m[2m)[22m failed
+
+    Locator: locator('text=AI Agent Dashboard')
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 5000ms[22m
+    [2m  - waiting for locator('text=AI Agent Dashboard')[22m
+
+
+      14 |     // ダッシュボードが表示されることを確認
+      15 |     const dashboard = page.locator('text=AI Agent Dashboard');
+    > 16 |     await expect(dashboard).toBeVisible();
+         |                             ^
+      17 |   });
+      18 | });
+      19 |
+        at /Users/user/workspace/AI_work/meta-tsundr-next-gen/tests/e2e/home.spec.ts:16:29
+
+    Error Context: evidence/night-run/20260331-205417/test-results/home-Home-Page-should-have-AI-Agent-Dashboard-chromium/error-context.md
+
+
+[1A[2K  11 failed
+    [chromium] › tests/e2e/agent.spec.ts:8:7 › Agent Functionality › should display agent dashboard 
+    [chromium] › tests/e2e/agent.spec.ts:13:7 › Agent Functionality › should show empty state when no agents are running 
+    [chromium] › tests/e2e/dashboard.spec.ts:13:7 › Dashboard › should display stats summary cards ─
+    [chromium] › tests/e2e/dashboard.spec.ts:21:7 › Dashboard › should show empty state when no executions exist 
+    [chromium] › tests/e2e/dashboard.spec.ts:26:7 › Dashboard › should display refresh button ──────
+    [chromium] › tests/e2e/dashboard.spec.ts:32:7 › Dashboard › should display status badges with correct labels 
+    [chromium] › tests/e2e/home.spec.ts:11:7 › Home Page › should have AI Agent Dashboard ──────────
+    [chromium] › tests/e2e/workflow.spec.ts:8:7 › Workflow Runner › should display Design-to-Code workflow card 
+    [chromium] › tests/e2e/workflow.spec.ts:19:7 › Workflow Runner › should have task input field ──
+    [chromium] › tests/e2e/workflow.spec.ts:31:7 › Workflow Runner › should enable run button when task is entered 
+    [chromium] › tests/e2e/workflow.spec.ts:39:7 › Workflow Runner › should show placeholder text in input 
+  20 passed (17.2s)
