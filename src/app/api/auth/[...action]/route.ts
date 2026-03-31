@@ -159,8 +159,9 @@ async function handleCallback(request: NextRequest): Promise<NextResponse> {
   try {
     const grpcResult = await authClient.register(
       email,
-      // OAuth users don't have a password; use a provider-specific placeholder
-      `github:${githubUser.id}`,
+      // OAuth users don't use password login; generate a cryptographically random
+      // placeholder so the account cannot be accessed via password authentication.
+      crypto.randomBytes(32).toString('base64url'),
       githubUser.name ?? githubUser.login,
     );
     userId = grpcResult.user?.id ?? '';
