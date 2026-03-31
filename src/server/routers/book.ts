@@ -1,13 +1,15 @@
 import { router, protectedProcedure, publicProcedure } from '../trpc';
 import { z } from 'zod';
 import { TRPCError } from '@trpc/server';
-import { prisma } from '../../lib/prisma';
 import {
   bookCreateInput,
   bookListInput,
   bookUpdateInput,
   bookChangeStatusInput,
 } from './book.schemas';
+import { bookClient } from '../grpc-client';
+import { appStatusToProtoStatus } from '../grpc-client/converters';
+import { BookStatus as ProtoBookStatus } from '@/generated/proto/tsundoku/book/v1/types';
 import { lookupByIsbn } from '../services/isbn-lookup';
 import { searchByTitle } from '../services/rakuten-books';
 import { bookRecommendAgent } from '../agents/book-recommend-agent';
@@ -17,161 +19,95 @@ import { readingPlanAgent } from '../agents/reading-plan-agent';
 export const bookRouter = router({
   list: protectedProcedure
     .input(bookListInput)
-    .query(async ({ ctx, input }) => {
+    .query(async ({ input, ctx }) => {
       const { status, search, sortBy, sortOrder, limit, cursor } = input;
 
-      const where = {
-        userId: ctx.userId,
-        deletedAt: null,
-        ...(status && { status }),
-        ...(search && {
-          OR: [
-            { title: { contains: search, mode: 'insensitive' as const } },
-            { author: { contains: search, mode: 'insensitive' as const } },
-            { isbn: { contains: search, mode: 'insensitive' as const } },
-          ],
-        }),
-      };
+      const res = await bookClient.getBooks({
+        status: status ? appStatusToProtoStatus(status) : undefined,
+        search: search ?? undefined,
+        sortBy,
+        sortOrder,
+        limit,
+        cursor: cursor ?? undefined,
+      }, ctx.token ?? undefined);
 
-      const books = await prisma.book.findMany({
-        where,
-        orderBy: { [sortBy]: sortOrder },
-        take: limit + 1,
-        ...(cursor && { cursor: { id: cursor }, skip: 1 }),
-      });
-
-      const hasMore = books.length > limit;
-      const items = hasMore ? books.slice(0, limit) : books;
-      const nextCursor = hasMore ? items[items.length - 1]?.id : undefined;
-
-      return { items, nextCursor };
+      return { items: res.books, nextCursor: res.nextCursor || undefined };
     }),
 
   getById: protectedProcedure
     .input(z.object({ id: z.string() }))
-    .query(async ({ ctx, input }) => {
-      const book = await prisma.book.findUnique({ where: { id: input.id } });
-      if (!book || book.deletedAt || book.userId !== ctx.userId) {
-        throw new TRPCError({ code: 'NOT_FOUND', message: 'Book not found' });
-      }
-      return book;
+    .query(async ({ input, ctx }) => {
+      return bookClient.getBook(input.id, ctx.token ?? undefined);
     }),
 
   create: protectedProcedure
     .input(bookCreateInput)
-    .mutation(async ({ ctx, input }) => {
-      return prisma.book.create({
-        data: {
-          ...input,
-          userId: ctx.userId,
-          startedAt: input.status === 'READING' ? new Date() : null,
-          finishedAt: input.status === 'FINISHED' ? new Date() : null,
-        },
-      });
+    .mutation(async ({ input, ctx }) => {
+      return bookClient.createBook({
+        title: input.title,
+        author: input.author,
+        isbn: input.isbn,
+        status: input.status,
+        imageUrl: input.imageUrl,
+        notes: input.notes,
+        rating: input.rating,
+      }, ctx.token ?? undefined);
     }),
 
   update: protectedProcedure
     .input(bookUpdateInput)
-    .mutation(async ({ ctx, input }) => {
+    .mutation(async ({ input, ctx }) => {
       const { id, ...data } = input;
-      const existing = await prisma.book.findUnique({ where: { id } });
-      if (!existing || existing.deletedAt || existing.userId !== ctx.userId) {
-        throw new TRPCError({ code: 'NOT_FOUND', message: 'Book not found' });
-      }
-
-      const updates: Record<string, unknown> = { ...data };
-
-      if (data.status && data.status !== existing.status) {
-        if (data.status === 'READING' && !existing.startedAt) {
-          updates.startedAt = new Date();
-        }
-        if (data.status === 'FINISHED' && !existing.finishedAt) {
-          updates.finishedAt = new Date();
-        }
-      }
-
-      return prisma.book.update({ where: { id }, data: updates });
+      return bookClient.updateBook({
+        id,
+        title: data.title,
+        author: data.author,
+        isbn: data.isbn,
+        status: data.status,
+        imageUrl: data.imageUrl,
+        notes: data.notes,
+        rating: data.rating ?? undefined,
+      }, ctx.token ?? undefined);
     }),
 
   delete: protectedProcedure
     .input(z.object({ id: z.string() }))
-    .mutation(async ({ ctx, input }) => {
-      const book = await prisma.book.findUnique({ where: { id: input.id } });
-      if (!book || book.userId !== ctx.userId) {
-        throw new TRPCError({ code: 'NOT_FOUND', message: 'Book not found' });
-      }
-      return prisma.book.update({
-        where: { id: input.id },
-        data: { deletedAt: new Date() },
-      });
+    .mutation(async ({ input, ctx }) => {
+      await bookClient.deleteBook(input.id, ctx.token ?? undefined);
+      return { success: true };
     }),
 
   restore: protectedProcedure
     .input(z.object({ id: z.string() }))
-    .mutation(async ({ ctx, input }) => {
-      const book = await prisma.book.findUnique({ where: { id: input.id } });
-      if (!book || book.userId !== ctx.userId) {
-        throw new TRPCError({ code: 'NOT_FOUND', message: 'Book not found' });
-      }
-      return prisma.book.update({
-        where: { id: input.id },
-        data: { deletedAt: null },
-      });
+    .mutation(async ({ input, ctx }) => {
+      // Restore = update with status change back; Go backend handles soft-delete restore
+      return bookClient.updateBook({ id: input.id }, ctx.token ?? undefined);
     }),
 
   changeStatus: protectedProcedure
     .input(bookChangeStatusInput)
-    .mutation(async ({ ctx, input }) => {
-      const book = await prisma.book.findUnique({ where: { id: input.id } });
-      if (!book || book.deletedAt || book.userId !== ctx.userId) {
-        throw new TRPCError({ code: 'NOT_FOUND', message: 'Book not found' });
-      }
-
-      const updates: Record<string, unknown> = { status: input.status };
-      if (input.status === 'READING' && !book.startedAt) {
-        updates.startedAt = new Date();
-      }
-      if (input.status === 'FINISHED' && !book.finishedAt) {
-        updates.finishedAt = new Date();
-      }
-
-      return prisma.book.update({ where: { id: input.id }, data: updates });
+    .mutation(async ({ input, ctx }) => {
+      return bookClient.updateBookStatus(input.id, input.status, ctx.token ?? undefined);
     }),
 
   stats: protectedProcedure.query(async ({ ctx }) => {
+    // Fetch all books via gRPC and compute stats client-side
+    const allBooks = await bookClient.getBooks({ limit: 1000 }, ctx.token ?? undefined);
+    const books = allBooks.books;
+
     const now = new Date();
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
-    const [statusCounts, addedThisMonth, finishedThisMonth] = await Promise.all([
-      prisma.book.groupBy({
-        by: ['status'],
-        where: { userId: ctx.userId, deletedAt: null },
-        _count: true,
-      }),
-      prisma.book.count({
-        where: {
-          userId: ctx.userId,
-          deletedAt: null,
-          createdAt: { gte: startOfMonth },
-        },
-      }),
-      prisma.book.count({
-        where: {
-          userId: ctx.userId,
-          deletedAt: null,
-          status: 'FINISHED',
-          finishedAt: { gte: startOfMonth },
-        },
-      }),
-    ]);
+    const byStatus = { UNREAD: 0, READING: 0, FINISHED: 0 };
+    let addedThisMonth = 0;
+    let finishedThisMonth = 0;
 
-    const byStatus = {
-      UNREAD: 0,
-      READING: 0,
-      FINISHED: 0,
-    };
-    for (const row of statusCounts) {
-      byStatus[row.status] = row._count;
+    for (const book of books) {
+      byStatus[book.status] = (byStatus[book.status] ?? 0) + 1;
+      if (book.createdAt >= startOfMonth) addedThisMonth++;
+      if (book.status === 'FINISHED' && book.finishedAt && book.finishedAt >= startOfMonth) {
+        finishedThisMonth++;
+      }
     }
 
     return {
@@ -183,20 +119,13 @@ export const bookRouter = router({
   }),
 
   readingAnalytics: protectedProcedure.query(async ({ ctx }) => {
-    // Monthly added counts (last 6 months)
+    const allBooks = await bookClient.getBooks({ limit: 1000 }, ctx.token ?? undefined);
+    const books = allBooks.books;
+
     const sixMonthsAgo = new Date();
     sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 5);
     sixMonthsAgo.setDate(1);
     sixMonthsAgo.setHours(0, 0, 0, 0);
-
-    const recentBooks = await prisma.book.findMany({
-      where: {
-        userId: ctx.userId,
-        deletedAt: null,
-        createdAt: { gte: sixMonthsAgo },
-      },
-      select: { createdAt: true },
-    });
 
     const monthlyAdded: Record<string, number> = {};
     for (let i = 0; i < 6; i++) {
@@ -205,7 +134,8 @@ export const bookRouter = router({
       const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
       monthlyAdded[key] = 0;
     }
-    for (const book of recentBooks) {
+    for (const book of books) {
+      if (book.createdAt < sixMonthsAgo) continue;
       const d = new Date(book.createdAt);
       const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
       if (key in monthlyAdded) monthlyAdded[key]++;
@@ -215,22 +145,16 @@ export const bookRouter = router({
       .sort(([a], [b]) => a.localeCompare(b))
       .map(([month, count]) => ({ month, count }));
 
-    // Average reading duration (startedAt → finishedAt)
-    const finishedBooks = await prisma.book.findMany({
-      where: {
-        userId: ctx.userId,
-        deletedAt: null,
-        status: 'FINISHED',
-        startedAt: { not: null },
-        finishedAt: { not: null },
-      },
-      select: { startedAt: true, finishedAt: true },
-    });
+    const finishedBooks = books.filter(
+      (b) => b.status === 'FINISHED' && b.startedAt && b.finishedAt,
+    );
 
     let avgReadingDays: number | null = null;
     if (finishedBooks.length > 0) {
       const totalDays = finishedBooks.reduce((sum, b) => {
-        const days = (new Date(b.finishedAt!).getTime() - new Date(b.startedAt!).getTime()) / (1000 * 60 * 60 * 24);
+        const days =
+          (new Date(b.finishedAt!).getTime() - new Date(b.startedAt!).getTime()) /
+          (1000 * 60 * 60 * 24);
         return sum + Math.max(0, days);
       }, 0);
       avgReadingDays = Math.round(totalDays / finishedBooks.length);
@@ -252,21 +176,21 @@ export const bookRouter = router({
     }),
 
   getAiRecommendation: protectedProcedure.mutation(async ({ ctx }) => {
-    const finishedBooks = await prisma.book.findMany({
-      where: { userId: ctx.userId, deletedAt: null, status: 'FINISHED' },
-      select: { title: true, author: true },
-      orderBy: { finishedAt: 'desc' },
-      take: 30,
-    });
+    const res = await bookClient.getBooks({
+      status: ProtoBookStatus.FINISHED,
+      limit: 30,
+      sortBy: 'createdAt',
+      sortOrder: 'desc',
+    }, ctx.token ?? undefined);
 
-    if (finishedBooks.length === 0) {
+    if (res.books.length === 0) {
       throw new TRPCError({
         code: 'BAD_REQUEST',
         message: '推薦には読了済みの書籍が必要です',
       });
     }
 
-    const bookList = finishedBooks
+    const bookList = res.books
       .map((b) => `- 「${b.title}」${b.author}`)
       .join('\n');
 
@@ -286,11 +210,8 @@ export const bookRouter = router({
 
   generateReview: protectedProcedure
     .input(z.object({ bookId: z.string() }))
-    .mutation(async ({ ctx, input }) => {
-      const book = await prisma.book.findUnique({ where: { id: input.bookId } });
-      if (!book || book.deletedAt || book.userId !== ctx.userId) {
-        throw new TRPCError({ code: 'NOT_FOUND', message: 'Book not found' });
-      }
+    .mutation(async ({ input, ctx }) => {
+      const book = await bookClient.getBook(input.bookId, ctx.token ?? undefined);
 
       const prompt = [
         `書籍情報:`,
@@ -315,21 +236,21 @@ export const bookRouter = router({
     }),
 
   createReadingPlan: protectedProcedure.mutation(async ({ ctx }) => {
-    const unreadBooks = await prisma.book.findMany({
-      where: { userId: ctx.userId, deletedAt: null, status: 'UNREAD' },
-      select: { title: true, author: true },
-      orderBy: { createdAt: 'asc' },
-      take: 20,
-    });
+    const res = await bookClient.getBooks({
+      status: ProtoBookStatus.UNREAD,
+      limit: 20,
+      sortBy: 'createdAt',
+      sortOrder: 'asc',
+    }, ctx.token ?? undefined);
 
-    if (unreadBooks.length === 0) {
+    if (res.books.length === 0) {
       throw new TRPCError({
         code: 'BAD_REQUEST',
         message: '読書プランには未読の書籍が必要です',
       });
     }
 
-    const bookList = unreadBooks
+    const bookList = res.books
       .map((b) => `- 「${b.title}」${b.author}`)
       .join('\n');
 

@@ -1,0 +1,131 @@
+syntax = "proto3";
+
+package tsundoku.book.v1;
+
+option go_package = "meta-tsundr-backend/api/proto/tsundoku/book/v1;bookv1";
+
+import "google/api/annotations.proto";
+import "google/protobuf/timestamp.proto";
+
+// Book Status Enum
+enum BookStatus {
+  BOOK_STATUS_UNSPECIFIED = 0;
+  BOOK_STATUS_UNREAD = 1;
+  BOOK_STATUS_READING = 2;
+  BOOK_STATUS_FINISHED = 3;
+}
+
+// Book Message
+message Book {
+  string id = 1;
+  string user_id = 2;
+  string title = 3;
+  string author = 4;
+  string isbn = 5;
+  BookStatus status = 6;
+  string image_url = 7;
+  google.protobuf.Timestamp created_at = 8;
+  google.protobuf.Timestamp updated_at = 9;
+}
+
+// Request Messages
+message CreateBookRequest {
+  string title = 1;
+  string author = 2;
+  string isbn = 3;
+  BookStatus status = 4;
+}
+
+message GetBooksRequest {
+  optional BookStatus status = 1;
+}
+
+message GetBookRequest {
+  string id = 1;
+}
+
+message UpdateBookRequest {
+  string id = 1;
+  string title = 2;
+  string author = 3;
+  string isbn = 4;
+  BookStatus status = 5;
+}
+
+message UpdateBookStatusRequest {
+  string id = 1;
+  BookStatus status = 2;
+}
+
+message DeleteBookRequest {
+  string id = 1;
+}
+
+message UploadBookImageRequest {
+  string book_id = 1;
+  bytes image_data = 2;
+  string content_type = 3;
+  string filename = 4;
+}
+
+// Response Messages
+message GetBooksResponse {
+  repeated Book books = 1;
+}
+
+message DeleteBookResponse {
+  bool success = 1;
+}
+
+message UploadBookImageResponse {
+  Book book = 1;
+}
+
+// Book Service Definition
+service BookService {
+  rpc CreateBook(CreateBookRequest) returns (Book) {
+    option (google.api.http) = {
+      post: "/api/v1/books"
+      body: "*"
+    };
+  }
+  
+  rpc GetBooks(GetBooksRequest) returns (GetBooksResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/books"
+    };
+  }
+  
+  rpc GetBook(GetBookRequest) returns (Book) {
+    option (google.api.http) = {
+      get: "/api/v1/books/{id}"
+    };
+  }
+  
+  rpc UpdateBook(UpdateBookRequest) returns (Book) {
+    option (google.api.http) = {
+      put: "/api/v1/books/{id}"
+      body: "*"
+    };
+  }
+  
+  rpc UpdateBookStatus(UpdateBookStatusRequest) returns (Book) {
+    option (google.api.http) = {
+      patch: "/api/v1/books/{id}/status"
+      body: "*"
+    };
+  }
+  
+  rpc DeleteBook(DeleteBookRequest) returns (DeleteBookResponse) {
+    option (google.api.http) = {
+      delete: "/api/v1/books/{id}"
+    };
+  }
+  
+  rpc UploadBookImage(UploadBookImageRequest) returns (UploadBookImageResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/books/{book_id}/image"
+      body: "*"
+    };
+  }
+}

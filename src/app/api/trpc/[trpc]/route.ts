@@ -15,10 +15,10 @@ async function createContext(req: Request): Promise<Context> {
   const cookieHeader = req.headers.get('cookie') ?? '';
   const token = parseCookie(cookieHeader, 'auth_token');
 
-  if (!token) return { userId: null };
+  if (!token) return { userId: null, token: null };
 
   const payload = await authService.verifyToken(token);
-  return { userId: payload?.sub ?? null };
+  return { userId: payload?.sub ?? null, token };
 }
 
 const handler = (req: Request) =>

@@ -2,6 +2,7 @@ import { initTRPC, TRPCError } from '@trpc/server';
 
 export interface Context {
   userId: string | null;
+  token: string | null;
 }
 
 const t = initTRPC.context<Context>().create();

@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package tsundoku.user.v1;
+
+option go_package = "meta-tsundr-backend/api/proto/tsundoku/user/v1;userv1";
+
+import "google/protobuf/timestamp.proto";
+
+// User Message
+message User {
+  string id = 1;
+  string email = 2;
+  string name = 3;
+  google.protobuf.Timestamp created_at = 4;
+  google.protobuf.Timestamp updated_at = 5;
+}

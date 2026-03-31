@@ -1,23 +1,71 @@
 import { createConnectTransport } from '@connectrpc/connect-node';
 
-// TODO: Import generated service clients after running `npm run proto:gen`
-// import { BookService } from '@/generated/proto/book_connect';
-// import { AuthService } from '@/generated/proto/auth_connect';
-// import { createClient } from '@connectrpc/connect';
-
-const GRPC_BACKEND_URL = process.env.GRPC_BACKEND_URL || 'http://localhost:50051';
+export const GRPC_BACKEND_URL = process.env.GRPC_BACKEND_URL || 'http://localhost:50051';
 
 /**
- * Connect (gRPC-compatible) transport for server-side communication
- * with the Go backend.
+ * Connect transport with auth interceptor.
+ * Injects Authorization header from GRPC_SERVICE_TOKEN env var
+ * (service-to-service authentication between Next.js and Go backend).
  */
 export const grpcTransport = createConnectTransport({
   baseUrl: GRPC_BACKEND_URL,
   httpVersion: '2',
+  interceptors: [
+    (next) => async (req) => {
+      const token = getServiceToken();
+      if (token) {
+        req.header.set('Authorization', `Bearer ${token}`);
+      }
+      return next(req);
+    },
+  ],
 });
 
-// TODO: Uncomment after proto generation
-// export const bookServiceClient = createClient(BookService, grpcTransport);
-// export const authServiceClient = createClient(AuthService, grpcTransport);
+/**
+ * Get the service token for gRPC backend authentication.
+ * Priority: GRPC_SERVICE_TOKEN env var (static service token).
+ */
+function getServiceToken(): string | null {
+  return process.env.GRPC_SERVICE_TOKEN ?? null;
+}
 
-export { GRPC_BACKEND_URL };
+/**
+ * Shared authenticated RPC helper for Connect JSON transcoding.
+ * Injects Authorization header on every request.
+ * Use `authenticated: false` to skip auth (login/register endpoints).
+ */
+export async function grpcRpc<TReq, TRes>(
+  service: string,
+  method: string,
+  request: TReq,
+  options?: { token?: string; authenticated?: boolean },
+): Promise<TRes> {
+  const url = `${GRPC_BACKEND_URL}/${service}/${method}`;
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+
+  if (options?.authenticated !== false) {
+    const token = options?.token ?? getServiceToken();
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+  }
+
+  const res = await fetch(url, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify(request),
+  });
+
+  if (!res.ok) {
+    const body = await res.text();
+    throw new Error(`gRPC ${method} failed: ${res.status} ${body}`);
+  }
+
+  return res.json() as Promise<TRes>;
+}
+
+export { bookClient } from './book-client';
+export { authClient } from './auth-client';
+export { grpcToTrpcError } from './errors';
+export { protoBookToAppBook, appStatusToProtoStatus } from './converters';
+export type { AppBook, AppBookStatus } from './converters';

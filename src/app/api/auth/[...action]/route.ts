@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import crypto from 'crypto';
 import { getOAuth2Config } from '@/server/middleware/auth';
 import { authService } from '@/server/middleware/auth';
+import { authClient } from '@/server/grpc-client';
 import { prisma } from '@/lib/prisma';
 
 function parseAction(params: string[]): { action: string; provider: string } | null {
@@ -149,18 +150,47 @@ async function handleCallback(request: NextRequest): Promise<NextResponse> {
     );
   }
 
-  // Upsert user in database
-  const user = await prisma.user.upsert({
-    where: { email },
-    update: { name: githubUser.name ?? githubUser.login },
-    create: {
-      email,
-      name: githubUser.name ?? githubUser.login,
-    },
-  });
+  // Register/login via gRPC AuthService (Go backend)
+  // Falls back to local Prisma if gRPC backend is unavailable
+  let userId: string;
+  let userName: string | null;
+  let userEmail: string;
 
-  // Generate JWT
-  const token = authService.generateDevToken(user.id, user.email);
+  try {
+    const grpcResult = await authClient.register(
+      email,
+      // OAuth users don't use password login; generate a cryptographically random
+      // placeholder so the account cannot be accessed via password authentication.
+      crypto.randomBytes(32).toString('base64url'),
+      githubUser.name ?? githubUser.login,
+    );
+    userId = grpcResult.user?.id ?? '';
+    userName = grpcResult.user?.name ?? githubUser.name;
+    userEmail = grpcResult.user?.email ?? email;
+  } catch {
+    // gRPC backend unavailable — fallback to local Prisma upsert
+    const user = await prisma.user.upsert({
+      where: { email },
+      update: { name: githubUser.name ?? githubUser.login },
+      create: {
+        email,
+        name: githubUser.name ?? githubUser.login,
+      },
+    });
+    userId = user.id;
+    userName = user.name;
+    userEmail = user.email;
+  }
+
+  if (!userId) {
+    return NextResponse.json(
+      { error: 'Failed to create or find user' },
+      { status: 500 },
+    );
+  }
+
+  // Generate JWT (local — Next.js remains the JWT issuer)
+  const token = authService.generateDevToken(userId, userEmail);
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
   const response = NextResponse.redirect(appUrl);
@@ -173,10 +203,9 @@ async function handleCallback(request: NextRequest): Promise<NextResponse> {
     path: '/',
   });
 
-  // Set user info cookie for client-side access
   response.cookies.set(
     'user_info',
-    JSON.stringify({ id: user.id, email: user.email, name: user.name }),
+    JSON.stringify({ id: userId, email: userEmail, name: userName }),
     {
       httpOnly: false,
       secure: process.env.NODE_ENV === 'production',
@@ -186,7 +215,6 @@ async function handleCallback(request: NextRequest): Promise<NextResponse> {
     },
   );
 
-  // Clear the oauth state cookie
   response.cookies.delete('oauth_state');
 
   return response;
