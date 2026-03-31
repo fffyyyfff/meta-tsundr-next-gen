@@ -1,20 +1,27 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
+import Link from 'next/link';
+import { BookOpenIcon, BarChart3Icon } from 'lucide-react';
+
+const NAV_ITEMS: { href: string; label: string; icon: typeof BookOpenIcon; exact?: boolean }[] = [
+  { href: '/books', label: '一覧', icon: BookOpenIcon, exact: true },
+  { href: '/books/stats', label: '統計', icon: BarChart3Icon },
+];
 
 export default function BooksLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
+  const pathname = usePathname();
   const [checked, setChecked] = useState(false);
 
   useEffect(() => {
-    // Simple auth guard: check cookie or localStorage for user session
     const hasSession =
       document.cookie.includes('auth-token') ||
+      document.cookie.includes('auth_token') ||
       localStorage.getItem('auth-user') !== null;
 
     if (!hasSession) {
-      // In dev mode, allow access with a default user
       if (process.env.NODE_ENV === 'development') {
         localStorage.setItem('auth-user', JSON.stringify({ id: 'dev-user', name: 'Dev' }));
       } else {
@@ -33,5 +40,35 @@ export default function BooksLayout({ children }: { children: React.ReactNode })
     );
   }
 
-  return <>{children}</>;
+  const isDetailPage = /^\/books\/[^/]+/.test(pathname) && pathname !== '/books/stats';
+
+  return (
+    <div>
+      {/* Sub-navigation for books section (hide on detail/edit pages) */}
+      {!isDetailPage && (
+        <nav className="border-b border-border" aria-label="書籍ナビゲーション">
+          <div className="container mx-auto flex items-center gap-1 px-4">
+            {NAV_ITEMS.map((item) => {
+              const active = item.exact ? pathname === item.href : pathname.startsWith(item.href);
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`inline-flex items-center gap-1.5 border-b-2 px-3 py-2.5 text-sm font-medium transition-colors ${
+                    active
+                      ? 'border-foreground text-foreground'
+                      : 'border-transparent text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  <item.icon className="size-4" />
+                  {item.label}
+                </Link>
+              );
+            })}
+          </div>
+        </nav>
+      )}
+      {children}
+    </div>
+  );
 }

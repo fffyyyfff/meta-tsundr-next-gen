@@ -183,6 +183,63 @@ export const bookRouter = router({
     };
   }),
 
+  readingAnalytics: protectedProcedure.query(async ({ ctx }) => {
+    // Monthly added counts (last 6 months)
+    const sixMonthsAgo = new Date();
+    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 5);
+    sixMonthsAgo.setDate(1);
+    sixMonthsAgo.setHours(0, 0, 0, 0);
+
+    const recentBooks = await prisma.book.findMany({
+      where: {
+        userId: ctx.userId,
+        deletedAt: null,
+        createdAt: { gte: sixMonthsAgo },
+      },
+      select: { createdAt: true },
+    });
+
+    const monthlyAdded: Record<string, number> = {};
+    for (let i = 0; i < 6; i++) {
+      const d = new Date();
+      d.setMonth(d.getMonth() - i);
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+      monthlyAdded[key] = 0;
+    }
+    for (const book of recentBooks) {
+      const d = new Date(book.createdAt);
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+      if (key in monthlyAdded) monthlyAdded[key]++;
+    }
+
+    const monthlyData = Object.entries(monthlyAdded)
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([month, count]) => ({ month, count }));
+
+    // Average reading duration (startedAt → finishedAt)
+    const finishedBooks = await prisma.book.findMany({
+      where: {
+        userId: ctx.userId,
+        deletedAt: null,
+        status: 'FINISHED',
+        startedAt: { not: null },
+        finishedAt: { not: null },
+      },
+      select: { startedAt: true, finishedAt: true },
+    });
+
+    let avgReadingDays: number | null = null;
+    if (finishedBooks.length > 0) {
+      const totalDays = finishedBooks.reduce((sum, b) => {
+        const days = (new Date(b.finishedAt!).getTime() - new Date(b.startedAt!).getTime()) / (1000 * 60 * 60 * 24);
+        return sum + Math.max(0, days);
+      }, 0);
+      avgReadingDays = Math.round(totalDays / finishedBooks.length);
+    }
+
+    return { monthlyData, avgReadingDays };
+  }),
+
   lookupIsbn: publicProcedure
     .input(z.object({ isbn: z.string().min(10).max(13) }))
     .query(async ({ input }) => {
