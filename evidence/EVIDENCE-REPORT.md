@@ -93,7 +93,8 @@ Full HTML report: [test-reports/index.html](./test-reports/index.html)
 ### 3.8 Books New Page
 ![Books New](./screenshots/08-books-new.png)
 
-- ISBN + Google Books / Open Library ルックアップ
+- ISBN入力 + 「検索」ボタン → 楽天ブックスAPI（優先） / Open Library API（フォールバック）でルックアップ
+- ISBN検索でタイトル・著者を自動入力、書影URLも取得
 - タイトル、著者、ステータス、評価（星クリック）、メモ
 - 全て日本語UI
 
@@ -110,9 +111,9 @@ Full HTML report: [test-reports/index.html](./test-reports/index.html)
 
 | Metric | Value |
 |--------|-------|
-| Source files (src/) | 118 |
-| Total lines (src/) | 26,310 |
-| Git commits | 30 |
+| Source files (src/) | 119 |
+| Total lines (src/) | 26,492 |
+| Git commits | 32 |
 | E2E tests | 43 (all passing) |
 | TypeScript errors | 0 |
 | Docker services | 3 (postgres, qdrant, web) |
@@ -162,7 +163,7 @@ Full HTML report: [test-reports/index.html](./test-reports/index.html)
 | Notifications (bell + webhook) | COMPLETE |
 | **Book CRUD (積読管理)** | COMPLETE |
 | **Book Status Management (積読/読書中/読了)** | COMPLETE |
-| **ISBN Lookup (Open Library API)** | COMPLETE |
+| **ISBN Lookup (楽天ブックスAPI + Open Library フォールバック)** | COMPLETE |
 | **Reading Statistics (recharts PieChart/BarChart)** | COMPLETE |
 | **AI Book Features (おすすめ/書評/読書計画)** | COMPLETE |
 | **Full-text Search (title/author/isbn)** | COMPLETE |
@@ -198,5 +199,6 @@ evidence/
     ├── 20260331-templates/
     ├── 20260331-books-frontend/
     ├── 20260331-phase-b2/
-    └── 20260331-phase-c2/
+    ├── 20260331-phase-c2/
+    └── 20260331-rakuten/
 ```
