@@ -42,15 +42,18 @@ services:
       DB_NAME: meta_tsundr
       DB_SSLMODE: disable
       GRPC_PORT: "50051"
+      JWT_SECRET: ${JWT_SECRET:-change-me-in-production-min-32-chars}
+      ENVIRONMENT: ${ENVIRONMENT:-development}
     depends_on:
       postgres:
         condition: service_healthy
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "/bin/sh", "-c", "wget -qO- http://localhost:50051/healthz || exit 1"]
+      test: ["CMD", "/app/grpc-health-probe", "-addr=:50051"]
       interval: 10s
       timeout: 5s
       retries: 5
+      start_period: 10s
 
   web:
     build:
