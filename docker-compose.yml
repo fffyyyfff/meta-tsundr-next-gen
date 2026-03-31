@@ -28,6 +28,30 @@ services:
       timeout: 5s
       retries: 5
 
+  go-backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "50051:50051"
+    environment:
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      DB_USER: meta_tsundr
+      DB_PASSWORD: meta_tsundr_dev
+      DB_NAME: meta_tsundr
+      DB_SSLMODE: disable
+      GRPC_PORT: "50051"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "/bin/sh", "-c", "wget -qO- http://localhost:50051/healthz || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   web:
     build:
       context: .
@@ -36,10 +60,14 @@ services:
       - "3000:3000"
     env_file:
       - .env.docker
+    environment:
+      GRPC_BACKEND_URL: http://go-backend:50051
     depends_on:
       postgres:
         condition: service_healthy
       qdrant:
+        condition: service_healthy
+      go-backend:
         condition: service_healthy
     restart: unless-stopped
 
