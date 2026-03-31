@@ -9,8 +9,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-
-type AgentType = 'design' | 'code-review' | 'test-gen' | 'task-mgmt';
+import { TemplateSelector } from '@/components/template-selector';
+import type { AgentType } from '@/stores/templateStore';
 
 const CONNECTION_LABEL: Record<string, string> = {
   idle: '',
@@ -36,6 +36,7 @@ export function AgentExecutor() {
   const [task, setTask] = useState('');
   const [agentType, setAgentType] = useState<AgentType>('design');
   const [useStream, setUseStream] = useState(true);
+  const [showTemplateSelector, setShowTemplateSelector] = useState(false);
   const { addAgent, updateAgent } = useAgentStore();
   const formRef = useRef<HTMLFormElement>(null);
   const taskInputRef = useRef<HTMLInputElement>(null);
@@ -158,6 +159,13 @@ export function AgentExecutor() {
     taskInputRef.current?.focus();
   }, { ctrl: true });
 
+  const handleTemplateSelect = useCallback((selectedTask: string, selectedAgentType: AgentType) => {
+    setTask(selectedTask);
+    setAgentType(selectedAgentType);
+    setShowTemplateSelector(false);
+    taskInputRef.current?.focus();
+  }, []);
+
   return (
     <Card className="w-full max-w-2xl mx-auto" role="region" aria-label="Agent task executor">
       <CardHeader>
@@ -186,7 +194,19 @@ export function AgentExecutor() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="task">Task Description</Label>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="task">Task Description</Label>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setShowTemplateSelector(true)}
+                disabled={isRunning}
+                aria-label="Choose from templates"
+              >
+                Templates
+              </Button>
+            </div>
             <Input
               ref={taskInputRef}
               id="task"
@@ -266,6 +286,12 @@ export function AgentExecutor() {
           </div>
         </form>
       </CardContent>
+      {showTemplateSelector && (
+        <TemplateSelector
+          onSelect={handleTemplateSelect}
+          onClose={() => setShowTemplateSelector(false)}
+        />
+      )}
     </Card>
   );
 }

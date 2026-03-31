@@ -12,6 +12,7 @@ import {
   CardFooter,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { ExportButton } from '@/components/export-button';
 
 const STATUS_CONFIG = {
   completed: {
@@ -163,14 +164,21 @@ export function Dashboard({ userId = 'default-user' }: DashboardProps) {
           <h2 className="text-2xl font-bold tracking-tight">Execution History</h2>
           <p className="text-muted-foreground">Agent execution logs and performance metrics</p>
         </div>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => listQuery.refetch()}
-          disabled={listQuery.isLoading}
-        >
-          Refresh
-        </Button>
+        <div className="flex items-center gap-2">
+          <ExportButton
+            userId={userId}
+            agentType={agentTypeFilter !== 'all' ? agentTypeFilter : undefined}
+            status={statusFilter !== 'all' ? statusFilter : undefined}
+          />
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => listQuery.refetch()}
+            disabled={listQuery.isLoading}
+          >
+            Refresh
+          </Button>
+        </div>
       </div>
 
       {/* Stats summary */}
