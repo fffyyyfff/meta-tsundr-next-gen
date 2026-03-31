@@ -54,4 +54,37 @@ test.describe('Evidence Capture', () => {
     await page.screenshot({ path: path.join(EVIDENCE_DIR, '06-login-mobile.png'), fullPage: true });
     await context.close();
   });
+
+  test('07 - Books list page', async ({ page }) => {
+    await page.goto('/');
+    await page.evaluate(() => {
+      localStorage.setItem('auth-user', JSON.stringify({ id: 'dev-user', name: 'Dev' }));
+    });
+    await page.goto('/books');
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(1000);
+    await page.screenshot({ path: path.join(EVIDENCE_DIR, '07-books-list.png'), fullPage: true });
+  });
+
+  test('08 - Books new page', async ({ page }) => {
+    await page.goto('/');
+    await page.evaluate(() => {
+      localStorage.setItem('auth-user', JSON.stringify({ id: 'dev-user', name: 'Dev' }));
+    });
+    await page.goto('/books/new');
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(1000);
+    await page.screenshot({ path: path.join(EVIDENCE_DIR, '08-books-new.png'), fullPage: true });
+  });
+
+  test('09 - Books stats page', async ({ page }) => {
+    await page.goto('/');
+    await page.evaluate(() => {
+      localStorage.setItem('auth-user', JSON.stringify({ id: 'dev-user', name: 'Dev' }));
+    });
+    await page.goto('/books/stats');
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(1000);
+    await page.screenshot({ path: path.join(EVIDENCE_DIR, '09-books-stats.png'), fullPage: true });
+  });
 });

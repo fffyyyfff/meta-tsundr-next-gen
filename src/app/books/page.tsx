@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { PlusIcon, SearchIcon, BarChart3Icon } from 'lucide-react';
+import { AiRecommendation, AiReadingPlan } from '@/components/ai-book-features';
 
 const TABS = [
   { value: 'all', label: '全て' },
@@ -171,6 +172,12 @@ export default function BooksPage() {
           </TabsContent>
         ))}
       </Tabs>
+
+      {/* AI Features */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <AiRecommendation />
+        <AiReadingPlan />
+      </div>
     </div>
   );
 }

@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ArrowLeftIcon, PencilIcon, TrashIcon, BookOpenIcon, BookCheckIcon, BookMarkedIcon } from 'lucide-react';
+import { AiReview } from '@/components/ai-book-features';
 
 function StarDisplay({ rating }: { rating: number | null | undefined }) {
   if (!rating) return <span className="text-sm text-muted-foreground">未評価</span>;
@@ -187,6 +188,9 @@ export default function BookDetailPage({ params }: { params: Promise<{ id: strin
           </div>
         </CardContent>
       </Card>
+
+      {/* AI Review */}
+      <AiReview bookId={book.id} />
 
       {/* Actions */}
       <div className="flex gap-2">
