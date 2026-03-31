@@ -70,3 +70,15 @@ model GeneratedComponent {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
+
+model ApiUsage {
+  id             String   @id @default(cuid())
+  agentType      String
+  inputTokens    Int
+  outputTokens   Int
+  responseTimeMs Int
+  createdAt      DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([agentType, createdAt])
+}
