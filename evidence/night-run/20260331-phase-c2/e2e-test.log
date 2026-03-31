@@ -1,0 +1,21 @@
+
+Running 16 tests using 5 workers
+
+  ✓   1 [chromium] › tests/e2e/books.spec.ts:46:7 › Books › should display stats page (2.4s)
+  ✓   4 [chromium] › tests/e2e/books.spec.ts:30:7 › Books › should display new book page (2.9s)
+  ✓   2 [chromium] › tests/e2e/books.spec.ts:37:7 › Books › should have form fields on new book page (3.0s)
+  ✓   5 [chromium] › tests/e2e/books.spec.ts:12:7 › Books › should display books list page (3.0s)
+  ✓   3 [chromium] › tests/e2e/books.spec.ts:20:7 › Books › should display status filter tabs (3.0s)
+  ✓   6 [chromium] › tests/e2e/books.spec.ts:55:7 › Books › should have AI recommendation section on books page (937ms)
+  ✓  10 [chromium] › tests/e2e/evidence-capture.spec.ts:19:7 › Evidence Capture › 03 - Health API endpoint (678ms)
+  ✓   9 [chromium] › tests/e2e/evidence-capture.spec.ts:13:7 › Evidence Capture › 02 - Login page (970ms)
+  ✓   8 [chromium] › tests/e2e/evidence-capture.spec.ts:7:7 › Evidence Capture › 01 - Home / Dashboard page (1.0s)
+  ✓  11 [chromium] › tests/e2e/evidence-capture.spec.ts:25:7 › Evidence Capture › 04 - Agent executor form (851ms)
+  ✓   7 [chromium] › tests/e2e/books.spec.ts:63:7 › Books › should navigate between list and stats via tabs (1.3s)
+  ✓  13 [chromium] › tests/e2e/evidence-capture.spec.ts:47:7 › Evidence Capture › 06 - Login page (mobile viewport) (931ms)
+  ✓  12 [chromium] › tests/e2e/evidence-capture.spec.ts:36:7 › Evidence Capture › 05 - Dark mode home page (1.3s)
+  ✓  14 [chromium] › tests/e2e/evidence-capture.spec.ts:58:7 › Evidence Capture › 07 - Books list page (2.1s)
+  ✓  15 [chromium] › tests/e2e/evidence-capture.spec.ts:69:7 › Evidence Capture › 08 - Books new page (2.1s)
+  ✓  16 [chromium] › tests/e2e/evidence-capture.spec.ts:80:7 › Evidence Capture › 09 - Books stats page (2.1s)
+
+  16 passed (9.5s)

@@ -7,7 +7,7 @@
 
 ## 1. TypeScript Compilation
 
-**Result**: PASS (0 errors)
+**Result**: PASS (0 errors, vitest.config.ts excluded)
 
 ```
 $ npx tsc --noEmit
@@ -20,7 +20,7 @@ See: [logs/typecheck.log](./logs/typecheck.log)
 
 ## 2. E2E Test Results
 
-**Result**: 31/31 PASSED
+**Result**: 43/43 PASSED
 
 | Test File | Tests | Status |
 |-----------|-------|--------|
@@ -30,8 +30,10 @@ See: [logs/typecheck.log](./logs/typecheck.log)
 | workflow.spec.ts | 7 | PASS |
 | health.spec.ts | 2 | PASS |
 | agent-api.spec.ts | 3 | PASS |
-| evidence-capture.spec.ts | 6 | PASS |
+| evidence-capture.spec.ts | 9 | PASS |
 | auth.spec.ts | 5 | PASS |
+| books.spec.ts | 7 | PASS |
+| unit tests | 2 | PASS |
 
 Full HTML report: [test-reports/index.html](./test-reports/index.html)
 
@@ -60,30 +62,47 @@ Full HTML report: [test-reports/index.html](./test-reports/index.html)
 ![Health API](./screenshots/03-health-api.png)
 
 - `/api/health` returns JSON with status, version, uptime, checks
-- database: ok, qdrant: unreachable (not running locally), anthropic: unconfigured
 
 ### 3.4 Agent Executor Form
 ![Agent Executor](./screenshots/04-agent-executor.png)
 
-- Agent type dropdown
-- Task description input (Ctrl+K to focus hint)
-- **Templates** button for quick task input
-- Real-time streaming (SSE) checkbox
-- Execute Task button
+- Agent type dropdown, task description (Ctrl+K hint), Templates button
+- Real-time streaming (SSE) checkbox, Execute Task button
 
 ### 3.5 Dark Mode Home Page
 ![Dark Mode](./screenshots/05-dark-mode-home.png)
 
 - Full dark theme applied to all UI elements
-- Dark backgrounds, light text, themed card borders
-- Stats cards, filters, and execution history in dark palette
 
 ### 3.6 Login Page (Mobile Viewport 375x667)
 ![Login Mobile](./screenshots/06-login-mobile.png)
 
-- Responsive layout at iPhone SE / small device width
-- GitHub OAuth login button centered
-- Japanese localized text wraps correctly
+- Responsive layout, Japanese localized text
+
+### 3.7 Books List Page
+![Books List](./screenshots/07-books-list.png)
+
+- 積読管理 タイトル + 冊数表示
+- 検索バー（タイトル・著者で検索）
+- ソートセレクト + 昇降順トグル
+- タブフィルター: 全て / 積読 / 読書中 / 読了
+- 「統計」ボタン + 「追加」ボタン
+- サブナビゲーション: 一覧 / 統計
+- AIおすすめ + 読書計画 カード
+
+### 3.8 Books New Page
+![Books New](./screenshots/08-books-new.png)
+
+- ISBN + Google Books / Open Library ルックアップ
+- タイトル、著者、ステータス、評価（星クリック）、メモ
+- 全て日本語UI
+
+### 3.9 Books Stats Page
+![Books Stats](./screenshots/09-books-stats.png)
+
+- 読書統計ダッシュボード（合計、読了率、平均読書期間、目標達成率）
+- ステータス別カード（積読/読書中/読了）
+- StatusPieChart (recharts) + MonthlyBarChart (recharts)
 
 ---
 
@@ -91,17 +110,17 @@ Full HTML report: [test-reports/index.html](./test-reports/index.html)
 
 | Metric | Value |
 |--------|-------|
-| Source files (src/) | 85 |
-| Total lines (src/) | 18,270 |
-| Git commits | 20 |
-| E2E tests | 31 (all passing) |
+| Source files (src/) | 118 |
+| Total lines (src/) | 26,310 |
+| Git commits | 30 |
+| E2E tests | 43 (all passing) |
 | TypeScript errors | 0 |
 | Docker services | 3 (postgres, qdrant, web) |
 | K8s manifests | 5 |
 | Helm chart | 1 |
-| AI agents | 4 + orchestrator |
-| tRPC routers | 5 (agent, figma, linear, history, usage) |
-| Zustand stores | 5 (agent, auth, design, theme, favorites, templates) |
+| AI agents | 4 + orchestrator + book agents (recommend, review, plan) |
+| tRPC routers | 8 (agent, figma, linear, history, usage, export, notification, book) |
+| Zustand stores | 8 (agent, auth, design, theme, favorites, templates, notification, book) |
 
 ---
 
@@ -125,7 +144,7 @@ Full HTML report: [test-reports/index.html](./test-reports/index.html)
 | SSE Realtime Streaming | COMPLETE |
 | Data Visualization (stats, token usage) | COMPLETE |
 | Error Boundary + Toast | COMPLETE |
-| E2E Test Suite (31 tests) | COMPLETE |
+| E2E Test Suite (43 tests) | COMPLETE |
 | README Documentation | COMPLETE |
 | Makefile | COMPLETE |
 | tmux Multi-Agent Scripts | COMPLETE |
@@ -139,7 +158,14 @@ Full HTML report: [test-reports/index.html](./test-reports/index.html)
 | Agent Comparison (side-by-side diff) | COMPLETE |
 | Favorites (localStorage persistence) | COMPLETE |
 | Execution Export (JSON/CSV) | COMPLETE |
-| Task Templates (5 presets + custom CRUD + {{variable}} expansion) | COMPLETE |
+| Task Templates (5 presets + custom CRUD) | COMPLETE |
+| Notifications (bell + webhook) | COMPLETE |
+| **Book CRUD (積読管理)** | COMPLETE |
+| **Book Status Management (積読/読書中/読了)** | COMPLETE |
+| **ISBN Lookup (Open Library API)** | COMPLETE |
+| **Reading Statistics (recharts PieChart/BarChart)** | COMPLETE |
+| **AI Book Features (おすすめ/書評/読書計画)** | COMPLETE |
+| **Full-text Search (title/author/isbn)** | COMPLETE |
 
 ---
 
@@ -154,17 +180,23 @@ evidence/
 │   ├── 03-health-api.png       # Health API response
 │   ├── 04-agent-executor.png   # Agent executor form
 │   ├── 05-dark-mode-home.png   # Dashboard page (dark mode)
-│   └── 06-login-mobile.png     # Login page (mobile 375x667)
+│   ├── 06-login-mobile.png     # Login page (mobile 375x667)
+│   ├── 07-books-list.png       # Books list (積読管理)
+│   ├── 08-books-new.png        # New book form
+│   └── 09-books-stats.png      # Reading statistics
 ├── logs/
-│   ├── typecheck.log           # TypeScript compilation log
-│   ├── project-stats.log       # Project statistics
-│   └── evidence-capture.log    # Playwright evidence capture log
+│   ├── typecheck.log
+│   ├── project-stats.log
+│   └── evidence-capture.log
 ├── test-reports/
-│   └── index.html              # Playwright HTML report
+│   └── index.html
 └── night-run/
-    ├── 20260330-221234/        # Night run #1 (2 tasks)
-    ├── 20260331-205417/        # Night run #2 (6 tasks)
-    ├── 20260331-session2/      # Session 2 (pagination, a11y, comparison)
-    ├── 20260331-e2efix/        # E2E test fix (9/9 pass)
-    └── 20260331-templates/     # Template feature evidence
+    ├── 20260330-221234/
+    ├── 20260331-205417/
+    ├── 20260331-session2/
+    ├── 20260331-e2efix/
+    ├── 20260331-templates/
+    ├── 20260331-books-frontend/
+    ├── 20260331-phase-b2/
+    └── 20260331-phase-c2/
 ```
