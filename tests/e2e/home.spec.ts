@@ -11,8 +11,8 @@ test.describe('Home Page', () => {
   test('should have AI Agent Dashboard', async ({ page }) => {
     await page.goto('/');
 
-    // ダッシュボードが表示されることを確認
-    const dashboard = page.locator('text=AI Agent Dashboard');
-    await expect(dashboard).toBeVisible();
+    // メイン見出しが表示されることを確認
+    const heading = page.getByRole('heading', { name: 'Meta-tsundr Next Gen' });
+    await expect(heading).toBeVisible();
   });
 });

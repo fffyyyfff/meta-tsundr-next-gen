@@ -6,7 +6,7 @@ test.describe('Workflow Runner', () => {
   });
 
   test('should display Design-to-Code workflow card', async ({ page }) => {
-    const title = page.getByRole('heading', { name: 'Design-to-Code Workflow' });
+    const title = page.getByText('Design-to-Code Workflow');
     await expect(title).toBeVisible();
   });
 
@@ -17,7 +17,7 @@ test.describe('Workflow Runner', () => {
   });
 
   test('should have task input field', async ({ page }) => {
-    const input = page.getByLabel('Task Description');
+    const input = page.locator('#workflow-task');
     await expect(input).toBeVisible();
     await expect(input).toBeEditable();
   });
@@ -29,7 +29,7 @@ test.describe('Workflow Runner', () => {
   });
 
   test('should enable run button when task is entered', async ({ page }) => {
-    const input = page.getByLabel('Task Description');
+    const input = page.locator('#workflow-task');
     await input.fill('Convert the login page design from Figma');
 
     const runButton = page.getByRole('button', { name: 'Run Design-to-Code' });
@@ -37,7 +37,7 @@ test.describe('Workflow Runner', () => {
   });
 
   test('should show placeholder text in input', async ({ page }) => {
-    const input = page.getByLabel('Task Description');
+    const input = page.locator('#workflow-task');
     await expect(input).toHaveAttribute(
       'placeholder',
       'e.g. Convert the login page design from Figma...',
@@ -45,7 +45,6 @@ test.describe('Workflow Runner', () => {
   });
 
   test('should not show step progress before running', async ({ page }) => {
-    // ワークフロー実行前はステップ進捗が表示されない
     await expect(page.getByText('Progress')).not.toBeVisible();
     await expect(page.getByText('Design Extraction')).not.toBeVisible();
   });

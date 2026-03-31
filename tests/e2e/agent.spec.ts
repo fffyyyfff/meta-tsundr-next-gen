@@ -6,12 +6,12 @@ test.describe('Agent Functionality', () => {
   });
 
   test('should display agent dashboard', async ({ page }) => {
-    const dashboard = page.locator('text=AI Agent Dashboard');
-    await expect(dashboard).toBeVisible();
+    const title = page.getByText('Execute AI Agent Task');
+    await expect(title).toBeVisible();
   });
 
   test('should show empty state when no agents are running', async ({ page }) => {
-    const emptyState = page.locator('text=No agents running');
+    const emptyState = page.getByText('No agent results yet. Execute a task to see results here.');
     await expect(emptyState).toBeVisible();
   });
 });
