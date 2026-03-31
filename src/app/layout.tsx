@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { TRPCProvider } from "@/lib/trpc-provider";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { NotificationBell } from "@/components/notification-bell";
 import { SkipNav } from "@/components/skip-nav";
 import { KeyboardShortcutsHelp } from "@/components/keyboard-shortcuts-help";
 
@@ -41,11 +42,14 @@ export default function RootLayout({
       </head>
       <body className="min-h-full flex flex-col">
         <SkipNav />
-        <header className="flex items-center justify-between border-b border-border px-6 py-3" role="banner">
-          <span className="text-lg font-semibold text-foreground">Meta-tsundr</span>
-          <ThemeToggle />
-        </header>
         <TRPCProvider>
+          <header className="flex items-center justify-between border-b border-border px-6 py-3" role="banner">
+            <span className="text-lg font-semibold text-foreground">Meta-tsundr</span>
+            <div className="flex items-center gap-1">
+              <NotificationBell />
+              <ThemeToggle />
+            </div>
+          </header>
           <main id="main-content" className="flex-1">
             {children}
           </main>

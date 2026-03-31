@@ -25,12 +25,33 @@ test.describe('Evidence Capture', () => {
   test('04 - Agent executor form', async ({ page }) => {
     await page.goto('/');
     await page.waitForLoadState('networkidle');
-    // Focus on agent executor area
     const executor = page.locator('form').first();
     if (await executor.isVisible()) {
       await executor.screenshot({ path: path.join(EVIDENCE_DIR, '04-agent-executor.png') });
     } else {
       await page.screenshot({ path: path.join(EVIDENCE_DIR, '04-agent-executor.png'), fullPage: true });
     }
+  });
+
+  test('05 - Dark mode home page', async ({ page }) => {
+    await page.goto('/');
+    await page.waitForLoadState('networkidle');
+    // Enable dark mode by adding class to <html>
+    await page.evaluate(() => {
+      document.documentElement.classList.add('dark');
+    });
+    await page.waitForTimeout(500);
+    await page.screenshot({ path: path.join(EVIDENCE_DIR, '05-dark-mode-home.png'), fullPage: true });
+  });
+
+  test('06 - Login page (mobile viewport)', async ({ browser }) => {
+    const context = await browser.newContext({
+      viewport: { width: 375, height: 667 },
+    });
+    const page = await context.newPage();
+    await page.goto('/login');
+    await page.waitForLoadState('networkidle');
+    await page.screenshot({ path: path.join(EVIDENCE_DIR, '06-login-mobile.png'), fullPage: true });
+    await context.close();
   });
 });

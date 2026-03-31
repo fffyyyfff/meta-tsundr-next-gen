@@ -82,3 +82,27 @@ model ApiUsage {
   @@index([createdAt])
   @@index([agentType, createdAt])
 }
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  event     String
+  title     String
+  message   String   @db.Text
+  read      Boolean  @default(false)
+  metadata  String?  @db.Text
+  createdAt DateTime @default(now())
+
+  @@index([userId, read])
+  @@index([userId, createdAt])
+}
+
+model WebhookConfig {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  slackUrl  String?
+  events    String
+  enabled   Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

@@ -5,6 +5,7 @@ import { linearRouter } from './linear';
 import { historyRouter } from './history';
 import { usageRouter } from './usage';
 import { exportRouter } from './export';
+import { notificationRouter } from './notification';
 
 export const appRouter = router({
   agent: agentRouter,
@@ -13,6 +14,7 @@ export const appRouter = router({
   history: historyRouter,
   usage: usageRouter,
   export: exportRouter,
+  notification: notificationRouter,
 });
 
 export type AppRouter = typeof appRouter;
