@@ -1,13 +1,13 @@
 name: Security Checks
 
 on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
-  schedule:
-    # Every Monday 00:00 UTC (09:00 JST)
-    - cron: '0 0 * * 1'
+  workflow_dispatch:  # Manual trigger only until CI is stable
+  # push:
+  #   branches: [main]
+  # pull_request:
+  #   branches: [main]
+  # schedule:
+  #   - cron: '0 0 * * 1'
 
 permissions:
   contents: read

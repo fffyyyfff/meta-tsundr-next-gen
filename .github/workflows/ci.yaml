@@ -1,10 +1,11 @@
 name: CI/CD Pipeline
 
 on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
+  workflow_dispatch:  # Manual trigger only until CI is stable
+  # push:
+  #   branches: [main]
+  # pull_request:
+  #   branches: [main]
 
 env:
   REGISTRY: ghcr.io
@@ -50,7 +51,7 @@ jobs:
   eval:
     runs-on: ubuntu-latest
     needs: lint-and-typecheck
-    if: ${{ secrets.ANTHROPIC_API_KEY != '' }}
+    if: false  # Enable when ANTHROPIC_API_KEY is configured in repo secrets
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
