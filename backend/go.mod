@@ -7,7 +7,7 @@ toolchain go1.24.5
 require (
 	github.com/golang-jwt/jwt/v5 v5.3.0
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.27.3
-	github.com/lib/pq v1.10.9
+	github.com/lib/pq v1.12.1
 	golang.org/x/crypto v0.44.0
 	google.golang.org/genproto/googleapis/api v0.0.0-20250929231259-57b25ae835d4
 	google.golang.org/grpc v1.75.1
