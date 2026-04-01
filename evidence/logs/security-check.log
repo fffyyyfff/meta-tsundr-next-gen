@@ -1,0 +1,57 @@
+=== Security Check 2026-04-01T02:19:41Z ===
+
+--- npm audit ---
+# npm audit report
+
+effect  <3.20.0
+Severity: high
+Effect `AsyncLocalStorage` context lost/contaminated inside Effect fibers under concurrent load with RPC - https://github.com/advisories/GHSA-38f7-945m-qr2g
+fix available via `npm audit fix --force`
+Will install uploadthing@6.12.0, which is a breaking change
+node_modules/@uploadthing/shared/node_modules/effect
+node_modules/effect
+node_modules/uploadthing/node_modules/effect
+  @prisma/config  6.13.0-dev.1 - 7.6.0-integration-feat-prisma-bootstrap.13
+  Depends on vulnerable versions of effect
+  node_modules/@prisma/config
+    prisma  6.13.0-dev.1 - 7.6.0-integration-feat-prisma-bootstrap.13
+    Depends on vulnerable versions of @prisma/config
+    node_modules/prisma
+  @uploadthing/shared  >=6.7.6-canary.06f1714
+  Depends on vulnerable versions of effect
+  node_modules/@uploadthing/shared
+    @uploadthing/react  5.6.1-canary.8c1c98d || 6.3.3-canary.1bafd62 - 6.3.3 || 6.4.2-canary.02ff941 - 6.4.2-canary.d850078 || >=6.6.1-canary.06f1714
+    Depends on vulnerable versions of @uploadthing/shared
+    Depends on vulnerable versions of uploadthing
+    node_modules/@uploadthing/react
+    uploadthing  4.1.1-canary.102891b - 4.1.1-canary.166c330 || 6.5.1-canary.1bafd62 - 6.5.1 || >=6.12.1-canary.06f1714
+    Depends on vulnerable versions of @uploadthing/shared
+    Depends on vulnerable versions of effect
+    node_modules/uploadthing
+
+6 high severity vulnerabilities
+
+To address all issues (including breaking changes), run:
+  npm audit fix --force
+[FAIL] npm audit: high or critical vulnerabilities found (see log)
+
+--- Known vulnerable versions ---
+  axios not found in dependencies
+
+--- .env gitignore check ---
+[PASS] .env files are in .gitignore
+
+--- Suspicious postinstall scripts ---
+[WARN] Packages with postinstall scripts (review manually):
+  - onnxruntime-node
+  - msw
+  - unrs-resolver
+
+--- Hardcoded secrets scan ---
+[FAIL] Potential hardcoded secrets found:
+/Users/user/workspace/AI_work/meta-tsundr-next-gen/src/server/agents/base-agent.ts:29:      apiKey: process.env.ANTHROPIC_API_KEY || 'sk-ant-test',
+
+=== Summary ===
+PASS: 1  WARN: 1  FAIL: 2
+Full log: /Users/user/workspace/AI_work/meta-tsundr-next-gen/evidence/logs/security-check.log
+Status: FAILED

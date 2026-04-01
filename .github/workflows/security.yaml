@@ -1,0 +1,105 @@
+name: Security Checks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    # Every Monday 00:00 UTC (09:00 JST)
+    - cron: '0 0 * * 1'
+
+permissions:
+  contents: read
+
+jobs:
+  npm-audit:
+    name: NPM Audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+      - run: npm ci
+      - name: Run npm audit
+        run: |
+          npm audit --audit-level=high > npm-audit-report.txt 2>&1 || true
+          cat npm-audit-report.txt
+          npm audit --audit-level=high
+      - name: Upload audit report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: npm-audit-report
+          path: npm-audit-report.txt
+
+  go-vuln:
+    name: Go Vulnerability Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.24'
+          cache-dependency-path: backend/go.sum
+      - name: Install govulncheck
+        run: go install golang.org/x/vuln/cmd/govulncheck@latest
+      - name: Run govulncheck
+        working-directory: backend
+        run: govulncheck ./...
+
+  license-check:
+    name: License Compliance
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+      - run: npm ci
+      - name: Check licenses
+        run: npx license-checker --onlyAllow 'MIT;Apache-2.0;ISC;BSD-2-Clause;BSD-3-Clause;0BSD;CC0-1.0;CC-BY-4.0;Unlicense;Python-2.0;BlueOak-1.0.0'
+
+  secret-scan:
+    name: Secret Detection
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Scan for secrets in recent commits
+        run: |
+          echo "Scanning last 50 commits for potential secrets..."
+          FINDINGS=$(git log -50 --diff-filter=A -p -- ':(exclude)*.lock' ':(exclude)package-lock.json' ':(exclude)go.sum' | \
+            grep -inE '(api[_-]?key|secret[_-]?key|password|auth[_-]?token|private[_-]?key)\s*[:=]' | \
+            grep -vE '(your_|placeholder|example|changeme|process\.env|getEnv|os\.Getenv)' || true)
+          if [ -n "$FINDINGS" ]; then
+            echo "::warning::Potential secrets detected in recent commits:"
+            echo "$FINDINGS"
+            echo "## Secret Scan Findings" >> "$GITHUB_STEP_SUMMARY"
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+            echo "$FINDINGS" >> "$GITHUB_STEP_SUMMARY"
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "No potential secrets found."
+          fi
+
+  summary:
+    name: Security Summary
+    runs-on: ubuntu-latest
+    needs: [npm-audit, go-vuln, license-check, secret-scan]
+    if: always()
+    steps:
+      - name: Generate summary
+        run: |
+          echo "## Security Check Results" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Check | Status |" >> "$GITHUB_STEP_SUMMARY"
+          echo "|-------|--------|" >> "$GITHUB_STEP_SUMMARY"
+          echo "| NPM Audit | ${{ needs.npm-audit.result == 'success' && '✅ Pass' || '❌ Fail' }} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Go Vulnerabilities | ${{ needs.go-vuln.result == 'success' && '✅ Pass' || '❌ Fail' }} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| License Compliance | ${{ needs.license-check.result == 'success' && '✅ Pass' || '❌ Fail' }} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Secret Detection | ${{ needs.secret-scan.result == 'success' && '✅ Pass' || '❌ Fail' }} |" >> "$GITHUB_STEP_SUMMARY"

@@ -1,4 +1,4 @@
-.PHONY: dev build test docker-up docker-down db-migrate db-studio
+.PHONY: dev build test docker-up docker-down db-migrate db-studio security-check
 
 dev:
 	npm run dev
@@ -20,3 +20,6 @@ db-migrate:
 
 db-studio:
 	npx prisma studio
+
+security-check:
+	bash scripts/security-check.sh

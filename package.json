@@ -19,7 +19,8 @@
     "db:generate": "prisma generate",
     "eval": "promptfoo eval",
     "eval:view": "promptfoo view",
-    "proto:gen": "buf generate"
+    "proto:gen": "buf generate",
+    "security:check": "bash scripts/security-check.sh"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.80.0",
@@ -74,5 +75,8 @@
     "typescript": "^5",
     "vite": "^8.0.3",
     "vitest": "^3.2.4"
+  },
+  "overrides": {
+    "axios": "1.14.0"
   }
 }

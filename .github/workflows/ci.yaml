@@ -24,6 +24,8 @@ jobs:
       - run: npx prisma generate
       - run: npx tsc --noEmit
       - run: npm run lint
+      - name: Security audit
+        run: npm audit --audit-level=high
 
   test:
     runs-on: ubuntu-latest
