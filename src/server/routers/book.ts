@@ -82,6 +82,14 @@ export const bookRouter = router({
         }, ctx.token ?? undefined);
       } catch {
         // gRPC backend not available — fallback to Prisma direct
+        // Ensure dev user exists
+        const userId = ctx.userId ?? 'dev-user';
+        await prisma.user.upsert({
+          where: { id: userId },
+          update: {},
+          create: { id: userId, email: `${userId}@localhost` },
+        });
+
         const book = await prisma.book.create({
           data: {
             title: input.title,
@@ -91,7 +99,7 @@ export const bookRouter = router({
             imageUrl: input.imageUrl ?? null,
             notes: input.notes ?? null,
             rating: input.rating ?? null,
-            userId: ctx.userId ?? 'dev-user',
+            userId,
           },
         });
         return book;
@@ -135,14 +143,20 @@ export const bookRouter = router({
     }),
 
   stats: publicProcedure.query(async ({ ctx }) => {
-    // Fetch all books via gRPC and compute stats client-side
-    const allBooks = await bookClient.getBooks({ limit: 1000 }, ctx.token ?? undefined);
-    const books = allBooks.books;
+    let books: Array<{ status: string; createdAt: Date; finishedAt?: Date | null }> = [];
+    try {
+      const allBooks = await bookClient.getBooks({ limit: 1000 }, ctx.token ?? undefined);
+      books = allBooks.books;
+    } catch {
+      try {
+        books = await prisma.book.findMany({ where: { deletedAt: null } });
+      } catch { /* DB not available */ }
+    }
 
     const now = new Date();
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
-    const byStatus = { UNREAD: 0, READING: 0, FINISHED: 0 };
+    const byStatus: Record<string, number> = { UNREAD: 0, READING: 0, FINISHED: 0 };
     let addedThisMonth = 0;
     let finishedThisMonth = 0;
 
@@ -163,8 +177,15 @@ export const bookRouter = router({
   }),
 
   readingAnalytics: publicProcedure.query(async ({ ctx }) => {
-    const allBooks = await bookClient.getBooks({ limit: 1000 }, ctx.token ?? undefined);
-    const books = allBooks.books;
+    let books: Array<{ status: string; createdAt: Date; startedAt?: Date | null; finishedAt?: Date | null }> = [];
+    try {
+      const allBooks = await bookClient.getBooks({ limit: 1000 }, ctx.token ?? undefined);
+      books = allBooks.books;
+    } catch {
+      try {
+        books = await prisma.book.findMany({ where: { deletedAt: null } });
+      } catch { /* DB not available */ }
+    }
 
     const sixMonthsAgo = new Date();
     sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 5);

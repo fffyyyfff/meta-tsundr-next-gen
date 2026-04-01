@@ -51,7 +51,7 @@ const STATUS_LABELS: Record<string, string> = {
 };
 
 interface StatusPieChartProps {
-  byStatus: { UNREAD: number; READING: number; FINISHED: number };
+  byStatus: Record<string, number>;
 }
 
 export function StatusPieChart({ byStatus }: StatusPieChartProps) {
