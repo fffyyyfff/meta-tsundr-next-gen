@@ -12,21 +12,22 @@
    - アプリURL: `http://localhost:3000`（開発用）
 5. 発行された **アプリID（applicationId）** をコピー
 
-### 2. 環境変数に設定
+### 2. 環境変数を設定（direnv）
 
 ```bash
-# .env.local を編集
 cd /Users/user/workspace/AI_work/meta-tsundr-next-gen
-```
 
-`.env.local` の該当行を変更：
+# direnv未インストールの場合
+brew install direnv
+echo 'eval "$(direnv hook zsh)"' >> ~/.zshrc
+source ~/.zshrc
 
-```
-# Before
-RAKUTEN_APP_ID=your_rakuten_app_id_here
+# envrcをコピーして編集
+cp .envrc.example .envrc
+vi .envrc   # RAKUTEN_APP_ID= の値を取得したアプリIDに変更
 
-# After（あなたのアプリIDに置き換え）
-RAKUTEN_APP_ID=1234567890abcdef
+# 環境変数を有効化
+direnv allow
 ```
 
 ### 3. サーバー再起動

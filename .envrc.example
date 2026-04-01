@@ -1,0 +1,48 @@
+# Meta-tsundr 環境変数設定
+# 手順:
+#   1. cp .envrc.example .envrc
+#   2. 下記の値を実際のAPIキーに書き換え
+#   3. direnv allow
+#
+# direnv未インストールの場合: brew install direnv
+# シェル設定: eval "$(direnv hook zsh)" を ~/.zshrc に追加
+
+# ============================
+# 必須: 書籍検索（楽天ブックスAPI）
+# 取得: https://webservice.rakuten.co.jp/
+# ============================
+export RAKUTEN_APP_ID=your_rakuten_app_id_here
+
+# ============================
+# 推奨: AI機能（Claude API）
+# 取得: https://console.anthropic.com/
+# ============================
+export ANTHROPIC_API_KEY=your_api_key_here
+
+# ============================
+# オプション: 認証（GitHub OAuth）
+# 取得: GitHub → Settings → Developer settings → OAuth Apps
+# ============================
+export GITHUB_CLIENT_ID=your_github_client_id_here
+export GITHUB_CLIENT_SECRET=your_github_client_secret_here
+
+# ============================
+# オプション: デザイン連携（Figma）
+# 取得: Figma → Settings → Personal Access Tokens
+# ============================
+export FIGMA_ACCESS_TOKEN=your_figma_token_here
+
+# ============================
+# オプション: タスク管理（Linear）
+# 取得: Linear → Settings → API
+# ============================
+export LINEAR_API_KEY=your_linear_api_key_here
+
+# ============================
+# インフラ（デフォルト値で動作）
+# ============================
+export DATABASE_URL="postgresql://meta_tsundr:meta_tsundr_dev@localhost:5432/meta_tsundr"
+export QDRANT_URL=http://localhost:6333
+export GRPC_BACKEND_URL=http://localhost:50051
+export JWT_SECRET=dev-secret-at-least-32-characters-long
+export NEXT_PUBLIC_APP_URL=http://localhost:3000
