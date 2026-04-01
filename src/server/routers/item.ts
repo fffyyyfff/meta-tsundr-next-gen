@@ -103,11 +103,46 @@ export const itemRouter = router({
   searchProduct: publicProcedure
     .input(z.object({
       keyword: z.string().min(1).max(200),
+      source: z.enum(['amazon', 'rakuten', 'auto']).default('auto'),
     }))
     .query(async ({ input }) => {
-      const { searchByKeyword } = await import('../services/rakuten-ichiba');
-      const results = await searchByKeyword(input.keyword, 10);
-      return results.map((r) => ({
+      type ProductResult = {
+        title: string;
+        creator: string;
+        externalId: string;
+        imageUrl: string | null;
+        price: number;
+        productUrl: string;
+        description: string;
+        source: 'amazon' | 'rakuten';
+      };
+
+      // Amazon を試行
+      if (input.source === 'amazon' || input.source === 'auto') {
+        try {
+          const { searchByKeyword: amazonSearch } = await import('../services/amazon-paapi');
+          const amazonResults = await amazonSearch(input.keyword, 10);
+          if (amazonResults.length > 0) {
+            return amazonResults.map((r): ProductResult => ({
+              title: r.title,
+              creator: r.creator,
+              externalId: r.externalId,
+              imageUrl: r.imageUrl,
+              price: r.price,
+              productUrl: r.productUrl,
+              description: r.description,
+              source: 'amazon',
+            }));
+          }
+        } catch {
+          // Amazon API unavailable — fall through to Rakuten
+        }
+      }
+
+      // 楽天にフォールバック（or 直接指定）
+      const { searchByKeyword: rakutenSearch } = await import('../services/rakuten-ichiba');
+      const results = await rakutenSearch(input.keyword, 10);
+      return results.map((r): ProductResult => ({
         title: r.title,
         creator: r.creator,
         externalId: r.externalId,
@@ -115,6 +150,7 @@ export const itemRouter = router({
         price: r.price,
         productUrl: r.productUrl,
         description: r.description,
+        source: 'rakuten',
       }));
     }),
 

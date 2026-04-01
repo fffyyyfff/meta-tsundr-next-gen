@@ -155,12 +155,13 @@ export function ItemForm({ defaultValues, onSubmit, isSubmitting, submitLabel = 
   const externalIdValue = watch('externalId');
 
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [searchSource, setSearchSource] = useState<'auto' | 'amazon' | 'rakuten'>('auto');
   const suggestionsRef = useRef<HTMLDivElement>(null);
 
   const debouncedTitle = useDebounce(titleValue, 500);
 
   const searchQuery = trpcReact.item.searchProduct.useQuery(
-    { keyword: debouncedTitle },
+    { keyword: debouncedTitle, source: searchSource },
     { enabled: debouncedTitle.length >= 3 && showSuggestions },
   );
 
@@ -255,6 +256,27 @@ export function ItemForm({ defaultValues, onSubmit, isSubmitting, submitLabel = 
             {/* Suggestions dropdown */}
             {showSuggestions && debouncedTitle.length >= 3 && (
               <div className="absolute z-20 mt-1 w-full rounded-lg border border-border bg-popover shadow-lg">
+                {/* Source toggle */}
+                <div className="flex border-b border-border text-sm">
+                  {([
+                    { value: 'auto', label: 'おすすめ' },
+                    { value: 'amazon', label: 'Amazon' },
+                    { value: 'rakuten', label: '楽天' },
+                  ] as const).map((s) => (
+                    <button
+                      key={s.value}
+                      type="button"
+                      onClick={() => setSearchSource(s.value)}
+                      className={`flex-1 px-3 py-1.5 text-center transition-colors ${
+                        searchSource === s.value
+                          ? 'border-b-2 border-primary font-medium text-foreground'
+                          : 'text-muted-foreground hover:text-foreground'
+                      }`}
+                    >
+                      {s.label}
+                    </button>
+                  ))}
+                </div>
                 {searchQuery.isLoading ? (
                   <div className="space-y-2 p-3">
                     {Array.from({ length: 3 }).map((_, i) => (
@@ -291,8 +313,22 @@ export function ItemForm({ defaultValues, onSubmit, isSubmitting, submitLabel = 
                         )}
                         <div className="min-w-0 flex-1">
                           <p className="truncate text-sm font-medium">{item.title}</p>
-                          {item.price != null && (
-                            <p className="text-xs text-muted-foreground">{`\u00A5${item.price.toLocaleString()}`}</p>
+                          <div className="flex items-center gap-2">
+                            {item.price != null && item.price > 0 && (
+                              <span className="text-xs text-muted-foreground">{`¥${item.price.toLocaleString()}`}</span>
+                            )}
+                            {'source' in item && (
+                              <span className={`rounded px-1 py-0.5 text-[10px] font-medium ${
+                                item.source === 'amazon'
+                                  ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300'
+                                  : 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300'
+                              }`}>
+                                {item.source === 'amazon' ? 'Amazon' : '楽天'}
+                              </span>
+                            )}
+                          </div>
+                          {item.creator && (
+                            <p className="truncate text-[10px] text-muted-foreground">{item.creator}</p>
                           )}
                         </div>
                       </button>
