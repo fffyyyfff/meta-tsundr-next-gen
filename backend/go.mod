@@ -5,7 +5,7 @@ go 1.24.1
 toolchain go1.24.5
 
 require (
-	github.com/golang-jwt/jwt/v5 v5.3.0
+	github.com/golang-jwt/jwt/v5 v5.3.1
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.27.3
 	github.com/lib/pq v1.10.9
 	golang.org/x/crypto v0.44.0
