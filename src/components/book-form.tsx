@@ -314,11 +314,27 @@ export function BookForm({ defaultValues, onSubmit, isSubmitting, submitLabel = 
                     {(releaseFilter === 'upcoming'
                       ? searchQuery.data.filter((item) => {
                           if (!item.salesDate) return false;
-                          // Parse Japanese date format like "2026年05月15日頃"
-                          const match = item.salesDate.match(/(\d{4})年(\d{1,2})月(\d{1,2})日/);
-                          if (!match) return true; // Keep if can't parse
-                          const salesDate = new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
-                          return salesDate >= new Date(new Date().setHours(0, 0, 0, 0));
+                          const today = new Date(new Date().setHours(0, 0, 0, 0));
+                          // "2026年05月15日頃" or "2026年05月15日"
+                          const fullMatch = item.salesDate.match(/(\d{4})年(\d{1,2})月(\d{1,2})日/);
+                          if (fullMatch) {
+                            const d = new Date(Number(fullMatch[1]), Number(fullMatch[2]) - 1, Number(fullMatch[3]));
+                            return d >= today;
+                          }
+                          // "2024年05月" (no day)
+                          const monthMatch = item.salesDate.match(/(\d{4})年(\d{1,2})月/);
+                          if (monthMatch) {
+                            // Use last day of that month
+                            const d = new Date(Number(monthMatch[1]), Number(monthMatch[2]), 0);
+                            return d >= today;
+                          }
+                          // "2024年" (year only)
+                          const yearMatch = item.salesDate.match(/(\d{4})年/);
+                          if (yearMatch) {
+                            const d = new Date(Number(yearMatch[1]), 11, 31);
+                            return d >= today;
+                          }
+                          return false; // Can't parse → exclude
                         })
                       : searchQuery.data
                     ).map((item, i) => (
