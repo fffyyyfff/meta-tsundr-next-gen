@@ -4,10 +4,11 @@ import path from 'path';
 const EVIDENCE_DIR = path.join(__dirname, '..', '..', 'evidence', 'screenshots');
 
 test.describe('Evidence Capture', () => {
-  test('01 - Home / Dashboard page', async ({ page }) => {
+  test('01 - Home page', async ({ page }) => {
     await page.goto('/');
     await page.waitForLoadState('networkidle');
-    await page.screenshot({ path: path.join(EVIDENCE_DIR, '01-home-dashboard.png'), fullPage: true });
+    await page.waitForTimeout(500);
+    await page.screenshot({ path: path.join(EVIDENCE_DIR, '01-home.png'), fullPage: true });
   });
 
   test('02 - Login page', async ({ page }) => {
@@ -23,7 +24,7 @@ test.describe('Evidence Capture', () => {
   });
 
   test('04 - Agent executor form', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/dashboard');
     await page.waitForLoadState('networkidle');
     const executor = page.locator('form').first();
     if (await executor.isVisible()) {
@@ -36,7 +37,6 @@ test.describe('Evidence Capture', () => {
   test('05 - Dark mode home page', async ({ page }) => {
     await page.goto('/');
     await page.waitForLoadState('networkidle');
-    // Enable dark mode by adding class to <html>
     await page.evaluate(() => {
       document.documentElement.classList.add('dark');
     });
@@ -86,5 +86,24 @@ test.describe('Evidence Capture', () => {
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(1000);
     await page.screenshot({ path: path.join(EVIDENCE_DIR, '09-books-stats.png'), fullPage: true });
+  });
+
+  test('10 - Dashboard page', async ({ page }) => {
+    await page.goto('/dashboard');
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(500);
+    await page.screenshot({ path: path.join(EVIDENCE_DIR, '10-dashboard.png'), fullPage: true });
+  });
+
+  test('11 - Sidebar expanded', async ({ page }) => {
+    await page.goto('/');
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(500);
+    const sidebar = page.locator('aside');
+    if (await sidebar.isVisible()) {
+      await sidebar.screenshot({ path: path.join(EVIDENCE_DIR, '11-sidebar.png') });
+    } else {
+      await page.screenshot({ path: path.join(EVIDENCE_DIR, '11-sidebar.png') });
+    }
   });
 });

@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Workflow Runner', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/dashboard');
   });
 
   test('should display Design-to-Code workflow card', async ({ page }) => {

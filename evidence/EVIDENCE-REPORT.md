@@ -41,16 +41,13 @@ Full HTML report: [test-reports/index.html](./test-reports/index.html)
 
 ## 3. Screenshots
 
-### 3.1 Home / Dashboard (Light Mode)
-![Home Dashboard](./screenshots/01-home-dashboard.png)
+### 3.1 Home Page
+![Home](./screenshots/01-home.png)
 
-- Agent Type selector (Design, Code Review, Test Gen, Task Mgmt)
-- Task Description input with **Templates** button
-- SSE streaming toggle
-- Design-to-Code Workflow runner
-- Execution History with status badges (Total, Success, Failed, Running)
-- **Agent/Status filter dropdowns** + pagination
-- **Export** button + **Refresh** button
+- Meta-tsundr タイトル + 「積読管理 & AI読書アシスタント」サブタイトル
+- メニューカード3枚: 積読管理 / 読書統計 / AI ダッシュボード(管理者バッジ付き)
+- 読書アクティビティサマリー
+- **サイドバーナビゲーション**: ホーム / 積読管理 / 統計 / AI ダッシュボード
 
 ### 3.2 Login Page
 ![Login Page](./screenshots/02-login-page.png)
@@ -63,7 +60,7 @@ Full HTML report: [test-reports/index.html](./test-reports/index.html)
 
 - `/api/health` returns JSON with status, version, uptime, checks
 
-### 3.4 Agent Executor Form
+### 3.4 Agent Executor Form (at /dashboard)
 ![Agent Executor](./screenshots/04-agent-executor.png)
 
 - Agent type dropdown, task description (Ctrl+K hint), Templates button
@@ -105,16 +102,32 @@ Full HTML report: [test-reports/index.html](./test-reports/index.html)
 - ステータス別カード（積読/読書中/読了）
 - StatusPieChart (recharts) + MonthlyBarChart (recharts)
 
+### 3.10 AI Dashboard (/dashboard)
+![Dashboard](./screenshots/10-dashboard.png)
+
+- AI ダッシュボード タイトル
+- AgentExecutor (タスク実行フォーム) + AgentResults
+- Design-to-Code Workflow Runner
+- Execution History (統計カード、フィルター、ページネーション)
+- サイドバーから「AI ダッシュボード」がアクティブ
+
+### 3.11 Sidebar Navigation
+![Sidebar](./screenshots/11-sidebar.png)
+
+- ホーム / 積読管理 / 統計 / AI ダッシュボード (adminバッジ)
+- 折りたたみ/展開トグル
+- モバイルハンバーガーメニュー対応
+
 ---
 
 ## 4. Project Statistics
 
 | Metric | Value |
 |--------|-------|
-| Source files (src/) | 119 |
-| Total lines (src/) | 26,492 |
-| Git commits | 32 |
-| E2E tests | 43 (all passing) |
+| Source files (src/) | 127 |
+| Total lines (src/) | 25,190 |
+| Git commits | 39 |
+| E2E tests | 44 (all passing) |
 | TypeScript errors | 0 |
 | Docker services | 3 (postgres, qdrant, web) |
 | K8s manifests | 5 |
@@ -167,6 +180,8 @@ Full HTML report: [test-reports/index.html](./test-reports/index.html)
 | **Reading Statistics (recharts PieChart/BarChart)** | COMPLETE |
 | **AI Book Features (おすすめ/書評/読書計画)** | COMPLETE |
 | **Full-text Search (title/author/isbn)** | COMPLETE |
+| **Sidebar Navigation (ホーム/積読管理/統計/AIダッシュボード)** | COMPLETE |
+| **Route Restructuring (/, /books, /dashboard)** | COMPLETE |
 
 ---
 
@@ -184,7 +199,9 @@ evidence/
 │   ├── 06-login-mobile.png     # Login page (mobile 375x667)
 │   ├── 07-books-list.png       # Books list (積読管理)
 │   ├── 08-books-new.png        # New book form
-│   └── 09-books-stats.png      # Reading statistics
+│   ├── 09-books-stats.png      # Reading statistics
+│   ├── 10-dashboard.png        # AI Dashboard (/dashboard)
+│   └── 11-sidebar.png          # Sidebar navigation
 ├── logs/
 │   ├── typecheck.log
 │   ├── project-stats.log

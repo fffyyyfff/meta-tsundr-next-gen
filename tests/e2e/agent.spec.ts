@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Agent Functionality', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/dashboard');
   });
 
   test('should display agent dashboard', async ({ page }) => {
