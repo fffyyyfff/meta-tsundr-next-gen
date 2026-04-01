@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export const BookStatusEnum = z.enum(['UNREAD', 'READING', 'FINISHED']);
+export const BookStatusEnum = z.enum(['WISHLIST', 'UNREAD', 'READING', 'FINISHED']);
 
 export const bookCreateInput = z.object({
   title: z.string().min(1).max(500),

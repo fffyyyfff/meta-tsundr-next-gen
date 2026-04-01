@@ -19,7 +19,7 @@ const bookFormSchema = z.object({
   title: z.string().min(1, 'タイトルは必須です'),
   author: z.string().min(1, '著者は必須です'),
   isbn: z.string().optional(),
-  status: z.enum(['UNREAD', 'READING', 'FINISHED']),
+  status: z.enum(['WISHLIST', 'UNREAD', 'READING', 'FINISHED']),
   imageUrl: z.string().optional(),
   notes: z.string().optional(),
   rating: z.number().min(1).max(5).nullable(),
@@ -27,7 +27,20 @@ const bookFormSchema = z.object({
 
 type BookFormValues = z.infer<typeof bookFormSchema>;
 
+function isFutureDate(salesDate?: string | null): boolean {
+  if (!salesDate) return false;
+  const today = new Date(new Date().setHours(0, 0, 0, 0));
+  const full = salesDate.match(/(\d{4})年(\d{1,2})月(\d{1,2})日/);
+  if (full) return new Date(Number(full[1]), Number(full[2]) - 1, Number(full[3])) >= today;
+  const month = salesDate.match(/(\d{4})年(\d{1,2})月/);
+  if (month) return new Date(Number(month[1]), Number(month[2]), 0) >= today;
+  const year = salesDate.match(/(\d{4})年/);
+  if (year) return new Date(Number(year[1]), 11, 31) >= today;
+  return false;
+}
+
 const STATUS_OPTIONS = [
+  { value: 'WISHLIST', label: '未購入' },
   { value: 'UNREAD', label: '積読' },
   { value: 'READING', label: '読書中' },
   { value: 'FINISHED', label: '読了' },
@@ -131,14 +144,18 @@ export function BookForm({ defaultValues, onSubmit, isSubmitting, submitLabel = 
   }, [showSuggestions]);
 
   const handleSelectSuggestion = useCallback(
-    (item: { title: string; author: string; isbn: string; imageUrl: string | null }) => {
+    (item: { title: string; author: string; isbn: string; imageUrl: string | null; salesDate?: string | null }) => {
       setValue('title', item.title);
       setValue('author', item.author);
       if (item.isbn) setValue('isbn', item.isbn);
       if (item.imageUrl) setValue('imageUrl', item.imageUrl);
+      // 発売予定タブから選択 or 発売日が未来 → 未購入に自動設定
+      if (releaseFilter === 'upcoming' || isFutureDate(item.salesDate)) {
+        setValue('status', 'WISHLIST');
+      }
       setShowSuggestions(false);
     },
-    [setValue],
+    [setValue, releaseFilter],
   );
 
   const handleIsbnLookup = async () => {

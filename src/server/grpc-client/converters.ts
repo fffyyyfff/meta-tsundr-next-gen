@@ -4,7 +4,7 @@ import {
   type Timestamp,
 } from '@/generated/proto/tsundoku/book/v1/types';
 
-export type AppBookStatus = 'UNREAD' | 'READING' | 'FINISHED';
+export type AppBookStatus = 'WISHLIST' | 'UNREAD' | 'READING' | 'FINISHED';
 
 export interface AppBook {
   id: string;
@@ -51,6 +51,7 @@ export function protoBookToAppBook(proto: Partial<ProtoBook>): AppBook {
  */
 export function appStatusToProtoStatus(status: AppBookStatus): ProtoBookStatus {
   const map: Record<AppBookStatus, ProtoBookStatus> = {
+    WISHLIST: ProtoBookStatus.UNSPECIFIED,
     UNREAD: ProtoBookStatus.UNREAD,
     READING: ProtoBookStatus.READING,
     FINISHED: ProtoBookStatus.FINISHED,

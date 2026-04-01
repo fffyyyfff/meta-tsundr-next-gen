@@ -9,6 +9,7 @@ datasource db {
 }
 
 enum BookStatus {
+  WISHLIST
   UNREAD
   READING
   FINISHED
