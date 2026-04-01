@@ -10,13 +10,17 @@ import (
 	"meta-tsundr-backend/internal/domain/entity"
 	"meta-tsundr-backend/internal/infrastructure/config"
 
+	"gorm.io/driver/mysql"
 	"gorm.io/driver/postgres"
+	"gorm.io/driver/sqlite"
+	"gorm.io/driver/sqlserver"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 )
 
 // DatabaseConfig represents a simplified database configuration used by main.go
 type DatabaseConfig struct {
+	Driver   string
 	Host     string
 	Port     string
 	User     string
@@ -26,6 +30,11 @@ type DatabaseConfig struct {
 
 // NewDatabaseFromConfig creates a new Database from a simplified DatabaseConfig
 func NewDatabaseFromConfig(cfg *DatabaseConfig) (*Database, error) {
+	driver := cfg.Driver
+	if driver == "" {
+		driver = "postgres"
+	}
+
 	portInt := 5432
 	if cfg.Port != "" {
 		p, err := strconv.Atoi(cfg.Port)
@@ -36,6 +45,7 @@ func NewDatabaseFromConfig(cfg *DatabaseConfig) (*Database, error) {
 	}
 
 	fullCfg := &config.DatabaseConfig{
+		Driver:  driver,
 		Host:    cfg.Host,
 		Port:    portInt,
 		User:    cfg.User,
@@ -56,32 +66,43 @@ type Database struct {
 	config   *config.DatabaseConfig
 }
 
-// NewDatabase creates a new database service
-func NewDatabase(cfg *config.DatabaseConfig) (*Database, error) {
-	// Convert config to internal Config
-	dbConfig := &Config{
-		Host:            cfg.Host,
-		Port:            cfg.Port,
-		User:            cfg.User,
-		Password:        cfg.Password,
-		Database:        cfg.DBName,
-		SSLMode:         cfg.SSLMode,
-		MaxOpenConns:    cfg.MaxOpenConns,
-		MaxIdleConns:    cfg.MaxIdleConns,
-		ConnMaxLifetime: cfg.ConnMaxLifetime,
+// buildDialector returns the appropriate GORM dialector based on the driver name.
+func buildDialector(cfg *config.DatabaseConfig) (gorm.Dialector, error) {
+	driver := cfg.Driver
+	if driver == "" {
+		driver = "postgres"
 	}
 
-	// Create raw SQL connection
-	db, err := NewConnection(dbConfig)
+	switch driver {
+	case "postgres":
+		dsn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=%s",
+			cfg.Host, cfg.Port, cfg.User, cfg.Password, cfg.DBName, cfg.SSLMode)
+		return postgres.Open(dsn), nil
+	case "mysql":
+		dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?parseTime=true",
+			cfg.User, cfg.Password, cfg.Host, cfg.Port, cfg.DBName)
+		return mysql.Open(dsn), nil
+	case "sqlite":
+		dsn := fmt.Sprintf("file:%s?cache=shared", cfg.DBName)
+		return sqlite.Open(dsn), nil
+	case "sqlserver":
+		dsn := fmt.Sprintf("sqlserver://%s:%s@%s:%d?database=%s",
+			cfg.User, cfg.Password, cfg.Host, cfg.Port, cfg.DBName)
+		return sqlserver.Open(dsn), nil
+	default:
+		return nil, fmt.Errorf("unsupported database driver: %s", driver)
+	}
+}
+
+// NewDatabase creates a new database service
+func NewDatabase(cfg *config.DatabaseConfig) (*Database, error) {
+	dialector, err := buildDialector(cfg)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create database connection: %w", err)
+		return nil, err
 	}
 
 	// Create GORM connection
-	dsn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=%s",
-		cfg.Host, cfg.Port, cfg.User, cfg.Password, cfg.DBName, cfg.SSLMode)
-
-	gormDB, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
+	gormDB, err := gorm.Open(dialector, &gorm.Config{
 		Logger: logger.Default.LogMode(logger.Info),
 	})
 	if err != nil {
@@ -104,11 +125,8 @@ func NewDatabase(cfg *config.DatabaseConfig) (*Database, error) {
 		sqlDB.SetConnMaxLifetime(cfg.ConnMaxLifetime)
 	}
 
-	// Note: Migrator is now optional (lazy initialization)
-	// Use AutoMigrate() for GORM-based migrations instead
-
 	return &Database{
-		db:       db,
+		db:       sqlDB,
 		gorm:     gormDB,
 		migrator: nil, // Lazy initialization - created only when needed
 		config:   cfg,
@@ -192,17 +210,11 @@ func (d *Database) AutoMigrate() error {
 	)
 }
 
-// Close closes the database connection
+// Close closes the database connection.
+// Since db is obtained from gorm.DB(), closing it once is sufficient.
 func (d *Database) Close() error {
-	if d.gorm != nil {
-		sqlDB, err := d.gorm.DB()
-		if err != nil {
-			return fmt.Errorf("failed to get GORM sql.DB: %w", err)
-		}
-		if err := sqlDB.Close(); err != nil {
-			return fmt.Errorf("failed to close GORM connection: %w", err)
-		}
+	if d.db != nil {
+		return d.db.Close()
 	}
-
-	return d.db.Close()
+	return nil
 }

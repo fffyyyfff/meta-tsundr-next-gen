@@ -334,9 +334,16 @@ export const bookRouter = router({
   }),
 
   searchExternal: publicProcedure
-    .input(z.object({ title: z.string().min(1).max(200) }))
+    .input(z.object({
+      title: z.string().min(1).max(200),
+      availability: z.string().optional(),
+      sort: z.string().optional(),
+    }))
     .query(async ({ input }) => {
-      const results = await searchByTitle(input.title, 10);
+      const results = await searchByTitle(input.title, 10, {
+        availability: input.availability,
+        sort: input.sort,
+      });
       return results.map((r) => ({
         title: r.title,
         author: r.author,
@@ -344,6 +351,8 @@ export const bookRouter = router({
         imageUrl: r.imageUrl,
         publisher: r.publisher,
         description: r.description,
+        salesDate: r.salesDate,
+        availability: r.availability,
       }));
     }),
 });

@@ -128,12 +128,29 @@ task run
 | `/dashboard` | AIダッシュボード（管理者） |
 | `/login` | ログイン |
 
+### Go バックエンド起動手順
+
+```bash
+# 1. PostgreSQL + Go バックエンドをDocker起動
+task docker:up:go
+
+# 2. 別ターミナルでGo gRPCサーバーをローカル起動（Docker不使用の場合）
+task go:run
+
+# 3. フロントエンド起動
+task run
+```
+
+> **Docker一括起動**: `task docker:up:go` でPostgreSQLとGoバックエンドをまとめて起動できます。
+> ローカルで Go を直接実行する場合は `task docker:up`（DB のみ起動）→ `task go:run`（別ターミナル）→ `task run` の順で起動します。
+
 ### Task Commands / タスクコマンド
 
 ```bash
 task run              # アプリ起動
 task test             # 全テスト実行
 task docker:up        # PostgreSQL + Qdrant 起動
+task docker:up:go     # PostgreSQL + Go バックエンド起動
 task go:run           # Go gRPC サーバー起動
 task security:check   # セキュリティ診断
 task evidence:capture # スクリーンショット撮影

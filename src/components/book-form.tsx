@@ -13,7 +13,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { SearchIcon, Loader2Icon } from 'lucide-react';
+import { SearchIcon, Loader2Icon, CalendarIcon, XIcon } from 'lucide-react';
 
 const bookFormSchema = z.object({
   title: z.string().min(1, 'タイトルは必須です'),
@@ -80,6 +80,7 @@ export function BookForm({ defaultValues, onSubmit, isSubmitting, submitLabel = 
     control,
     setValue,
     watch,
+    reset,
     formState: { errors },
   } = useForm<BookFormValues>({
     resolver: zodResolver(bookFormSchema),
@@ -97,10 +98,14 @@ export function BookForm({ defaultValues, onSubmit, isSubmitting, submitLabel = 
 
   const isbn = watch('isbn');
   const titleValue = watch('title');
+  const authorValue = watch('author');
+  const notesValue = watch('notes');
+  const ratingValue = watch('rating');
   const imageUrl = watch('imageUrl');
   const [lookupLoading, setLookupLoading] = useState(false);
   const [isbnPreview, setIsbnPreview] = useState<{ title: string; author: string; coverUrl: string | null } | null>(null);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [releaseFilter, setReleaseFilter] = useState<'all' | 'upcoming'>('all');
   const suggestionsRef = useRef<HTMLDivElement>(null);
   const utils = trpcReact.useUtils();
 
@@ -108,7 +113,10 @@ export function BookForm({ defaultValues, onSubmit, isSubmitting, submitLabel = 
   const debouncedTitle = useDebounce(titleValue, 500);
 
   const searchQuery = trpcReact.book.searchExternal.useQuery(
-    { title: debouncedTitle },
+    {
+      title: debouncedTitle,
+      ...(releaseFilter === 'upcoming' ? { availability: '4' } : {}),
+    },
     { enabled: debouncedTitle.length >= 3 && showSuggestions },
   );
 
@@ -158,6 +166,20 @@ export function BookForm({ defaultValues, onSubmit, isSubmitting, submitLabel = 
 
   const hasSuggestions = searchQuery.data && searchQuery.data.length > 0;
 
+  const handleFormClear = () => {
+    reset({
+      title: '',
+      author: '',
+      isbn: '',
+      status: 'UNREAD',
+      imageUrl: '',
+      notes: '',
+      rating: null,
+    });
+    setIsbnPreview(null);
+    setShowSuggestions(false);
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -169,12 +191,24 @@ export function BookForm({ defaultValues, onSubmit, isSubmitting, submitLabel = 
           <div className="space-y-1">
             <Label htmlFor="isbn">ISBN</Label>
             <div className="flex gap-2">
-              <Input
-                id="isbn"
-                {...register('isbn')}
-                placeholder="978-..."
-                className="flex-1"
-              />
+              <div className="relative flex-1">
+                <Input
+                  id="isbn"
+                  {...register('isbn')}
+                  placeholder="978-..."
+                  className="pr-7"
+                />
+                {isbn && (
+                  <button
+                    type="button"
+                    onClick={() => { setValue('isbn', ''); setIsbnPreview(null); setValue('imageUrl', ''); }}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    aria-label="ISBNをクリア"
+                  >
+                    <XIcon className="size-4" />
+                  </button>
+                )}
+              </div>
               <Button type="button" variant="outline" size="sm" onClick={handleIsbnLookup} disabled={lookupLoading} aria-label="ISBNで検索">
                 {lookupLoading ? (
                   <Loader2Icon className="size-4 animate-spin" />
@@ -208,23 +242,61 @@ export function BookForm({ defaultValues, onSubmit, isSubmitting, submitLabel = 
           {/* Title + search suggestions */}
           <div className="relative space-y-1" ref={suggestionsRef}>
             <Label htmlFor="title">タイトル *</Label>
-            <Input
-              id="title"
-              {...register('title')}
-              placeholder="本のタイトル（3文字以上で候補表示）"
-              aria-invalid={!!errors.title}
-              onFocus={() => { if (debouncedTitle.length >= 3) setShowSuggestions(true); }}
-              onChange={(e) => {
-                register('title').onChange(e);
-                if (e.target.value.length >= 3) setShowSuggestions(true);
-                else setShowSuggestions(false);
-              }}
-            />
+            <div className="relative">
+              <Input
+                id="title"
+                {...register('title')}
+                placeholder="本のタイトル（3文字以上で候補表示）"
+                aria-invalid={!!errors.title}
+                className="pr-7"
+                onFocus={() => { if (debouncedTitle.length >= 3) setShowSuggestions(true); }}
+                onChange={(e) => {
+                  register('title').onChange(e);
+                  if (e.target.value.length >= 3) setShowSuggestions(true);
+                  else setShowSuggestions(false);
+                }}
+              />
+              {titleValue && (
+                <button
+                  type="button"
+                  onClick={() => { setValue('title', ''); setShowSuggestions(false); }}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  aria-label="タイトルをクリア"
+                >
+                  <XIcon className="size-4" />
+                </button>
+              )}
+            </div>
             {errors.title && <p className="text-xs text-destructive">{errors.title.message}</p>}
 
             {/* Suggestions dropdown */}
             {showSuggestions && debouncedTitle.length >= 3 && (
               <div className="absolute z-20 mt-1 w-full rounded-lg border border-border bg-popover shadow-lg">
+                {/* Release schedule filter tabs */}
+                <div className="flex border-b border-border">
+                  <button
+                    type="button"
+                    onClick={() => setReleaseFilter('all')}
+                    className={`flex-1 px-3 py-1.5 text-xs font-medium transition-colors ${
+                      releaseFilter === 'all'
+                        ? 'border-b-2 border-primary text-primary'
+                        : 'text-muted-foreground hover:text-foreground'
+                    }`}
+                  >
+                    全て
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setReleaseFilter('upcoming')}
+                    className={`flex-1 px-3 py-1.5 text-xs font-medium transition-colors ${
+                      releaseFilter === 'upcoming'
+                        ? 'border-b-2 border-primary text-primary'
+                        : 'text-muted-foreground hover:text-foreground'
+                    }`}
+                  >
+                    発売予定
+                  </button>
+                </div>
                 {searchQuery.isLoading ? (
                   <div className="space-y-2 p-3">
                     {Array.from({ length: 3 }).map((_, i) => (
@@ -265,6 +337,12 @@ export function BookForm({ defaultValues, onSubmit, isSubmitting, submitLabel = 
                           {item.publisher && (
                             <p className="truncate text-[10px] text-muted-foreground">{item.publisher}</p>
                           )}
+                          {item.salesDate && (
+                            <span className="mt-0.5 inline-flex items-center gap-1 rounded-full bg-blue-100 px-1.5 py-0.5 text-[10px] font-medium text-blue-700 dark:bg-blue-900/40 dark:text-blue-300">
+                              <CalendarIcon className="size-2.5" />
+                              {item.salesDate}
+                            </span>
+                          )}
                         </div>
                       </button>
                     ))}
@@ -277,7 +355,19 @@ export function BookForm({ defaultValues, onSubmit, isSubmitting, submitLabel = 
           {/* Author */}
           <div className="space-y-1">
             <Label htmlFor="author">著者 *</Label>
-            <Input id="author" {...register('author')} placeholder="著者名" aria-invalid={!!errors.author} />
+            <div className="relative">
+              <Input id="author" {...register('author')} placeholder="著者名" aria-invalid={!!errors.author} className="pr-7" />
+              {authorValue && (
+                <button
+                  type="button"
+                  onClick={() => setValue('author', '')}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  aria-label="著者をクリア"
+                >
+                  <XIcon className="size-4" />
+                </button>
+              )}
+            </div>
             {errors.author && <p className="text-xs text-destructive">{errors.author.message}</p>}
           </div>
 
@@ -324,11 +414,26 @@ export function BookForm({ defaultValues, onSubmit, isSubmitting, submitLabel = 
           {/* Notes */}
           <div className="space-y-1">
             <Label htmlFor="notes">メモ</Label>
-            <Textarea id="notes" {...register('notes')} placeholder="感想やメモ..." rows={4} />
+            <div className="relative">
+              <Textarea id="notes" {...register('notes')} placeholder="感想やメモ..." rows={4} className="pr-7" />
+              {notesValue && (
+                <button
+                  type="button"
+                  onClick={() => setValue('notes', '')}
+                  className="absolute right-2 top-2 text-gray-400 hover:text-gray-600"
+                  aria-label="メモをクリア"
+                >
+                  <XIcon className="size-4" />
+                </button>
+              )}
+            </div>
           </div>
 
           {/* Submit */}
           <div className="flex gap-2">
+            <Button type="button" variant="outline" size="sm" onClick={handleFormClear}>
+              フォームをクリア
+            </Button>
             <Button type="submit" disabled={isSubmitting} className="flex-1">
               {isSubmitting ? '保存中...' : submitLabel}
             </Button>

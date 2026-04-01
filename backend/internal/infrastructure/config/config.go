@@ -26,6 +26,7 @@ type ServerConfig struct {
 
 // DatabaseConfig データベース設定
 type DatabaseConfig struct {
+	Driver          string        `json:"driver"` // "postgres" (default), "mysql", "sqlite", "sqlserver"
 	Host            string        `json:"host"`
 	Port            int           `json:"port"`
 	User            string        `json:"user"`

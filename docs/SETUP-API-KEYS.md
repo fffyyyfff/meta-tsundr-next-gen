@@ -84,6 +84,81 @@ GITHUB_CLIENT_SECRET=xxxxx
 
 ---
 
+## マルチDB対応（Goバックエンド）
+
+GoバックエンドはDB_DRIVER環境変数で接続先データベースを切り替えられます。
+
+### 対応ドライバー
+
+| ドライバー | DB_DRIVER値 | デフォルトポート |
+|------------|-------------|------------------|
+| PostgreSQL | `postgres` | 5432 |
+| MySQL | `mysql` | 3306 |
+| SQLite | `sqlite` | — |
+| SQL Server | `sqlserver` | 1433 |
+
+### 各DBの設定例
+
+#### PostgreSQL（デフォルト）
+
+```bash
+export DB_DRIVER=postgres
+export DB_HOST=localhost
+export DB_PORT=5432
+export DB_USER=meta_tsundr
+export DB_PASSWORD=meta_tsundr_dev
+export DB_NAME=meta_tsundr
+export DB_SSLMODE=disable
+```
+
+#### MySQL
+
+```bash
+export DB_DRIVER=mysql
+export DB_HOST=localhost
+export DB_PORT=3306
+export DB_USER=meta_tsundr
+export DB_PASSWORD=meta_tsundr_dev
+export DB_NAME=meta_tsundr
+```
+
+#### SQLite
+
+```bash
+export DB_DRIVER=sqlite
+export DB_NAME=./data/meta_tsundr.db
+```
+
+#### SQL Server
+
+```bash
+export DB_DRIVER=sqlserver
+export DB_HOST=localhost
+export DB_PORT=1433
+export DB_USER=sa
+export DB_PASSWORD=YourStrong!Passw0rd
+export DB_NAME=meta_tsundr
+```
+
+### docker-compose.yml でのDB切り替え
+
+`docker-compose.yml` の `go-backend.environment` セクションで `DB_DRIVER` を変更します:
+
+```yaml
+go-backend:
+  environment:
+    DB_DRIVER: mysql          # postgres → mysql に変更
+    DB_HOST: mysql            # サービス名に合わせる
+    DB_PORT: "3306"
+    DB_USER: meta_tsundr
+    DB_PASSWORD: meta_tsundr_dev
+    DB_NAME: meta_tsundr
+```
+
+MySQL等を使う場合は、対応するDBサービスを `docker-compose.yml` に追加し、`depends_on` も更新してください。
+
+---
+
 ## 全環境変数一覧
 
 ```bash

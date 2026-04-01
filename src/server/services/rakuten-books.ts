@@ -5,6 +5,8 @@ export interface RakutenBookItem {
   imageUrl: string | null;
   publisher: string;
   description: string;
+  salesDate: string;
+  availability: string;
 }
 
 interface RakutenAPIItem {
@@ -16,6 +18,8 @@ interface RakutenAPIItem {
     mediumImageUrl?: string;
     itemCaption?: string;
     publisherName?: string;
+    salesDate?: string;
+    availability?: string;
   };
 }
 
@@ -36,6 +40,8 @@ function parseItem(raw: RakutenAPIItem): RakutenBookItem {
     imageUrl: item.largeImageUrl || item.mediumImageUrl || null,
     publisher: item.publisherName ?? '',
     description: item.itemCaption ?? '',
+    salesDate: item.salesDate ?? '',
+    availability: item.availability ?? '',
   };
 }
 
@@ -58,12 +64,20 @@ export async function searchByIsbn(isbn: string): Promise<RakutenBookItem | null
   }
 }
 
-export async function searchByTitle(title: string, hits = 10): Promise<RakutenBookItem[]> {
+export async function searchByTitle(
+  title: string,
+  hits = 10,
+  options?: { availability?: string; sort?: string },
+): Promise<RakutenBookItem[]> {
   const appId = getAppId();
   if (!appId) return [];
 
   try {
-    const url = `https://app.rakuten.co.jp/services/api/BooksBook/Search/20170404?format=json&title=${encodeURIComponent(title)}&hits=${hits}&applicationId=${encodeURIComponent(appId)}`;
+    const sort = options?.sort ?? '-releaseDate';
+    let url = `https://app.rakuten.co.jp/services/api/BooksBook/Search/20170404?format=json&title=${encodeURIComponent(title)}&hits=${hits}&sort=${encodeURIComponent(sort)}&applicationId=${encodeURIComponent(appId)}`;
+    if (options?.availability) {
+      url += `&availability=${encodeURIComponent(options.availability)}`;
+    }
     const response = await fetch(url);
     if (!response.ok) return [];
 

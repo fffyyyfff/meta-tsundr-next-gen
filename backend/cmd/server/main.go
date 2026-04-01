@@ -29,6 +29,7 @@ func main() {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 
 	port := getEnv("GRPC_PORT", "50051")
+	dbDriver := getEnv("DB_DRIVER", "postgres")
 	dbHost := getEnv("DB_HOST", "localhost")
 	dbPort := getEnv("DB_PORT", "5432")
 	dbUser := getEnv("DB_USER", "meta_tsundr")
@@ -42,9 +43,10 @@ func main() {
 	}
 
 	log.Println("Starting meta-tsundr gRPC server...")
-	log.Printf("Environment: %s, Port: %s", env, port)
+	log.Printf("Environment: %s, Port: %s, DB Driver: %s", env, port, dbDriver)
 
 	dbCfg := &database.DatabaseConfig{
+		Driver:   dbDriver,
 		Host:     dbHost,
 		Port:     dbPort,
 		User:     dbUser,
