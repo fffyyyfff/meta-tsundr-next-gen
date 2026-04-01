@@ -113,10 +113,7 @@ export function BookForm({ defaultValues, onSubmit, isSubmitting, submitLabel = 
   const debouncedTitle = useDebounce(titleValue, 500);
 
   const searchQuery = trpcReact.book.searchExternal.useQuery(
-    {
-      title: debouncedTitle,
-      ...(releaseFilter === 'upcoming' ? { availability: '4' } : {}),
-    },
+    { title: debouncedTitle },
     { enabled: debouncedTitle.length >= 3 && showSuggestions },
   );
 
