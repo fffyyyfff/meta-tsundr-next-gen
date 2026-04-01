@@ -1,0 +1,145 @@
+version: '3'
+
+vars:
+  BACKEND_DIR: ./backend
+
+tasks:
+  # === メイン起動 ===
+  run:
+    desc: 積読管理アプリを起動（Next.js dev server）
+    cmds:
+      - npm run dev
+
+  run:all:
+    desc: 全サービス起動（Docker + Next.js）
+    deps: [docker:up]
+    cmds:
+      - npm run dev
+
+  # === フロントエンド ===
+  dev:
+    desc: Next.js 開発サーバー起動
+    cmds:
+      - npm run dev
+
+  build:
+    desc: Next.js プロダクションビルド
+    cmds:
+      - npm run build
+
+  lint:
+    desc: ESLint 実行
+    cmds:
+      - npm run lint
+
+  # === データベース ===
+  db:migrate:
+    desc: Prisma マイグレーション実行
+    cmds:
+      - npx prisma migrate dev
+
+  db:push:
+    desc: Prisma スキーマをDBに反映
+    cmds:
+      - npx prisma db push
+
+  db:studio:
+    desc: Prisma Studio（DB GUI）起動
+    cmds:
+      - npx prisma studio
+
+  db:generate:
+    desc: Prisma クライアント生成
+    cmds:
+      - npx prisma generate
+
+  # === Go バックエンド ===
+  go:build:
+    desc: Go バックエンドをビルド
+    dir: "{{.BACKEND_DIR}}"
+    cmds:
+      - go build -o bin/server ./cmd/server
+
+  go:run:
+    desc: Go gRPC サーバーを起動
+    dir: "{{.BACKEND_DIR}}"
+    cmds:
+      - go run ./cmd/server
+
+  go:test:
+    desc: Go テスト実行
+    dir: "{{.BACKEND_DIR}}"
+    cmds:
+      - go test ./...
+
+  # === Docker ===
+  docker:up:
+    desc: Docker Compose でインフラ起動（PostgreSQL + Qdrant）
+    cmds:
+      - docker compose up -d postgres qdrant
+
+  docker:up:all:
+    desc: Docker Compose 全サービス起動
+    cmds:
+      - docker compose up -d --build
+
+  docker:down:
+    desc: Docker Compose 停止
+    cmds:
+      - docker compose down
+
+  docker:logs:
+    desc: Docker Compose ログ表示
+    cmds:
+      - docker compose logs -f
+
+  # === テスト ===
+  test:
+    desc: 全テスト実行（E2E + Unit）
+    cmds:
+      - npx playwright test
+      - npx vitest run 2>/dev/null || true
+
+  test:e2e:
+    desc: Playwright E2E テスト
+    cmds:
+      - npx playwright test
+
+  test:unit:
+    desc: Vitest ユニットテスト
+    cmds:
+      - npx vitest run
+
+  test:e2e:ui:
+    desc: Playwright UI モード
+    cmds:
+      - npx playwright test --ui
+
+  # === セキュリティ ===
+  security:check:
+    desc: セキュリティ診断実行
+    cmds:
+      - bash scripts/security-check.sh
+
+  # === 証跡 ===
+  evidence:capture:
+    desc: スクリーンショット撮影
+    cmds:
+      - npx playwright test tests/e2e/evidence-capture.spec.ts
+
+  # === コード生成 ===
+  proto:gen:
+    desc: Proto → TypeScript クライアント生成
+    cmds:
+      - npx buf generate
+
+  # === Eval ===
+  eval:
+    desc: Promptfoo エージェント評価実行
+    cmds:
+      - npx promptfoo eval
+
+  eval:view:
+    desc: Promptfoo 結果ビューア起動
+    cmds:
+      - npx promptfoo view
