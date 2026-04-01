@@ -1,4 +1,5 @@
-import { router, protectedProcedure, publicProcedure } from '../trpc';
+import { router, publicProcedure } from '../trpc';
+import { prisma } from '../../lib/prisma';
 import { z } from 'zod';
 import { TRPCError } from '@trpc/server';
 import {
@@ -34,32 +35,70 @@ export const bookRouter = router({
 
         return { items: res.books, nextCursor: res.nextCursor || undefined };
       } catch {
-        // gRPC backend not available — return empty list
-        return { items: [], nextCursor: undefined };
+        // gRPC backend not available — fallback to Prisma
+        try {
+          const where: Record<string, unknown> = { deletedAt: null };
+          if (ctx.userId) where.userId = ctx.userId;
+          if (status) where.status = status;
+          if (search) {
+            where.OR = [
+              { title: { contains: search, mode: 'insensitive' } },
+              { author: { contains: search, mode: 'insensitive' } },
+            ];
+          }
+          const books = await prisma.book.findMany({
+            where,
+            orderBy: { [sortBy]: sortOrder },
+            take: limit + 1,
+            ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
+          });
+          const hasMore = books.length > limit;
+          const items = hasMore ? books.slice(0, limit) : books;
+          return { items, nextCursor: hasMore ? items[items.length - 1]?.id : undefined };
+        } catch {
+          return { items: [], nextCursor: undefined };
+        }
       }
     }),
 
-  getById: protectedProcedure
+  getById: publicProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ input, ctx }) => {
       return bookClient.getBook(input.id, ctx.token ?? undefined);
     }),
 
-  create: protectedProcedure
+  create: publicProcedure
     .input(bookCreateInput)
     .mutation(async ({ input, ctx }) => {
-      return bookClient.createBook({
-        title: input.title,
-        author: input.author,
-        isbn: input.isbn,
-        status: input.status,
-        imageUrl: input.imageUrl,
-        notes: input.notes,
-        rating: input.rating,
-      }, ctx.token ?? undefined);
+      try {
+        return await bookClient.createBook({
+          title: input.title,
+          author: input.author,
+          isbn: input.isbn,
+          status: input.status,
+          imageUrl: input.imageUrl,
+          notes: input.notes,
+          rating: input.rating,
+        }, ctx.token ?? undefined);
+      } catch {
+        // gRPC backend not available — fallback to Prisma direct
+        const book = await prisma.book.create({
+          data: {
+            title: input.title,
+            author: input.author,
+            isbn: input.isbn ?? null,
+            status: input.status ?? 'UNREAD',
+            imageUrl: input.imageUrl ?? null,
+            notes: input.notes ?? null,
+            rating: input.rating ?? null,
+            userId: ctx.userId ?? 'dev-user',
+          },
+        });
+        return book;
+      }
     }),
 
-  update: protectedProcedure
+  update: publicProcedure
     .input(bookUpdateInput)
     .mutation(async ({ input, ctx }) => {
       const { id, ...data } = input;
@@ -75,27 +114,27 @@ export const bookRouter = router({
       }, ctx.token ?? undefined);
     }),
 
-  delete: protectedProcedure
+  delete: publicProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ input, ctx }) => {
       await bookClient.deleteBook(input.id, ctx.token ?? undefined);
       return { success: true };
     }),
 
-  restore: protectedProcedure
+  restore: publicProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ input, ctx }) => {
       // Restore = update with status change back; Go backend handles soft-delete restore
       return bookClient.updateBook({ id: input.id }, ctx.token ?? undefined);
     }),
 
-  changeStatus: protectedProcedure
+  changeStatus: publicProcedure
     .input(bookChangeStatusInput)
     .mutation(async ({ input, ctx }) => {
       return bookClient.updateBookStatus(input.id, input.status, ctx.token ?? undefined);
     }),
 
-  stats: protectedProcedure.query(async ({ ctx }) => {
+  stats: publicProcedure.query(async ({ ctx }) => {
     // Fetch all books via gRPC and compute stats client-side
     const allBooks = await bookClient.getBooks({ limit: 1000 }, ctx.token ?? undefined);
     const books = allBooks.books;
@@ -123,7 +162,7 @@ export const bookRouter = router({
     };
   }),
 
-  readingAnalytics: protectedProcedure.query(async ({ ctx }) => {
+  readingAnalytics: publicProcedure.query(async ({ ctx }) => {
     const allBooks = await bookClient.getBooks({ limit: 1000 }, ctx.token ?? undefined);
     const books = allBooks.books;
 
@@ -180,7 +219,7 @@ export const bookRouter = router({
       };
     }),
 
-  getAiRecommendation: protectedProcedure.mutation(async ({ ctx }) => {
+  getAiRecommendation: publicProcedure.mutation(async ({ ctx }) => {
     const res = await bookClient.getBooks({
       status: ProtoBookStatus.FINISHED,
       limit: 30,
@@ -213,7 +252,7 @@ export const bookRouter = router({
     return { recommendation: result.result, tokenUsage: result.tokenUsage };
   }),
 
-  generateReview: protectedProcedure
+  generateReview: publicProcedure
     .input(z.object({ bookId: z.string() }))
     .mutation(async ({ input, ctx }) => {
       const book = await bookClient.getBook(input.bookId, ctx.token ?? undefined);
@@ -240,7 +279,7 @@ export const bookRouter = router({
       return { review: result.result, tokenUsage: result.tokenUsage };
     }),
 
-  createReadingPlan: protectedProcedure.mutation(async ({ ctx }) => {
+  createReadingPlan: publicProcedure.mutation(async ({ ctx }) => {
     const res = await bookClient.getBooks({
       status: ProtoBookStatus.UNREAD,
       limit: 20,
