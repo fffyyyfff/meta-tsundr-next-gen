@@ -26,7 +26,7 @@ export abstract class BaseAgent {
   constructor(config: AgentConfig) {
     this.config = config;
     this.anthropic = new Anthropic({
-      apiKey: process.env.ANTHROPIC_API_KEY || 'sk-ant-test',
+      apiKey: process.env.ANTHROPIC_API_KEY,
     });
   }
 
