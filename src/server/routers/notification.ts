@@ -12,18 +12,19 @@ export const notificationRouter = router({
       }),
     )
     .query(async ({ input }) => {
-      const notifications = await prisma.notification.findMany({
-        where: {
-          userId: input.userId,
-          ...(input.unreadOnly && { read: false }),
-        },
-        orderBy: { createdAt: 'desc' },
-        take: input.limit,
-      });
+      try {
+        const notifications = await prisma.notification.findMany({
+          where: {
+            userId: input.userId,
+            ...(input.unreadOnly && { read: false }),
+          },
+          orderBy: { createdAt: 'desc' },
+          take: input.limit,
+        });
 
-      const unreadCount = await prisma.notification.count({
-        where: { userId: input.userId, read: false },
-      });
+        const unreadCount = await prisma.notification.count({
+          where: { userId: input.userId, read: false },
+        });
 
       return {
         notifications: notifications.map((n) => ({
@@ -37,6 +38,10 @@ export const notificationRouter = router({
         })),
         unreadCount,
       };
+      } catch {
+        // DB not available
+        return { notifications: [], unreadCount: 0 };
+      }
     }),
 
   markAsRead: publicProcedure

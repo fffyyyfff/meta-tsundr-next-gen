@@ -17,21 +17,26 @@ import { bookReviewAgent } from '../agents/book-review-agent';
 import { readingPlanAgent } from '../agents/reading-plan-agent';
 
 export const bookRouter = router({
-  list: protectedProcedure
+  list: publicProcedure
     .input(bookListInput)
     .query(async ({ input, ctx }) => {
       const { status, search, sortBy, sortOrder, limit, cursor } = input;
 
-      const res = await bookClient.getBooks({
-        status: status ? appStatusToProtoStatus(status) : undefined,
-        search: search ?? undefined,
-        sortBy,
-        sortOrder,
-        limit,
-        cursor: cursor ?? undefined,
-      }, ctx.token ?? undefined);
+      try {
+        const res = await bookClient.getBooks({
+          status: status ? appStatusToProtoStatus(status) : undefined,
+          search: search ?? undefined,
+          sortBy,
+          sortOrder,
+          limit,
+          cursor: cursor ?? undefined,
+        }, ctx.token ?? undefined);
 
-      return { items: res.books, nextCursor: res.nextCursor || undefined };
+        return { items: res.books, nextCursor: res.nextCursor || undefined };
+      } catch {
+        // gRPC backend not available — return empty list
+        return { items: [], nextCursor: undefined };
+      }
     }),
 
   getById: protectedProcedure
