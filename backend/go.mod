@@ -1,14 +1,12 @@
 module meta-tsundr-backend
 
-go 1.24.1
-
-toolchain go1.24.5
+go 1.25.0
 
 require (
 	github.com/golang-jwt/jwt/v5 v5.3.0
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.27.3
 	github.com/lib/pq v1.10.9
-	golang.org/x/crypto v0.44.0
+	golang.org/x/crypto v0.49.0
 	google.golang.org/genproto/googleapis/api v0.0.0-20250929231259-57b25ae835d4
 	google.golang.org/grpc v1.75.1
 	google.golang.org/protobuf v1.36.10
@@ -36,9 +34,9 @@ require (
 	github.com/microsoft/go-mssqldb v1.8.2 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/stretchr/testify v1.11.1 // indirect
-	golang.org/x/net v0.47.0 // indirect
-	golang.org/x/sync v0.18.0 // indirect
-	golang.org/x/sys v0.38.0 // indirect
-	golang.org/x/text v0.31.0 // indirect
+	golang.org/x/net v0.51.0 // indirect
+	golang.org/x/sync v0.20.0 // indirect
+	golang.org/x/sys v0.42.0 // indirect
+	golang.org/x/text v0.35.0 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20250929231259-57b25ae835d4 // indirect
 )
