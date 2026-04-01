@@ -8,6 +8,8 @@ import {
   BookOpenIcon,
   BarChart3Icon,
   ShieldIcon,
+  PackageIcon,
+  HeartIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
   MenuIcon,
@@ -23,6 +25,8 @@ const NAV_ITEMS: Array<{
   { href: '/', label: 'ホーム', icon: HomeIcon },
   { href: '/books', label: '積読管理', icon: BookOpenIcon },
   { href: '/books/stats', label: '統計', icon: BarChart3Icon },
+  { href: '/purchases', label: '購入管理', icon: PackageIcon },
+  { href: '/purchases?status=WISHLIST', label: 'ウィッシュリスト', icon: HeartIcon },
   { href: '/dashboard', label: 'AI ダッシュボード', icon: ShieldIcon, badge: 'admin' },
 ];
 

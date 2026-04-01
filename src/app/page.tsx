@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { BookOpenIcon, BarChart3Icon, ShieldIcon, BookMarkedIcon, BookCheckIcon, Loader2Icon } from 'lucide-react';
+import { BookOpenIcon, BarChart3Icon, ShieldIcon, BookMarkedIcon, BookCheckIcon, Loader2Icon, PackageIcon, HeartIcon } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { trpcReact } from '@/lib/trpc-provider';
 
@@ -29,6 +29,22 @@ const MENU_CARDS: Array<{
     icon: BarChart3Icon,
     color: 'text-emerald-500',
     bg: 'bg-emerald-500/10',
+  },
+  {
+    title: '購入管理',
+    description: '購入・ウィッシュリストを管理',
+    href: '/purchases',
+    icon: PackageIcon,
+    color: 'text-amber-500',
+    bg: 'bg-amber-500/10',
+  },
+  {
+    title: 'ウィッシュリスト',
+    description: '欲しいものリスト',
+    href: '/purchases?status=WISHLIST',
+    icon: HeartIcon,
+    color: 'text-rose-500',
+    bg: 'bg-rose-500/10',
   },
   {
     title: 'AI ダッシュボード',

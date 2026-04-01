@@ -7,6 +7,7 @@ import { usageRouter } from './usage';
 import { exportRouter } from './export';
 import { notificationRouter } from './notification';
 import { bookRouter } from './book';
+import { itemRouter } from './item';
 
 export const appRouter = router({
   agent: agentRouter,
@@ -17,6 +18,7 @@ export const appRouter = router({
   export: exportRouter,
   notification: notificationRouter,
   book: bookRouter,
+  item: itemRouter,
 });
 
 export type AppRouter = typeof appRouter;

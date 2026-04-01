@@ -25,6 +25,52 @@ model User {
   agents       AgentExecution[]
   projects     Project[]
   books        Book[]
+  items        Item[]
+}
+
+enum ItemCategory {
+  BOOK
+  ELECTRONICS
+  DAILY_GOODS
+  FOOD
+  CLOTHING
+  HOBBY
+  OTHER
+}
+
+enum ItemStatus {
+  WISHLIST
+  PURCHASED
+  IN_USE
+  COMPLETED
+  RETURNED
+}
+
+model Item {
+  id           String       @id @default(cuid())
+  userId       String
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category     ItemCategory
+  title        String
+  creator      String?
+  externalId   String?
+  status       ItemStatus   @default(PURCHASED)
+  imageUrl     String?
+  price        Int?
+  purchaseDate DateTime?
+  source       String?
+  productUrl   String?
+  notes        String?      @db.Text
+  rating       Int?
+  metadata     Json?
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  deletedAt    DateTime?
+
+  @@index([userId, category])
+  @@index([userId, status])
+  @@index([userId, deletedAt])
+  @@index([externalId])
 }
 
 model Book {
