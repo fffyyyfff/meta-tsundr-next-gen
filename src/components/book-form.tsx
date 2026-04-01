@@ -311,7 +311,17 @@ export function BookForm({ defaultValues, onSubmit, isSubmitting, submitLabel = 
                   </div>
                 ) : hasSuggestions ? (
                   <div className="max-h-64 overflow-y-auto">
-                    {searchQuery.data.map((item, i) => (
+                    {(releaseFilter === 'upcoming'
+                      ? searchQuery.data.filter((item) => {
+                          if (!item.salesDate) return false;
+                          // Parse Japanese date format like "2026年05月15日頃"
+                          const match = item.salesDate.match(/(\d{4})年(\d{1,2})月(\d{1,2})日/);
+                          if (!match) return true; // Keep if can't parse
+                          const salesDate = new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
+                          return salesDate >= new Date(new Date().setHours(0, 0, 0, 0));
+                        })
+                      : searchQuery.data
+                    ).map((item, i) => (
                       <button
                         key={`${item.isbn}-${i}`}
                         type="button"
