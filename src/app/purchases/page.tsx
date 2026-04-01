@@ -118,7 +118,9 @@ export default function PurchasesPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">購入管理</h1>
+          <h1 className="text-2xl font-bold tracking-tight">
+            {activeStatus === 'WISHLIST' ? 'ウィッシュリスト' : '購入管理'}
+          </h1>
           <p className="text-muted-foreground">あなたの購入記録 ({totalCount}件)</p>
         </div>
         <Button render={<Link href="/purchases/new" />}>
