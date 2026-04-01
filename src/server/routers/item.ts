@@ -103,35 +103,19 @@ export const itemRouter = router({
   searchProduct: publicProcedure
     .input(z.object({
       keyword: z.string().min(1).max(200),
-      category: z.string().optional(),
     }))
     .query(async ({ input }) => {
-      // Search existing items as product suggestions
-      try {
-        const items = await prisma.item.findMany({
-          where: {
-            deletedAt: null,
-            OR: [
-              { title: { contains: input.keyword, mode: 'insensitive' } },
-              { creator: { contains: input.keyword, mode: 'insensitive' } },
-            ],
-            ...(input.category ? { category: input.category as never } : {}),
-          },
-          select: {
-            title: true,
-            creator: true,
-            imageUrl: true,
-            price: true,
-            externalId: true,
-            source: true,
-          },
-          take: 10,
-          distinct: ['title'],
-        });
-        return items;
-      } catch {
-        return [];
-      }
+      const { searchByKeyword } = await import('../services/rakuten-ichiba');
+      const results = await searchByKeyword(input.keyword, 10);
+      return results.map((r) => ({
+        title: r.title,
+        creator: r.creator,
+        externalId: r.externalId,
+        imageUrl: r.imageUrl,
+        price: r.price,
+        productUrl: r.productUrl,
+        description: r.description,
+      }));
     }),
 
   stats: publicProcedure.query(async ({ ctx }) => {

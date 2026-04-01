@@ -10,6 +10,14 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: "https",
+        hostname: "image.rakuten.co.jp",
+      },
+      {
+        protocol: "https",
+        hostname: "*.rakuten.co.jp",
+      },
+      {
+        protocol: "https",
         hostname: "covers.openlibrary.org",
       },
     ],

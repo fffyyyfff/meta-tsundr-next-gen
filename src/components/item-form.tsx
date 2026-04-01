@@ -160,7 +160,7 @@ export function ItemForm({ defaultValues, onSubmit, isSubmitting, submitLabel = 
   const debouncedTitle = useDebounce(titleValue, 500);
 
   const searchQuery = trpcReact.item.searchProduct.useQuery(
-    { keyword: debouncedTitle, category: categoryValue },
+    { keyword: debouncedTitle },
     { enabled: debouncedTitle.length >= 3 && showSuggestions },
   );
 
