@@ -82,34 +82,62 @@ Figmaデザインからコード生成、レビュー、テスト、タスク管
 
 - Node.js 22+
 - Docker & Docker Compose
-- Anthropic API key
+- [direnv](https://direnv.net/)（環境変数管理）
+- [go-task](https://taskfile.dev/)（タスクランナー）
 
 ### Installation / インストール
 
 ```bash
-# 1. Clone the repository / リポジトリをクローン
-git clone https://github.com/your-org/meta-tsundr-next-gen.git
+# 1. Clone / クローン
+git clone https://github.com/fffyyyfff/meta-tsundr-next-gen.git
 cd meta-tsundr-next-gen
 
-# 2. Install dependencies / 依存パッケージをインストール
+# 2. Install dependencies / 依存インストール
 npm install
 
-# 3. Start infrastructure / インフラを起動 (PostgreSQL, Qdrant)
-docker compose up -d
+# 3. Environment variables / 環境変数設定
+cp .envrc.example .envrc
+vi .envrc                    # APIキーを設定（詳細は docs/SETUP-API-KEYS.md）
+direnv allow                 # 環境変数を有効化
 
-# 4. Configure environment / 環境変数を設定
-cp .env.example .env.local
-# Edit .env.local with your API keys
-# .env.local を編集してAPIキーを設定
-
-# 5. Run database migrations / DBマイグレーション実行
-npx prisma migrate dev
-
-# 6. Generate Prisma client / Prismaクライアント生成
+# 4. Prisma client / Prismaクライアント生成
 npx prisma generate
 
-# 7. Start development server / 開発サーバー起動
-npm run dev
+# 5. Start / 起動
+task run
+```
+
+### API Keys / APIキー設定
+
+| キー | 用途 | 必須 | 取得先 |
+|------|------|------|--------|
+| `RAKUTEN_APP_ID` | 書籍検索・書影取得 | **必須** | [Rakuten Developers](https://webservice.rakuten.co.jp/) |
+| `ANTHROPIC_API_KEY` | AI機能（レコメンド、書評） | 推奨 | [Anthropic Console](https://console.anthropic.com/) |
+| `GITHUB_CLIENT_ID/SECRET` | GitHubログイン | 任意 | GitHub → Settings → OAuth Apps |
+
+詳細: [docs/SETUP-API-KEYS.md](./docs/SETUP-API-KEYS.md)
+
+### Pages / ページ構成
+
+| パス | 内容 |
+|------|------|
+| `/` | ホーム（メニュー） |
+| `/books` | 積読管理（書籍一覧、検索、フィルター） |
+| `/books/new` | 書籍追加（楽天API検索、ISBN自動入力） |
+| `/books/stats` | 読書統計 |
+| `/dashboard` | AIダッシュボード（管理者） |
+| `/login` | ログイン |
+
+### Task Commands / タスクコマンド
+
+```bash
+task run              # アプリ起動
+task test             # 全テスト実行
+task docker:up        # PostgreSQL + Qdrant 起動
+task go:run           # Go gRPC サーバー起動
+task security:check   # セキュリティ診断
+task evidence:capture # スクリーンショット撮影
+task --list           # 全コマンド一覧
 ```
 
 Open [http://localhost:3000](http://localhost:3000) to access the platform.
