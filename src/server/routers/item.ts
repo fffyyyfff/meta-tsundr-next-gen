@@ -135,23 +135,32 @@ export const itemRouter = router({
             }));
           }
         } catch {
-          // Amazon API unavailable — fall through to Rakuten
+          // Amazon API unavailable
+        }
+
+        // Amazon を明示指定した場合はフォールバックしない
+        if (input.source === 'amazon') {
+          return [];
         }
       }
 
-      // 楽天にフォールバック（or 直接指定）
-      const { searchByKeyword: rakutenSearch } = await import('../services/rakuten-ichiba');
-      const results = await rakutenSearch(input.keyword, 10);
-      return results.map((r): ProductResult => ({
-        title: r.title,
-        creator: r.creator,
-        externalId: r.externalId,
-        imageUrl: r.imageUrl,
-        price: r.price,
-        productUrl: r.productUrl,
-        description: r.description,
-        source: 'rakuten',
-      }));
+      // 楽天（auto のフォールバック or 楽天直接指定）
+      if (input.source === 'rakuten' || input.source === 'auto') {
+        const { searchByKeyword: rakutenSearch } = await import('../services/rakuten-ichiba');
+        const results = await rakutenSearch(input.keyword, 10);
+        return results.map((r): ProductResult => ({
+          title: r.title,
+          creator: r.creator,
+          externalId: r.externalId,
+          imageUrl: r.imageUrl,
+          price: r.price,
+          productUrl: r.productUrl,
+          description: r.description,
+          source: 'rakuten',
+        }));
+      }
+
+      return [];
     }),
 
   stats: publicProcedure.query(async ({ ctx }) => {

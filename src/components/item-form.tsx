@@ -334,6 +334,12 @@ export function ItemForm({ defaultValues, onSubmit, isSubmitting, submitLabel = 
                       </button>
                     ))}
                   </div>
+                ) : searchQuery.data && searchQuery.data.length === 0 ? (
+                  <div className="p-4 text-center text-sm text-muted-foreground">
+                    {searchSource === 'amazon'
+                      ? 'Amazon APIキーが未設定です。.envrc に AMAZON_ACCESS_KEY を設定してください。'
+                      : '検索結果がありません'}
+                  </div>
                 ) : null}
               </div>
             )}
