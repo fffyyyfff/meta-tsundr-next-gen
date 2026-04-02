@@ -12,6 +12,7 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuLabel,
+  DropdownMenuGroup,
 } from '@/components/ui/dropdown-menu';
 import { MoreVerticalIcon, PencilIcon, TrashIcon, BookOpenIcon, BookCheckIcon, BookMarkedIcon } from 'lucide-react';
 
@@ -82,24 +83,30 @@ export function BookCard({ book, onStatusChange, onDelete }: BookCardProps) {
               <MoreVerticalIcon className="size-4" />
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
+              <DropdownMenuItem render={<Link href={`/books/${book.id}`} />}>
+                <BookOpenIcon className="size-4" />
+                詳細を見る
+              </DropdownMenuItem>
               <DropdownMenuItem render={<Link href={`/books/${book.id}/edit`} />}>
                 <PencilIcon className="size-4" />
                 編集
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuLabel>ステータス変更</DropdownMenuLabel>
-              <DropdownMenuItem onClick={() => onStatusChange?.(book.id, 'UNREAD')}>
-                <BookMarkedIcon className="size-4" />
-                積読
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => onStatusChange?.(book.id, 'READING')}>
-                <BookOpenIcon className="size-4" />
-                読書中
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => onStatusChange?.(book.id, 'FINISHED')}>
-                <BookCheckIcon className="size-4" />
-                読了
-              </DropdownMenuItem>
+              <DropdownMenuGroup>
+                <DropdownMenuLabel>ステータス変更</DropdownMenuLabel>
+                <DropdownMenuItem onClick={() => onStatusChange?.(book.id, 'UNREAD')}>
+                  <BookMarkedIcon className="size-4" />
+                  積読
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => onStatusChange?.(book.id, 'READING')}>
+                  <BookOpenIcon className="size-4" />
+                  読書中
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => onStatusChange?.(book.id, 'FINISHED')}>
+                  <BookCheckIcon className="size-4" />
+                  読了
+                </DropdownMenuItem>
+              </DropdownMenuGroup>
               <DropdownMenuSeparator />
               <DropdownMenuItem variant="destructive" onClick={() => onDelete?.(book.id)}>
                 <TrashIcon className="size-4" />
