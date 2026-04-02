@@ -64,7 +64,16 @@ export const bookRouter = router({
   getById: publicProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ input, ctx }) => {
-      return bookClient.getBook(input.id, ctx.token ?? undefined);
+      try {
+        return await bookClient.getBook(input.id, ctx.token ?? undefined);
+      } catch {
+        // gRPC fallback to Prisma
+        const book = await prisma.book.findFirst({
+          where: { id: input.id, deletedAt: null },
+        });
+        if (!book) throw new TRPCError({ code: 'NOT_FOUND', message: '書籍が見つかりません' });
+        return book;
+      }
     }),
 
   create: publicProcedure
