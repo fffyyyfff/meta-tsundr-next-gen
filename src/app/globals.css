@@ -141,10 +141,10 @@ body[data-page-theme="books"] {
 }
 
 body[data-page-theme="purchases"] {
-  --page-accent: oklch(0.7 0.18 70);
+  --page-accent: oklch(0.58 0.18 70);
   --page-accent-light: oklch(0.92 0.05 70);
   --page-accent-foreground: oklch(1 0 0);
-  --page-accent-muted: oklch(0.7 0.18 70 / 0.15);
+  --page-accent-muted: oklch(0.58 0.18 70 / 0.15);
 }
 
 body[data-page-theme="stats"] {
@@ -181,10 +181,10 @@ body[data-page-theme="books"].dark,
 .dark body[data-page-theme="purchases"],
 body[data-page-theme="purchases"].dark,
 .dark[data-page-theme="purchases"] {
-  --page-accent: oklch(0.75 0.18 70);
+  --page-accent: oklch(0.65 0.18 70);
   --page-accent-light: oklch(0.25 0.05 70);
   --page-accent-foreground: oklch(1 0 0);
-  --page-accent-muted: oklch(0.75 0.18 70 / 0.2);
+  --page-accent-muted: oklch(0.65 0.18 70 / 0.2);
 }
 
 .dark body[data-page-theme="stats"],
@@ -211,12 +211,16 @@ body[data-page-theme="dashboard"].dark,
 
 .glass {
   background: oklch(1 0 0 / 0.6);
+  -webkit-backdrop-filter: blur(12px) saturate(1.5);
   backdrop-filter: blur(12px) saturate(1.5);
   border: 1px solid oklch(1 0 0 / 0.2);
 }
 
 .dark .glass {
-  background: oklch(0.2 0 0 / 0.5);
+  background: oklch(0.15 0 0 / 0.6);
+  -webkit-backdrop-filter: blur(12px) saturate(1.5);
+  backdrop-filter: blur(12px) saturate(1.5);
+  border-color: oklch(1 0 0 / 0.08);
 }
 
 .text-display {
