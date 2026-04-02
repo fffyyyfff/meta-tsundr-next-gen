@@ -320,7 +320,7 @@ export function ItemForm({ defaultValues, onSubmit, isSubmitting, submitLabel = 
                             {'source' in item && (
                               <span className={`rounded px-1 py-0.5 text-[10px] font-medium ${
                                 item.source === 'amazon'
-                                  ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300'
+                                  ? 'bg-sky-100 text-sky-700 dark:bg-sky-900/40 dark:text-sky-300'
                                   : 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300'
                               }`}>
                                 {item.source === 'amazon' ? 'Amazon' : '楽天'}
