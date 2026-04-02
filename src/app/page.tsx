@@ -1,61 +1,8 @@
 'use client';
 
-import Link from 'next/link';
 import { BookOpenIcon, BarChart3Icon, ShieldIcon, BookMarkedIcon, BookCheckIcon, Loader2Icon, PackageIcon, HeartIcon } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { trpcReact } from '@/lib/trpc-provider';
-
-const MENU_CARDS: Array<{
-  title: string;
-  description: string;
-  href: string;
-  icon: typeof BookOpenIcon;
-  color: string;
-  bg: string;
-  badge?: string;
-}> = [
-  {
-    title: '積読管理',
-    description: 'あなたの読書記録を管理',
-    href: '/books',
-    icon: BookOpenIcon,
-    color: 'text-blue-500',
-    bg: 'bg-blue-500/10',
-  },
-  {
-    title: '読書統計',
-    description: '読書の傾向を分析',
-    href: '/books/stats',
-    icon: BarChart3Icon,
-    color: 'text-emerald-500',
-    bg: 'bg-emerald-500/10',
-  },
-  {
-    title: '購入管理',
-    description: '購入・ウィッシュリストを管理',
-    href: '/purchases',
-    icon: PackageIcon,
-    color: 'text-amber-500',
-    bg: 'bg-amber-500/10',
-  },
-  {
-    title: 'ウィッシュリスト',
-    description: '欲しいものリスト',
-    href: '/purchases?status=WISHLIST',
-    icon: HeartIcon,
-    color: 'text-rose-500',
-    bg: 'bg-rose-500/10',
-  },
-  {
-    title: 'AI ダッシュボード',
-    description: 'AIエージェント管理',
-    href: '/dashboard',
-    icon: ShieldIcon,
-    color: 'text-violet-500',
-    bg: 'bg-violet-500/10',
-    badge: '管理者',
-  },
-];
+import { BentoGrid, BentoCard } from '@/components/bento-grid';
 
 function ActivitySummary() {
   const { data, isLoading } = trpcReact.book.stats.useQuery(undefined, {
@@ -82,15 +29,13 @@ function ActivitySummary() {
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
       {items.map((item) => (
-        <Card key={item.label} size="sm">
-          <CardContent className="pt-0">
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <item.icon className={`h-3.5 w-3.5 ${item.color}`} />
-              {item.label}
-            </div>
-            <p className="mt-1 text-2xl font-bold">{item.value}</p>
-          </CardContent>
-        </Card>
+        <div key={item.label} className="glass rounded-xl p-4">
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <item.icon className={`h-3.5 w-3.5 ${item.color}`} />
+            {item.label}
+          </div>
+          <p className="mt-1 text-2xl font-bold">{item.value}</p>
+        </div>
       ))}
     </div>
   );
@@ -98,41 +43,63 @@ function ActivitySummary() {
 
 export default function Home() {
   return (
-    <div className="container mx-auto max-w-4xl px-4 py-10 space-y-10">
+    <div className="container mx-auto max-w-5xl px-4 py-16 space-y-16">
       {/* Hero */}
       <div className="text-center space-y-3">
-        <h1 className="text-4xl font-bold tracking-tight">Meta-tsundr</h1>
+        <h1 className="text-display">Meta-tsundr</h1>
         <p className="text-lg text-muted-foreground">
           積読管理 & AI読書アシスタント
         </p>
       </div>
 
-      {/* Menu Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {MENU_CARDS.map((card) => (
-          <Link key={card.href} href={card.href} className="group">
-            <Card className="h-full transition-shadow hover:shadow-md">
-              <CardHeader className="pb-2">
-                <div className="flex items-center justify-between">
-                  <div className={`rounded-lg p-2 ${card.bg}`}>
-                    <card.icon className={`h-6 w-6 ${card.color}`} />
-                  </div>
-                  {card.badge && (
-                    <span className="rounded-full bg-violet-100 px-2 py-0.5 text-[10px] font-medium text-violet-700 dark:bg-violet-900/30 dark:text-violet-400">
-                      {card.badge}
-                    </span>
-                  )}
-                </div>
-                <CardTitle className="text-base group-hover:underline">{card.title}</CardTitle>
-                <CardDescription>{card.description}</CardDescription>
-              </CardHeader>
-            </Card>
-          </Link>
-        ))}
-      </div>
+      {/* Bento Grid */}
+      <BentoGrid>
+        <BentoCard
+          title="積読管理"
+          description="あなたの読書記録を管理"
+          href="/books"
+          icon={BookOpenIcon}
+          iconColor="text-blue-500"
+          iconBg="bg-blue-500/10"
+          className="md:row-span-2"
+        />
+        <BentoCard
+          title="読書統計"
+          description="読書の傾向を分析"
+          href="/books/stats"
+          icon={BarChart3Icon}
+          iconColor="text-emerald-500"
+          iconBg="bg-emerald-500/10"
+        />
+        <BentoCard
+          title="購入管理"
+          description="購入・ウィッシュリストを管理"
+          href="/purchases"
+          icon={PackageIcon}
+          iconColor="text-amber-500"
+          iconBg="bg-amber-500/10"
+        />
+        <BentoCard
+          title="ウィッシュリスト"
+          description="欲しいものリスト"
+          href="/purchases?status=WISHLIST"
+          icon={HeartIcon}
+          iconColor="text-rose-500"
+          iconBg="bg-rose-500/10"
+        />
+        <BentoCard
+          title="AI ダッシュボード"
+          description="AIエージェント管理"
+          href="/dashboard"
+          icon={ShieldIcon}
+          iconColor="text-violet-500"
+          iconBg="bg-violet-500/10"
+          badge="管理者"
+        />
+      </BentoGrid>
 
       {/* Activity Summary */}
-      <section className="space-y-3">
+      <section className="space-y-4">
         <h2 className="text-lg font-semibold">読書アクティビティ</h2>
         <ActivitySummary />
       </section>

@@ -84,7 +84,7 @@ export function ItemCard({ item, onStatusChange, onDelete }: ItemCardProps) {
   const priceStr = formatPrice(item.price);
 
   return (
-    <Card className="group relative transition-shadow hover:shadow-md">
+    <Card className="group relative transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md">
       <CardContent className="flex gap-4 py-3">
         <Link href={`/purchases/${item.id}`} className="shrink-0">
           {item.imageUrl ? (

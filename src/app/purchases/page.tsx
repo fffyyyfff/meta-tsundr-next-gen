@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { PlusIcon, SearchIcon, BarChart3Icon } from 'lucide-react';
+import { PageHeader } from '@/components/page-header';
 
 type ItemCategory = 'BOOK' | 'ELECTRONICS' | 'DAILY_GOODS' | 'FOOD' | 'CLOTHING' | 'HOBBY' | 'OTHER';
 type ItemStatus = 'WISHLIST' | 'PURCHASED' | 'IN_USE' | 'COMPLETED' | 'RETURNED';
@@ -116,24 +117,19 @@ export default function PurchasesPage() {
   return (
     <div className="container mx-auto px-4 py-8 space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">
-            {activeStatus === 'WISHLIST' ? 'ウィッシュリスト' : '購入管理'}
-          </h1>
-          <p className="text-muted-foreground">あなたの購入記録 ({totalCount}件)</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" render={<Link href="/purchases/stats" />}>
-            <BarChart3Icon className="size-4 mr-1" />
-            統計
-          </Button>
-          <Button render={<Link href="/purchases/new" />}>
-            <PlusIcon className="size-4 mr-1" />
-            追加
-          </Button>
-        </div>
-      </div>
+      <PageHeader
+        title={activeStatus === 'WISHLIST' ? 'ウィッシュリスト' : '購入管理'}
+        description={`あなたの購入記録 (${totalCount}件)`}
+      >
+        <Button variant="outline" render={<Link href="/purchases/stats" />}>
+          <BarChart3Icon className="size-4 mr-1" />
+          統計
+        </Button>
+        <Button render={<Link href="/purchases/new" />}>
+          <PlusIcon className="size-4 mr-1" />
+          追加
+        </Button>
+      </PageHeader>
 
       {/* Filters */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center">

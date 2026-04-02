@@ -7,6 +7,7 @@ import { NotificationBell } from "@/components/notification-bell";
 import { Sidebar } from "@/components/sidebar";
 import { SkipNav } from "@/components/skip-nav";
 import { KeyboardShortcutsHelp } from "@/components/keyboard-shortcuts-help";
+import { PageThemeProvider } from "@/components/page-theme-provider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -44,19 +45,21 @@ export default function RootLayout({
       <body className="min-h-full flex">
         <SkipNav />
         <TRPCProvider>
-          <Sidebar />
-          <div className="flex flex-1 flex-col min-w-0">
-            <header className="flex items-center justify-end border-b border-border px-6 py-3 md:pl-4" role="banner">
-              <div className="flex items-center gap-1">
-                <NotificationBell />
-                <ThemeToggle />
-              </div>
-            </header>
-            <main id="main-content" className="flex-1">
-              {children}
-            </main>
-          </div>
-          <KeyboardShortcutsHelp />
+          <PageThemeProvider>
+            <Sidebar />
+            <div className="flex flex-1 flex-col min-w-0">
+              <header className="flex items-center justify-end border-b border-border px-6 py-3 md:pl-4" role="banner">
+                <div className="flex items-center gap-1">
+                  <NotificationBell />
+                  <ThemeToggle />
+                </div>
+              </header>
+              <main id="main-content" className="flex-1">
+                {children}
+              </main>
+            </div>
+            <KeyboardShortcutsHelp />
+          </PageThemeProvider>
         </TRPCProvider>
       </body>
     </html>

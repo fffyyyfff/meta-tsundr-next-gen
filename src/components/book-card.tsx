@@ -48,7 +48,7 @@ function formatDate(date: string | Date): string {
 
 export function BookCard({ book, onStatusChange, onDelete }: BookCardProps) {
   return (
-    <Card className="group relative transition-shadow hover:shadow-md">
+    <Card className="group relative transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md">
       <CardContent className="flex gap-4 py-3">
         <Link href={`/books/${book.id}`} className="shrink-0">
           <BookCover title={book.title} imageUrl={book.imageUrl} width={96} height={128} />

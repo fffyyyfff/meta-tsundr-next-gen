@@ -53,21 +53,56 @@ export function Sidebar() {
         <MenuIcon className="h-5 w-5" />
       </button>
 
-      {/* Mobile overlay */}
+      {/* Mobile fullscreen overlay menu */}
       {mobileOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black/40 md:hidden"
-          onClick={() => setMobileOpen(false)}
-        />
+          className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[var(--page-accent)] md:hidden"
+        >
+          {/* Close button */}
+          <button
+            onClick={() => setMobileOpen(false)}
+            className="absolute right-4 top-4 rounded-md p-2 text-white/80 hover:text-white"
+            aria-label="メニューを閉じる"
+          >
+            <XIcon className="h-6 w-6" />
+          </button>
+
+          {/* Nav items */}
+          <nav className="space-y-6 text-center" aria-label="モバイルナビゲーション">
+            {NAV_ITEMS.map((item, index) => {
+              const active = isActive(pathname, item.href);
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={() => setMobileOpen(false)}
+                  className={`flex items-center justify-center gap-3 text-3xl font-bold text-white transition-opacity ${
+                    active ? 'opacity-100' : 'opacity-70 hover:opacity-100'
+                  }`}
+                  style={{
+                    animation: `fade-in-up 0.4s ease-out ${index * 0.05}s both`,
+                  }}
+                >
+                  <item.icon className="h-7 w-7 shrink-0" />
+                  <span>{item.label}</span>
+                  {item.badge && (
+                    <span className="ml-1 rounded bg-white/20 px-2 py-0.5 text-xs font-medium">
+                      {item.badge}
+                    </span>
+                  )}
+                </Link>
+              );
+            })}
+          </nav>
+        </div>
       )}
 
-      {/* Sidebar */}
+      {/* Desktop Sidebar */}
       <aside
         className={`
-          fixed top-0 left-0 z-50 flex h-full flex-col border-r border-border bg-background transition-all duration-200
+          hidden md:flex fixed top-0 left-0 z-50 h-full flex-col border-r border-border bg-background transition-all duration-200
           ${collapsed ? 'w-16' : 'w-60'}
-          ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}
-          md:relative md:translate-x-0
+          md:relative
         `}
       >
         {/* Header */}
@@ -77,18 +112,10 @@ export function Sidebar() {
               Meta-tsundr
             </Link>
           )}
-          {/* Mobile close */}
-          <button
-            onClick={() => setMobileOpen(false)}
-            className="rounded-md p-1 text-muted-foreground hover:bg-accent md:hidden"
-            aria-label="メニューを閉じる"
-          >
-            <XIcon className="h-4 w-4" />
-          </button>
           {/* Desktop collapse toggle */}
           <button
             onClick={() => setCollapsed((v) => !v)}
-            className="hidden rounded-md p-1 text-muted-foreground hover:bg-accent md:block"
+            className="rounded-md p-1 text-muted-foreground hover:bg-accent"
             aria-label={collapsed ? 'サイドバーを展開' : 'サイドバーを折りたたむ'}
           >
             {collapsed ? <ChevronRightIcon className="h-4 w-4" /> : <ChevronLeftIcon className="h-4 w-4" />}
@@ -103,14 +130,13 @@ export function Sidebar() {
               <Link
                 key={item.href}
                 href={item.href}
-                onClick={() => setMobileOpen(false)}
                 className={`
                   flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors
                   ${active
-                    ? 'bg-accent text-accent-foreground'
-                    : 'text-muted-foreground hover:bg-accent/50 hover:text-foreground'
+                    ? 'border-l-2 border-[var(--page-accent)] bg-[var(--page-accent-muted)] text-[var(--page-accent)]'
+                    : 'border-l-2 border-transparent text-muted-foreground hover:bg-accent/50 hover:text-foreground'
                   }
-                  ${collapsed ? 'justify-center px-2' : ''}
+                  ${collapsed ? 'justify-center px-2 border-l-0' : ''}
                 `}
                 title={collapsed ? item.label : undefined}
               >

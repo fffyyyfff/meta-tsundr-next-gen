@@ -54,7 +54,7 @@ export default function PurchasesLayout({ children }: { children: React.ReactNod
                   href={item.href}
                   className={`inline-flex items-center gap-1.5 border-b-2 px-3 py-2.5 text-sm font-medium transition-colors ${
                     active
-                      ? 'border-foreground text-foreground'
+                      ? 'border-[var(--page-accent)] text-[var(--page-accent)]'
                       : 'border-transparent text-muted-foreground hover:text-foreground'
                   }`}
                 >

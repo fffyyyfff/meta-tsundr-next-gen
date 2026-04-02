@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { PlusIcon, SearchIcon, BarChart3Icon } from 'lucide-react';
 import { AiRecommendation, AiReadingPlan } from '@/components/ai-book-features';
+import { PageHeader } from '@/components/page-header';
 
 const TABS = [
   { value: 'all', label: '全て' },
@@ -75,22 +76,19 @@ export default function BooksPage() {
   return (
     <div className="container mx-auto px-4 py-8 space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">積読管理</h1>
-          <p className="text-muted-foreground">あなたの読書記録 ({totalCount}冊)</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" render={<Link href="/books/stats" />}>
-            <BarChart3Icon className="size-4 mr-1" />
-            統計
-          </Button>
-          <Button render={<Link href="/books/new" />}>
-            <PlusIcon className="size-4 mr-1" />
-            追加
-          </Button>
-        </div>
-      </div>
+      <PageHeader
+        title="積読管理"
+        description={`あなたの読書記録 (${totalCount}冊)`}
+      >
+        <Button variant="outline" render={<Link href="/books/stats" />}>
+          <BarChart3Icon className="size-4 mr-1" />
+          統計
+        </Button>
+        <Button render={<Link href="/books/new" />}>
+          <PlusIcon className="size-4 mr-1" />
+          追加
+        </Button>
+      </PageHeader>
 
       {/* Filters */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center">

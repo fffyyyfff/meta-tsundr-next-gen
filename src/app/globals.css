@@ -46,6 +46,10 @@
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
+  --color-page-accent: var(--page-accent);
+  --color-page-accent-light: var(--page-accent-light);
+  --color-page-accent-foreground: var(--page-accent-foreground);
+  --color-page-accent-muted: var(--page-accent-muted);
 }
 
 :root {
@@ -115,6 +119,142 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
+}
+
+/* ============================================
+   Page theme CSS variables
+   ============================================ */
+
+/* Light mode themes */
+:root {
+  --page-accent: oklch(0.62 0.24 15);
+  --page-accent-light: oklch(0.92 0.05 15);
+  --page-accent-foreground: oklch(1 0 0);
+  --page-accent-muted: oklch(0.62 0.24 15 / 0.15);
+}
+
+body[data-page-theme="books"] {
+  --page-accent: oklch(0.55 0.2 250);
+  --page-accent-light: oklch(0.92 0.05 250);
+  --page-accent-foreground: oklch(1 0 0);
+  --page-accent-muted: oklch(0.55 0.2 250 / 0.15);
+}
+
+body[data-page-theme="purchases"] {
+  --page-accent: oklch(0.7 0.18 70);
+  --page-accent-light: oklch(0.92 0.05 70);
+  --page-accent-foreground: oklch(1 0 0);
+  --page-accent-muted: oklch(0.7 0.18 70 / 0.15);
+}
+
+body[data-page-theme="stats"] {
+  --page-accent: oklch(0.6 0.18 160);
+  --page-accent-light: oklch(0.92 0.05 160);
+  --page-accent-foreground: oklch(1 0 0);
+  --page-accent-muted: oklch(0.6 0.18 160 / 0.15);
+}
+
+body[data-page-theme="dashboard"] {
+  --page-accent: oklch(0.55 0.22 290);
+  --page-accent-light: oklch(0.92 0.05 290);
+  --page-accent-foreground: oklch(1 0 0);
+  --page-accent-muted: oklch(0.55 0.22 290 / 0.15);
+}
+
+/* Dark mode themes - slightly higher lightness */
+.dark {
+  --page-accent: oklch(0.68 0.24 15);
+  --page-accent-light: oklch(0.25 0.05 15);
+  --page-accent-foreground: oklch(1 0 0);
+  --page-accent-muted: oklch(0.68 0.24 15 / 0.2);
+}
+
+.dark body[data-page-theme="books"],
+body[data-page-theme="books"].dark,
+.dark[data-page-theme="books"] {
+  --page-accent: oklch(0.62 0.2 250);
+  --page-accent-light: oklch(0.25 0.05 250);
+  --page-accent-foreground: oklch(1 0 0);
+  --page-accent-muted: oklch(0.62 0.2 250 / 0.2);
+}
+
+.dark body[data-page-theme="purchases"],
+body[data-page-theme="purchases"].dark,
+.dark[data-page-theme="purchases"] {
+  --page-accent: oklch(0.75 0.18 70);
+  --page-accent-light: oklch(0.25 0.05 70);
+  --page-accent-foreground: oklch(1 0 0);
+  --page-accent-muted: oklch(0.75 0.18 70 / 0.2);
+}
+
+.dark body[data-page-theme="stats"],
+body[data-page-theme="stats"].dark,
+.dark[data-page-theme="stats"] {
+  --page-accent: oklch(0.67 0.18 160);
+  --page-accent-light: oklch(0.25 0.05 160);
+  --page-accent-foreground: oklch(1 0 0);
+  --page-accent-muted: oklch(0.67 0.18 160 / 0.2);
+}
+
+.dark body[data-page-theme="dashboard"],
+body[data-page-theme="dashboard"].dark,
+.dark[data-page-theme="dashboard"] {
+  --page-accent: oklch(0.62 0.22 290);
+  --page-accent-light: oklch(0.25 0.05 290);
+  --page-accent-foreground: oklch(1 0 0);
+  --page-accent-muted: oklch(0.62 0.22 290 / 0.2);
+}
+
+/* ============================================
+   Utility classes
+   ============================================ */
+
+.glass {
+  background: oklch(1 0 0 / 0.6);
+  backdrop-filter: blur(12px) saturate(1.5);
+  border: 1px solid oklch(1 0 0 / 0.2);
+}
+
+.dark .glass {
+  background: oklch(0.2 0 0 / 0.5);
+}
+
+.text-display {
+  font-size: clamp(2.5rem, 5vw, 4.5rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+}
+
+.text-page-title {
+  font-size: clamp(1.75rem, 3vw, 3rem);
+  font-weight: 700;
+}
+
+/* ============================================
+   Animations
+   ============================================ */
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 @layer base {
