@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import Script from "next/script";
 import "./globals.css";
 import { TRPCProvider } from "@/lib/trpc-provider";
 import { HeaderActions } from "@/components/header-actions";
@@ -36,13 +35,6 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="min-h-full flex" suppressHydrationWarning>
-        <Script
-          id="theme-init"
-          strategy="beforeInteractive"
-          dangerouslySetInnerHTML={{
-            __html: `(function(){try{var t=localStorage.getItem('theme');var d=t==='dark'||(t!=='light'&&matchMedia('(prefers-color-scheme:dark)').matches);if(d)document.documentElement.classList.add('dark')}catch(e){}})()`,
-          }}
-        />
         <SkipNav />
         <TRPCProvider>
           <PageThemeProvider>

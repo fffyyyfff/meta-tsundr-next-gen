@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 const THEME_ROUTES: ReadonlyArray<readonly [string, string]> = [
   ["/books/stats", "stats"],
@@ -25,7 +25,23 @@ function getPageTheme(pathname: string): string | null {
 
 export function PageThemeProvider({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const [mounted, setMounted] = useState(false);
 
+  // Initialize dark mode theme on mount
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem('theme');
+      const isDark = stored === 'dark' || (stored !== 'light' && matchMedia('(prefers-color-scheme:dark)').matches);
+      if (isDark) {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    } catch {}
+    setMounted(true);
+  }, []);
+
+  // Apply page theme
   useEffect(() => {
     const theme = getPageTheme(pathname);
     if (theme) {
@@ -37,6 +53,11 @@ export function PageThemeProvider({ children }: { children: React.ReactNode }) {
       document.body.removeAttribute("data-page-theme");
     };
   }, [pathname]);
+
+  // Prevent hydration mismatch by not rendering until mounted
+  if (!mounted) {
+    return <div style={{ visibility: 'hidden' }}>{children}</div>;
+  }
 
   return <>{children}</>;
 }

@@ -1,14 +1,20 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Sun, Moon } from "lucide-react";
 import { useThemeStore } from "@/stores/themeStore";
 
 export function ThemeToggle() {
   const { theme, setTheme } = useThemeStore();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Apply theme on mount and listen for system preference changes
   useEffect(() => {
+    if (!mounted) return;
     const resolved = theme === "system"
       ? window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"
       : theme;
@@ -22,7 +28,7 @@ export function ThemeToggle() {
     };
     mq.addEventListener("change", handler);
     return () => mq.removeEventListener("change", handler);
-  }, [theme]);
+  }, [theme, mounted]);
 
   const toggle = () => {
     const resolved = theme === "system"
@@ -31,7 +37,19 @@ export function ThemeToggle() {
     setTheme(resolved === "dark" ? "light" : "dark");
   };
 
-  const isDark = theme === "dark" || (theme === "system" && typeof window !== "undefined" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+  // Render placeholder during SSR to avoid hydration mismatch
+  if (!mounted) {
+    return (
+      <button
+        className="rounded-md p-2 text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
+        aria-label="Toggle dark mode"
+      >
+        <div className="h-5 w-5" />
+      </button>
+    );
+  }
+
+  const isDark = theme === "dark" || (theme === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches);
 
   return (
     <button
