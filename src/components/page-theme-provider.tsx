@@ -3,17 +3,17 @@
 import { usePathname } from "next/navigation";
 import { useEffect } from "react";
 
-const THEME_MAP: Record<string, string> = {
-  "/books/stats": "stats",
-  "/purchases/stats": "stats",
-  "/books": "books",
-  "/purchases": "purchases",
-  "/dashboard": "dashboard",
-};
+const THEME_ROUTES: ReadonlyArray<readonly [string, string]> = [
+  ["/books/stats", "stats"],
+  ["/purchases/stats", "stats"],
+  ["/books", "books"],
+  ["/purchases", "purchases"],
+  ["/dashboard", "dashboard"],
+] as const;
 
 function getPageTheme(pathname: string): string | null {
-  // Check exact matches first (longer paths first)
-  for (const [path, theme] of Object.entries(THEME_MAP)) {
+  // Exact matches first (sorted longest-path-first to avoid prefix collisions)
+  for (const [path, theme] of THEME_ROUTES) {
     if (pathname === path) return theme;
   }
   // Then prefix matches

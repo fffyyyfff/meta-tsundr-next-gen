@@ -2,8 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { TRPCProvider } from "@/lib/trpc-provider";
-import { ThemeToggle } from "@/components/theme-toggle";
-import { NotificationBell } from "@/components/notification-bell";
+import { HeaderActions } from "@/components/header-actions";
 import { Sidebar } from "@/components/sidebar";
 import { SkipNav } from "@/components/skip-nav";
 import { KeyboardShortcutsHelp } from "@/components/keyboard-shortcuts-help";
@@ -49,10 +48,7 @@ export default function RootLayout({
             <Sidebar />
             <div className="flex flex-1 flex-col min-w-0">
               <header className="flex items-center justify-end border-b border-border px-6 py-3 md:pl-4" role="banner">
-                <div className="flex items-center gap-1">
-                  <NotificationBell />
-                  <ThemeToggle />
-                </div>
+                <HeaderActions />
               </header>
               <main id="main-content" className="flex-1">
                 {children}

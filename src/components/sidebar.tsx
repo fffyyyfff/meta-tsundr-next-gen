@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
@@ -37,18 +37,78 @@ function isActive(pathname: string, href: string): boolean {
   return pathname.startsWith(href);
 }
 
+const FOCUSABLE_SELECTOR = 'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
 export function Sidebar() {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const navRef = useRef<HTMLDivElement>(null);
+  const closeRef = useRef<HTMLButtonElement>(null);
+
+  const closeMobileNav = useCallback(() => {
+    setMobileOpen(false);
+  }, []);
+
+  // ESC key to close + focus trap
+  useEffect(() => {
+    if (!mobileOpen) return;
+
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === 'Escape') {
+        closeMobileNav();
+        return;
+      }
+
+      if (e.key === 'Tab' && navRef.current) {
+        const focusable = navRef.current.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR);
+        if (focusable.length === 0) return;
+
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+
+        if (e.shiftKey) {
+          if (document.activeElement === first) {
+            e.preventDefault();
+            last.focus();
+          }
+        } else {
+          if (document.activeElement === last) {
+            e.preventDefault();
+            first.focus();
+          }
+        }
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [mobileOpen, closeMobileNav]);
+
+  // Focus management: move focus into nav on open, restore to trigger on close
+  useEffect(() => {
+    if (mobileOpen) {
+      // Focus the close button when nav opens
+      requestAnimationFrame(() => {
+        closeRef.current?.focus();
+      });
+    } else {
+      // Restore focus to trigger when nav closes (only if trigger exists)
+      triggerRef.current?.focus();
+    }
+  }, [mobileOpen]);
 
   return (
     <>
       {/* Mobile hamburger */}
       <button
+        ref={triggerRef}
         onClick={() => setMobileOpen(true)}
         className="fixed left-3 top-3 z-40 rounded-md p-2 text-muted-foreground hover:bg-accent md:hidden"
         aria-label="メニューを開く"
+        aria-expanded={mobileOpen}
+        aria-controls="mobile-nav"
       >
         <MenuIcon className="h-5 w-5" />
       </button>
@@ -56,11 +116,17 @@ export function Sidebar() {
       {/* Mobile fullscreen overlay menu */}
       {mobileOpen && (
         <div
+          id="mobile-nav"
+          ref={navRef}
+          role="dialog"
+          aria-modal="true"
+          aria-label="ナビゲーションメニュー"
           className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[var(--page-accent)] md:hidden"
         >
           {/* Close button */}
           <button
-            onClick={() => setMobileOpen(false)}
+            ref={closeRef}
+            onClick={closeMobileNav}
             className="absolute right-4 top-4 rounded-md p-2 text-white/80 hover:text-white"
             aria-label="メニューを閉じる"
           >
@@ -75,7 +141,7 @@ export function Sidebar() {
                 <Link
                   key={item.href}
                   href={item.href}
-                  onClick={() => setMobileOpen(false)}
+                  onClick={closeMobileNav}
                   className={`flex items-center justify-center gap-3 text-3xl font-bold text-white transition-opacity ${
                     active ? 'opacity-100' : 'opacity-70 hover:opacity-100'
                   }`}
@@ -99,6 +165,7 @@ export function Sidebar() {
 
       {/* Desktop Sidebar */}
       <aside
+        suppressHydrationWarning
         className={`
           hidden md:flex fixed top-0 left-0 z-50 h-full flex-col border-r border-border bg-background transition-all duration-200
           ${collapsed ? 'w-16' : 'w-60'}
