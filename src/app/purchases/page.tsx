@@ -10,7 +10,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { PlusIcon, SearchIcon } from 'lucide-react';
+import { PlusIcon, SearchIcon, BarChart3Icon } from 'lucide-react';
 
 type ItemCategory = 'BOOK' | 'ELECTRONICS' | 'DAILY_GOODS' | 'FOOD' | 'CLOTHING' | 'HOBBY' | 'OTHER';
 type ItemStatus = 'WISHLIST' | 'PURCHASED' | 'IN_USE' | 'COMPLETED' | 'RETURNED';
@@ -123,10 +123,16 @@ export default function PurchasesPage() {
           </h1>
           <p className="text-muted-foreground">あなたの購入記録 ({totalCount}件)</p>
         </div>
-        <Button render={<Link href="/purchases/new" />}>
-          <PlusIcon className="size-4 mr-1" />
-          追加
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" render={<Link href="/purchases/stats" />}>
+            <BarChart3Icon className="size-4 mr-1" />
+            統計
+          </Button>
+          <Button render={<Link href="/purchases/new" />}>
+            <PlusIcon className="size-4 mr-1" />
+            追加
+          </Button>
+        </div>
       </div>
 
       {/* Filters */}

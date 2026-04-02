@@ -1,6 +1,6 @@
 # Evidence Report - Meta Tsundr Next Gen
 
-**Date**: 2026-03-31 (updated)
+**Date**: 2026-04-02 (updated)
 **Project**: https://github.com/fffyyyfff/meta-tsundr-next-gen
 
 ---
@@ -20,20 +20,20 @@ See: [logs/typecheck.log](./logs/typecheck.log)
 
 ## 2. E2E Test Results
 
-**Result**: 43/43 PASSED
+**Result**: 56/56 PASSED
 
 | Test File | Tests | Status |
 |-----------|-------|--------|
-| home.spec.ts | 2 | PASS |
+| home.spec.ts | 3 | PASS |
 | agent.spec.ts | 2 | PASS |
 | dashboard.spec.ts | 4 | PASS |
 | workflow.spec.ts | 7 | PASS |
-| health.spec.ts | 2 | PASS |
+| health.spec.ts | 6 | PASS |
 | agent-api.spec.ts | 3 | PASS |
-| evidence-capture.spec.ts | 9 | PASS |
-| auth.spec.ts | 5 | PASS |
+| evidence-capture.spec.ts | 15 | PASS |
 | books.spec.ts | 7 | PASS |
-| unit tests | 2 | PASS |
+| purchases.spec.ts | 8 | PASS |
+| unit tests | 1 | PASS |
 
 Full HTML report: [test-reports/index.html](./test-reports/index.html)
 
@@ -114,9 +114,38 @@ Full HTML report: [test-reports/index.html](./test-reports/index.html)
 ### 3.11 Sidebar Navigation
 ![Sidebar](./screenshots/11-sidebar.png)
 
-- ホーム / 積読管理 / 統計 / AI ダッシュボード (adminバッジ)
+- ホーム / 積読管理 / 統計 / 購入管理 / ウィッシュリスト / AI ダッシュボード (adminバッジ)
 - 折りたたみ/展開トグル
 - モバイルハンバーガーメニュー対応
+
+### 3.12 Purchases List Page
+![Purchases List](./screenshots/12-purchases-list.png)
+
+- 購入管理 タイトル + 件数表示
+- カテゴリタブ: 全て / 書籍 / 家電 / 日用品 / 食品 / 衣類 / 趣味 / その他
+- ステータスフィルター: 全ステータス / 欲しい / 購入済み / 使用中 / 完了 / 返品
+- 検索バー + ソート（追加日/タイトル/価格/更新日）+ 昇降順トグル
+- 追加ボタン
+
+### 3.13 Purchases New Page
+![Purchases New](./screenshots/13-purchases-new.png)
+
+- カテゴリ選択 → カテゴリに応じてcreatorラベル変更（著者/メーカー/ブランド）
+- タイトル入力 → 3文字以上で商品検索（Amazon PA-API / 楽天API）
+- ソース切り替えタブ: おすすめ / Amazon / 楽天
+- 価格、ステータス、購入元、評価（星）、メモ
+- 各フィールドにクリアボタン + フォームクリア
+
+### 3.14 Purchases Stats Page
+![Purchases Stats](./screenshots/14-purchases-stats.png)
+
+- 購入統計ページ（Worker1の実装待ち or 404）
+
+### 3.15 Wishlist Page
+![Wishlist](./screenshots/15-wishlist.png)
+
+- ウィッシュリスト タイトル（/purchases?status=WISHLIST）
+- WISHLISTステータスでフィルタリングされた一覧
 
 ---
 
@@ -124,17 +153,17 @@ Full HTML report: [test-reports/index.html](./test-reports/index.html)
 
 | Metric | Value |
 |--------|-------|
-| Source files (src/) | 127 |
-| Total lines (src/) | 25,190 |
-| Git commits | 39 |
-| E2E tests | 44 (all passing) |
+| Source files (src/) | 144 |
+| Total lines (src/) | 31,992 |
+| Git commits | 66 |
+| E2E tests | 56 (all passing) |
 | TypeScript errors | 0 |
-| Docker services | 3 (postgres, qdrant, web) |
+| Docker services | 4 (postgres, qdrant, go-backend, web) |
 | K8s manifests | 5 |
 | Helm chart | 1 |
 | AI agents | 4 + orchestrator + book agents (recommend, review, plan) |
-| tRPC routers | 8 (agent, figma, linear, history, usage, export, notification, book) |
-| Zustand stores | 8 (agent, auth, design, theme, favorites, templates, notification, book) |
+| tRPC routers | 9 (agent, figma, linear, history, usage, export, notification, book, item) |
+| Zustand stores | 9 (agent, auth, design, theme, favorites, templates, notification, book, item) |
 
 ---
 
@@ -180,8 +209,16 @@ Full HTML report: [test-reports/index.html](./test-reports/index.html)
 | **Reading Statistics (recharts PieChart/BarChart)** | COMPLETE |
 | **AI Book Features (おすすめ/書評/読書計画)** | COMPLETE |
 | **Full-text Search (title/author/isbn)** | COMPLETE |
-| **Sidebar Navigation (ホーム/積読管理/統計/AIダッシュボード)** | COMPLETE |
-| **Route Restructuring (/, /books, /dashboard)** | COMPLETE |
+| **Sidebar Navigation (ホーム/積読管理/統計/購入管理/ウィッシュリスト/AIダッシュボード)** | COMPLETE |
+| **Route Restructuring (/, /books, /purchases, /dashboard)** | COMPLETE |
+| **Purchase CRUD (購入管理)** | COMPLETE |
+| **Purchase Category Tabs (書籍/家電/日用品/食品/衣類/趣味/その他)** | COMPLETE |
+| **Purchase Status Management (欲しい/購入済み/使用中/完了/返品)** | COMPLETE |
+| **Product Search (Amazon PA-API + 楽天市場API)** | COMPLETE |
+| **Category-aware Creator Label (著者/メーカー/ブランド)** | COMPLETE |
+| **Wishlist Page (/purchases?status=WISHLIST)** | COMPLETE |
+| **Item Form Clear Buttons (individual + form-wide)** | COMPLETE |
+| **Source Toggle (おすすめ/Amazon/楽天)** | COMPLETE |
 
 ---
 
@@ -201,7 +238,11 @@ evidence/
 │   ├── 08-books-new.png        # New book form
 │   ├── 09-books-stats.png      # Reading statistics
 │   ├── 10-dashboard.png        # AI Dashboard (/dashboard)
-│   └── 11-sidebar.png          # Sidebar navigation
+│   ├── 11-sidebar.png          # Sidebar navigation
+│   ├── 12-purchases-list.png   # Purchases list (購入管理)
+│   ├── 13-purchases-new.png    # New purchase form
+│   ├── 14-purchases-stats.png  # Purchase statistics
+│   └── 15-wishlist.png         # Wishlist (/purchases?status=WISHLIST)
 ├── logs/
 │   ├── typecheck.log
 │   ├── project-stats.log

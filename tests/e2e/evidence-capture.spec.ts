@@ -106,4 +106,49 @@ test.describe('Evidence Capture', () => {
       await page.screenshot({ path: path.join(EVIDENCE_DIR, '11-sidebar.png') });
     }
   });
+
+  test('12 - Purchases list page', async ({ page }) => {
+    await page.goto('/');
+    await page.evaluate(() => {
+      localStorage.setItem('auth-user', JSON.stringify({ id: 'dev-user', name: 'Dev' }));
+    });
+    await page.goto('/purchases');
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(1000);
+    await page.screenshot({ path: path.join(EVIDENCE_DIR, '12-purchases-list.png'), fullPage: true });
+  });
+
+  test('13 - Purchases new page', async ({ page }) => {
+    await page.goto('/');
+    await page.evaluate(() => {
+      localStorage.setItem('auth-user', JSON.stringify({ id: 'dev-user', name: 'Dev' }));
+    });
+    await page.goto('/purchases/new');
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(1000);
+    await page.screenshot({ path: path.join(EVIDENCE_DIR, '13-purchases-new.png'), fullPage: true });
+  });
+
+  test('14 - Purchases stats page', async ({ page }) => {
+    await page.goto('/');
+    await page.evaluate(() => {
+      localStorage.setItem('auth-user', JSON.stringify({ id: 'dev-user', name: 'Dev' }));
+    });
+    // Stats page may not exist yet; capture whatever renders at this path
+    await page.goto('/purchases/stats');
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(1000);
+    await page.screenshot({ path: path.join(EVIDENCE_DIR, '14-purchases-stats.png'), fullPage: true });
+  });
+
+  test('15 - Wishlist page', async ({ page }) => {
+    await page.goto('/');
+    await page.evaluate(() => {
+      localStorage.setItem('auth-user', JSON.stringify({ id: 'dev-user', name: 'Dev' }));
+    });
+    await page.goto('/purchases?status=WISHLIST');
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(1000);
+    await page.screenshot({ path: path.join(EVIDENCE_DIR, '15-wishlist.png'), fullPage: true });
+  });
 });
