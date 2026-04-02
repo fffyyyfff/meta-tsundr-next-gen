@@ -83,7 +83,7 @@ export function FullscreenMenu({ isOpen, onClose }: FullscreenMenuProps) {
       }`}
     >
       {/* Left column - accent background */}
-      <div className="relative flex w-full flex-col justify-between bg-[oklch(0.55_0.24_15)] p-8 md:w-[65%] md:p-16">
+      <div className="relative flex w-full flex-col justify-between bg-[var(--page-accent)] p-8 md:w-[65%] md:p-16">
         {/* Main nav */}
         <nav className="mt-16 flex flex-col space-y-4 md:mt-24">
           {MAIN_NAV.map((item, i) => (
@@ -143,7 +143,7 @@ export function FullscreenMenu({ isOpen, onClose }: FullscreenMenuProps) {
           <Link
             href="/purchases/new"
             onClick={onClose}
-            className="rounded-full border border-[oklch(0.55_0.24_15)] px-6 py-2 text-[oklch(0.55_0.24_15)] transition-colors hover:bg-[oklch(0.55_0.24_15)] hover:text-white"
+            className="rounded-full border border-[var(--page-accent)] px-6 py-2 text-[var(--page-accent)] transition-colors hover:bg-[var(--page-accent)] hover:text-white"
           >
             はじめる
           </Link>
