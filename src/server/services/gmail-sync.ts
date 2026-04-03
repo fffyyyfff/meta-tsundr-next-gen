@@ -26,13 +26,13 @@ export async function fetchPurchaseEmails(
   const res = await gmail.users.messages.list({
     userId: "me",
     q,
-    maxResults: 50,
+    maxResults: 10,
   });
 
   if (!res.data.messages) return [];
 
   const emails: PurchaseEmail[] = [];
-  for (const msg of res.data.messages.slice(0, 20)) {
+  for (const msg of res.data.messages.slice(0, 5)) {
     const detail = await gmail.users.messages.get({
       userId: "me",
       id: msg.id!,
