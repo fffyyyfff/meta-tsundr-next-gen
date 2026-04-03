@@ -1,13 +1,13 @@
 name: Security Checks
 
 on:
-  workflow_dispatch:  # Manual trigger only until CI is stable
-  # push:
-  #   branches: [main]
-  # pull_request:
-  #   branches: [main]
-  # schedule:
-  #   - cron: '0 0 * * 1'
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: '0 0 * * 1'
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -16,6 +16,8 @@ jobs:
   npm-audit:
     name: NPM Audit
     runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: "postgresql://ci:ci@localhost:5432/ci"
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -54,6 +56,8 @@ jobs:
   license-check:
     name: License Compliance
     runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: "postgresql://ci:ci@localhost:5432/ci"
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
