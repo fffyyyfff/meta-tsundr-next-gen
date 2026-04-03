@@ -131,8 +131,8 @@ export function GmailConnect() {
     );
   }
 
-  const formatPrice = (price: number) =>
-    `¥${price.toLocaleString("ja-JP")}`;
+  const formatPrice = (price: number | null | undefined) =>
+    price != null ? `¥${price.toLocaleString("ja-JP")}` : '';
 
   return (
     <>
