@@ -53,7 +53,7 @@ export AMAZON_PARTNER_TAG=your_partner_tag-22
 # ============================
 # オプション: キャッシュ（Redis / Valkey）
 # ============================
-export CACHE_PROVIDER=redis
+export CACHE_PROVIDER=valkey
 export REDIS_URL=redis://localhost:6379
 
 export DATABASE_URL="postgresql://meta_tsundr:meta_tsundr_dev@localhost:5432/meta_tsundr"
