@@ -23,6 +23,7 @@ import {
   PlayIcon,
   CheckCircleIcon,
   Undo2Icon,
+  ExternalLinkIcon,
 } from 'lucide-react';
 
 type ItemStatus = 'WISHLIST' | 'PURCHASED' | 'IN_USE' | 'COMPLETED' | 'RETURNED';
@@ -143,6 +144,10 @@ export function ItemCard({ item, onStatusChange, onDelete }: ItemCardProps) {
               <MoreVerticalIcon className="size-4" />
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
+              <DropdownMenuItem render={<Link href={`/purchases/${item.id}`} />}>
+                <ExternalLinkIcon className="size-4" />
+                詳細を見る
+              </DropdownMenuItem>
               <DropdownMenuItem render={<Link href={`/purchases/${item.id}/edit`} />}>
                 <PencilIcon className="size-4" />
                 編集
