@@ -9,37 +9,42 @@ import {
   itemUpdateInput,
   itemChangeStatusInput,
 } from './item.schemas';
+import { withCache, invalidateCache } from '../services/cached-queries';
 
 export const itemRouter = router({
   list: publicProcedure
     .input(itemListInput)
     .query(async ({ input, ctx }) => {
       const { category, status, source, search, sortBy, sortOrder, limit, cursor } = input;
+      const userId = ctx.userId ?? 'all';
+      const cacheKey = `items:list:${userId}:${category ?? 'all'}:${status ?? 'all'}:${source ?? 'all'}:${search ?? 'all'}:${sortBy}:${sortOrder}:${limit}:${cursor ?? 'none'}`;
 
-      try {
-        const where: Record<string, unknown> = { deletedAt: null };
-        if (ctx.userId) where.userId = ctx.userId;
-        if (category) where.category = category;
-        if (status) where.status = status;
-        if (source) where.source = source;
-        if (search) {
-          where.OR = [
-            { title: { contains: search, mode: 'insensitive' } },
-            { creator: { contains: search, mode: 'insensitive' } },
-          ];
+      return withCache(cacheKey, 60, async () => {
+        try {
+          const where: Record<string, unknown> = { deletedAt: null };
+          if (ctx.userId) where.userId = ctx.userId;
+          if (category) where.category = category;
+          if (status) where.status = status;
+          if (source) where.source = source;
+          if (search) {
+            where.OR = [
+              { title: { contains: search, mode: 'insensitive' } },
+              { creator: { contains: search, mode: 'insensitive' } },
+            ];
+          }
+          const items = await prisma.item.findMany({
+            where,
+            orderBy: { [sortBy]: sortOrder },
+            take: limit + 1,
+            ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
+          });
+          const hasMore = items.length > limit;
+          const result = hasMore ? items.slice(0, limit) : items;
+          return { items: result, nextCursor: hasMore ? result[result.length - 1]?.id : undefined };
+        } catch {
+          return { items: [], nextCursor: undefined };
         }
-        const items = await prisma.item.findMany({
-          where,
-          orderBy: { [sortBy]: sortOrder },
-          take: limit + 1,
-          ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
-        });
-        const hasMore = items.length > limit;
-        const result = hasMore ? items.slice(0, limit) : items;
-        return { items: result, nextCursor: hasMore ? result[result.length - 1]?.id : undefined };
-      } catch {
-        return { items: [], nextCursor: undefined };
-      }
+      });
     }),
 
   getById: publicProcedure
@@ -62,7 +67,7 @@ export const itemRouter = router({
         create: { id: userId, email: `${userId}@localhost` },
       });
 
-      return prisma.item.create({
+      const result = await prisma.item.create({
         data: {
           category: input.category,
           title: input.title,
@@ -80,13 +85,15 @@ export const itemRouter = router({
           userId,
         },
       });
+      await invalidateCache('items:*');
+      return result;
     }),
 
   update: publicProcedure
     .input(itemUpdateInput)
     .mutation(async ({ input }) => {
       const { id, ...data } = input;
-      return prisma.item.update({
+      const result = await prisma.item.update({
         where: { id },
         data: {
           ...(data.category !== undefined && { category: data.category }),
@@ -108,6 +115,8 @@ export const itemRouter = router({
           }),
         },
       });
+      await invalidateCache('items:*');
+      return result;
     }),
 
   delete: publicProcedure
@@ -117,6 +126,7 @@ export const itemRouter = router({
         where: { id: input.id },
         data: { deletedAt: new Date() },
       });
+      await invalidateCache('items:*');
       return { success: true };
     }),
 
@@ -127,19 +137,26 @@ export const itemRouter = router({
         where: { id: input.id },
         data: { deletedAt: null },
       });
+      await invalidateCache('items:*');
       return { success: true };
     }),
 
   changeStatus: publicProcedure
     .input(itemChangeStatusInput)
     .mutation(async ({ input }) => {
-      return prisma.item.update({
+      const result = await prisma.item.update({
         where: { id: input.id },
         data: { status: input.status },
       });
+      await invalidateCache('items:*');
+      return result;
     }),
 
   stats: publicProcedure.query(async ({ ctx }) => {
+    const userId = ctx.userId ?? 'all';
+    const cacheKey = `items:stats:${userId}`;
+
+    return withCache(cacheKey, 300, async () => {
     try {
       const where: Record<string, unknown> = { deletedAt: null };
       if (ctx.userId) where.userId = ctx.userId;
@@ -237,6 +254,7 @@ export const itemRouter = router({
         monthlySpending: [],
       };
     }
+    });
   }),
 
   searchProduct: publicProcedure

@@ -50,6 +50,12 @@ export AMAZON_PARTNER_TAG=your_partner_tag-22
 # ============================
 # インフラ（デフォルト値で動作）
 # ============================
+# ============================
+# オプション: キャッシュ（Redis / Valkey）
+# ============================
+export CACHE_PROVIDER=redis
+export REDIS_URL=redis://localhost:6379
+
 export DATABASE_URL="postgresql://meta_tsundr:meta_tsundr_dev@localhost:5432/meta_tsundr"
 export QDRANT_URL=http://localhost:6333
 export GRPC_BACKEND_URL=http://localhost:50051
