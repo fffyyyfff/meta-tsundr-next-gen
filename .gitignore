@@ -52,3 +52,5 @@ next-env.d.ts
 
 # PWA workbox (auto-generated, not used)
 /public/workbox-*.js
+backend/.next/
+backend/server

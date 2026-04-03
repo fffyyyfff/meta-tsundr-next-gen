@@ -2,71 +2,21 @@
 
 **日付**: 2026-04-04
 **プロジェクト**: meta-tsundr-next-gen
-**レポート種別**: アーキテクチャリファクタリング後 全機能証跡
+**レポート種別**: 全機能証跡レポート (再キャプチャ)
 
-## アーキテクチャ
-
-### 設計パターン: Bulletproof React + Cal.com Pattern
-
-フラットな `src/components/` + `src/stores/` 構成から、**Feature-Sliced Design** に移行。
-各機能ドメインを `features/` 配下に自己完結させ、横断的関心事は `shared/` に集約。
-
-```
-src/
-├── features/                    # 機能ドメイン (Bulletproof React)
-│   ├── auth/
-│   │   ├── components/          # auth-guard.tsx
-│   │   ├── stores/              # authStore.ts
-│   │   └── index.ts             # barrel export
-│   ├── books/
-│   │   ├── components/          # book-card, book-cover, book-form,
-│   │   │                        # book-status-badge, isbn-lookup,
-│   │   │                        # ai-book-features, reading-stats
-│   │   ├── stores/              # bookStore.ts
-│   │   └── index.ts
-│   ├── purchases/
-│   │   ├── components/          # item-card, item-form, item-status-badge,
-│   │   │                        # category-icon, gmail-connect, gmail-icon
-│   │   ├── stores/              # itemStore.ts
-│   │   └── index.ts
-│   └── dashboard/
-│       ├── components/          # agent-executor, agent-results, agent-comparison,
-│       │                        # workflow-runner, agent-dashboard, stats-chart,
-│       │                        # token-usage, usage-monitor, template-selector,
-│       │                        # template-editor, favorites-list, export-button,
-│       │                        # dashboard
-│       ├── stores/              # agentStore, templateStore, favoritesStore, designStore
-│       └── index.ts
-├── shared/                      # 横断的関心事 (Cal.com pattern)
-│   ├── components/              # sidebar, header-actions, page-header,
-│   │                            # bento-grid, error-boundary, toast, etc.
-│   ├── ui/                      # shadcn/ui (button, card, input, etc.)
-│   ├── stores/                  # notificationStore, themeStore
-│   ├── hooks/                   # useAgentStream, useDebounce, useKeyboardShortcut, usePagination
-│   └── lib/                     # prisma, trpc, trpc-provider, utils
-├── server/                      # バックエンドロジック
-│   ├── routers/                 # tRPC routers (agent, book, item, gmail, etc.)
-│   ├── services/                # gmail-orchestrator, notification, usage-tracker, figma-mcp
-│   ├── agents/                  # AI agent definitions
-│   ├── grpc-client/             # Go gRPC client
-│   └── middleware/              # auth, rate-limit
-├── app/                         # Next.js App Router (pages + API routes)
-├── generated/                   # Prisma generated client
-└── types/                       # 共通型定義
-```
+---
 
 ## プロジェクト統計
 
 | 項目 | 値 |
 |---|---|
-| ソースファイル数 (src/) | 168 |
-| 総行数 (TS/TSX) | 35,931 |
-| Gitコミット数 | 98 |
-| ページ数 | 11 |
-| tRPCルーター数 | 10 (agent, figma, linear, history, usage, export, notification, book, item, gmail) |
-| E2Eテスト数 | 56+ (全PASS) |
+| ソースファイル数 (src/) | 198 |
+| TypeScript/TSXファイル数 | 195 |
+| 総行数 (TS/TSX) | 36,695 |
+| ページ数 | 13 |
+| APIルート数 | 6 |
+| Gitコミット数 | 106 |
 | TypeScriptエラー | 0 |
-| Docker サービス | 4 (postgres, valkey, go-backend, web) |
 | Feature モジュール | 4 (auth, books, purchases, dashboard) |
 
 ## 技術スタック
@@ -80,8 +30,10 @@ src/
 | バックエンド (Go) | gRPC, GORM, マルチDB対応 (Postgres/MySQL/SQLite/SQLServer) |
 | キャッシュ | Redis/Valkey (ioredis) |
 | 外部API | 楽天ブックスAPI, 楽天市場API, Amazon PA-API, Gmail API (OAuth2) |
+| AI | Claude API (メール解析、書籍推薦) |
 | テスト | Vitest, Playwright |
-| CI/CD | GitHub Actions (push/PR自動実行) |
+| CI/CD | GitHub Actions (manual dispatch) |
+| インフラ | Docker Compose (postgres, valkey, go-backend, web) |
 
 ## 機能一覧
 
@@ -100,16 +52,18 @@ src/
 - カテゴリ管理 (BOOK/ELECTRONICS/DAILY_GOODS/FOOD/CLOTHING/HOBBY/OTHER)
 - ステータス管理 (WISHLIST/PURCHASED/IN_USE/COMPLETED/RETURNED)
 - 購入統計ダッシュボード（カテゴリ別、月別、ソース別）
+- 画像自動エンリッチメント（商品画像の自動取得・補完）
 - ソフトデリート/リストア
 - Redisキャッシュ対応
 
 ### Gmail連携
 - Google OAuth2によるGmail接続
 - 購入確認メール自動取得・同期
+- Claude AIによるメール解析（購入情報の自動抽出）
+- プレビュー → 確認フロー（解析結果を確認してから登録）
 - 接続状態表示（メールアドレス、最終同期日時）
 - 同期実行（新規件数/スキップ/エラー表示）
 - 連携解除機能
-- 購入管理ページのヘッダーに統合
 
 ### UIデザインシステム
 - ページ別テーマカラー（赤/青/アンバー/エメラルド/バイオレット）
@@ -118,7 +72,8 @@ src/
 - BentoGridレイアウト（ホーム）
 - PageHeaderコンポーネント（border-l-4 accent）
 - フルスクリーンモバイルメニュー（fade-in-upアニメーション）
-- フォーカストラップ + aria-modal（a11y準拠）
+- マイクロインタラクション（hover, focus, transition）
+- フォーカストラップ + aria-modal（WCAG AA準拠）
 
 ### バックエンド (Go gRPC)
 - gRPCサーバー
@@ -126,10 +81,21 @@ src/
 - Health Checking Protocol
 - Graceful Shutdown
 
-### CI/CD
-- GitHub Actions: push/PRトリガー自動実行
-- lint-and-typecheck → test → build-web/build-agent-service
-- Security Checks: npm audit, govulncheck, license-check, secret-scan（週次スケジュール）
+### キャッシュ
+- Redis/Valkey によるデータキャッシュ
+- Graceful degradation（キャッシュ障害時もサービス継続）
+
+### アーキテクチャ
+- Cal.com pattern によるハンドラー分離（handler/ ディレクトリ構成）
+- shared/ ディレクトリによる横断的関心事の集約
+- Feature-Sliced Design (features/ 配下に機能ドメインを自己完結)
+
+### PWA
+- Web App Manifest
+- Service Worker
+- オフラインサポート
+
+---
 
 ## スクリーンショット
 
@@ -145,7 +111,7 @@ src/
 *書籍追加フォーム - クリアボタン付き*
 
 ![読書統計](./screenshots/04-books-stats.png)
-*読書統計 - エメラルドテーマ*
+*読書統計 - エメラルドテーマ、PieChart/BarChart*
 
 ![購入管理](./screenshots/05-purchases-list.png)
 *購入管理 - アンバーテーマ、Gmail連携ボタン表示*
@@ -154,7 +120,7 @@ src/
 *商品追加フォーム - ソース切り替え (おすすめ/Amazon/楽天)*
 
 ![購入統計](./screenshots/07-purchases-stats.png)
-*購入統計ダッシュボード*
+*購入統計ダッシュボード - カテゴリ別/月別/ソース別*
 
 ![ウィッシュリスト](./screenshots/08-wishlist.png)
 *ウィッシュリスト (/purchases?status=WISHLIST)*
@@ -173,22 +139,33 @@ src/
 ### API
 
 ![Health API](./screenshots/12-health-api.png)
-*ヘルスチェックAPI*
+*ヘルスチェックAPI (/api/health)*
 
 ### モバイル
 
 ![フルスクリーンメニュー](./screenshots/13-fullscreen-menu.png)
-*フルスクリーンモバイルメニュー (375x812, page-accent背景, fade-in-up)*
+*フルスクリーンモバイルメニュー (page-accent背景, fade-in-up)*
+
+---
 
 ## テスト結果
 
 | テスト種別 | 結果 | 詳細 |
 |---|---|---|
-| TypeCheck (tsc --noEmit) | PASS | 0 errors |
-| Next.js Build | PASS | 16 routes (11 static + 5 dynamic) |
-| E2Eスクリーンショット | PASS | 13枚全撮影完了 (16.6s) |
-| E2E + Unit全体 | PASS | 56+ tests |
-| CI (GitHub Actions) | 修正済 | Dockerfile: prisma generated client コピー追加 |
+| E2Eスクリーンショット | PASS | 13枚全撮影完了 (8.1s) |
+| Playwright テスト | 13 passed | 0 failed |
+
+---
+
+## 最近の変更点
+
+- **画像エンリッチメント機能**: 購入商品の画像を外部APIから自動取得・補完する機能を追加
+- **購入詳細ページ再デザイン**: 購入管理の詳細表示UIを刷新
+- **ハンドラー分離リファクタリング**: Cal.com pattern に基づきルーターからハンドラーを分離、コードの可読性と保守性を向上
+- **Prismaフォールバック**: Go バックエンド停止時にPrismaで自動フォールバックする仕組みを追加
+- **認証なしCRUD**: 開発時に認証なしでBook/Item CRUDを使用可能に
+
+---
 
 ## ファイル構成
 

@@ -118,8 +118,9 @@ export async function searchByKeyword(
 
     if (!response.ok) return []; // API error — fallback to Rakuten
 
-    const data = await response.json();
-    const items = data?.SearchResult?.Items;
+    const data = (await response.json()) as Record<string, unknown>;
+    const searchResult = data?.SearchResult as Record<string, unknown> | undefined;
+    const items = searchResult?.Items;
     if (!Array.isArray(items)) return [];
 
     return items.map((item: Record<string, unknown>): AmazonProductItem => {
