@@ -85,10 +85,11 @@ export async function syncPurchases(userId: string): Promise<SyncResult> {
     });
   }
 
-  const emails = await fetchPurchaseEmails(
-    accessToken,
-    connection.lastSyncAt ?? undefined
-  );
+  // Use lastSyncAt if available, otherwise fetch last 30 days
+  const syncSince = connection.lastSyncAt
+    ?? new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+
+  const emails = await fetchPurchaseEmails(accessToken, syncSince);
 
   let newItems = 0;
   let skipped = 0;
