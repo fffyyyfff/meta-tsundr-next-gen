@@ -4,7 +4,8 @@ import { useState } from 'react';
 import { trpcReact } from '@/lib/trpc-provider';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { MailIcon, Loader2Icon, RefreshCwIcon, UnplugIcon, CheckCircleIcon } from 'lucide-react';
+import { Loader2Icon, RefreshCwIcon, UnplugIcon, CheckCircleIcon } from 'lucide-react';
+import { GmailIcon } from '@/components/gmail-icon';
 
 export function GmailConnect() {
   const statusQuery = trpcReact.gmail.getStatus.useQuery(undefined, { retry: false });
@@ -36,7 +37,7 @@ export function GmailConnect() {
   if (!status?.connected) {
     return (
       <Button variant="outline" size="sm" render={<a href="/api/auth/google" />}>
-        <MailIcon className="size-4 mr-1" />
+        <GmailIcon className="size-4 mr-1" />
         Gmail連携
       </Button>
     );
@@ -47,7 +48,7 @@ export function GmailConnect() {
     <Card variant="glass" className="w-full">
       <CardContent className="flex flex-wrap items-center gap-3 py-2 px-3">
         <div className="flex items-center gap-2 text-sm">
-          <MailIcon className="size-4 text-[var(--page-accent)]" />
+          <GmailIcon className="size-4 text-[var(--page-accent)]" />
           <span className="text-muted-foreground">{status.email ?? 'Gmail連携済み'}</span>
         </div>
 
