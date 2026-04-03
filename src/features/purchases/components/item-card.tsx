@@ -13,6 +13,7 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuLabel,
+  DropdownMenuGroup,
 } from '@/shared/ui/dropdown-menu';
 import {
   MoreVerticalIcon,
@@ -153,16 +154,18 @@ export function ItemCard({ item, onStatusChange, onDelete }: ItemCardProps) {
                 編集
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuLabel>ステータス変更</DropdownMenuLabel>
-              {STATUS_ACTIONS.map((action) => (
-                <DropdownMenuItem
-                  key={action.status}
-                  onClick={() => onStatusChange?.(item.id, action.status)}
-                >
-                  <action.icon className="size-4" />
-                  {action.label}
-                </DropdownMenuItem>
-              ))}
+              <DropdownMenuGroup>
+                <DropdownMenuLabel>ステータス変更</DropdownMenuLabel>
+                {STATUS_ACTIONS.map((action) => (
+                  <DropdownMenuItem
+                    key={action.status}
+                    onClick={() => onStatusChange?.(item.id, action.status)}
+                  >
+                    <action.icon className="size-4" />
+                    {action.label}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuGroup>
               <DropdownMenuSeparator />
               <DropdownMenuItem variant="destructive" onClick={() => onDelete?.(item.id)}>
                 <TrashIcon className="size-4" />
