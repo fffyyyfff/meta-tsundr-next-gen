@@ -96,7 +96,7 @@ jobs:
           tags: |
             type=sha
             type=raw,value=latest
-      - uses: docker/build-push-action@v5
+      - uses: docker/build-push-action@v7
         with:
           context: .
           push: true
@@ -126,7 +126,7 @@ jobs:
           tags: |
             type=sha
             type=raw,value=latest
-      - uses: docker/build-push-action@v5
+      - uses: docker/build-push-action@v7
         with:
           context: .
           file: Dockerfile.agent-service
