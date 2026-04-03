@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { PlusIcon, SearchIcon, BarChart3Icon } from 'lucide-react';
 import { PageHeader } from '@/components/page-header';
+import { GmailConnect } from '@/components/gmail-connect';
 
 type ItemCategory = 'BOOK' | 'ELECTRONICS' | 'DAILY_GOODS' | 'FOOD' | 'CLOTHING' | 'HOBBY' | 'OTHER';
 type ItemStatus = 'WISHLIST' | 'PURCHASED' | 'IN_USE' | 'COMPLETED' | 'RETURNED';
@@ -121,6 +122,7 @@ export default function PurchasesPage() {
         title={activeStatus === 'WISHLIST' ? 'ウィッシュリスト' : '購入管理'}
         description={`あなたの購入記録 (${totalCount}件)`}
       >
+        <GmailConnect />
         <Button variant="outline" render={<Link href="/purchases/stats" />}>
           <BarChart3Icon className="size-4 mr-1" />
           統計

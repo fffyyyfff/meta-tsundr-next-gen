@@ -39,6 +39,14 @@ export FIGMA_ACCESS_TOKEN=your_figma_token_here
 export LINEAR_API_KEY=your_linear_api_key_here
 
 # ============================
+# オプション: Gmail連携（購入履歴自動取得）
+# 取得: Google Cloud Console → APIとサービス → 認証情報
+# 詳細: docs/SETUP-GMAIL.md
+# ============================
+export GOOGLE_CLIENT_ID=your_google_client_id_here.apps.googleusercontent.com
+export GOOGLE_CLIENT_SECRET=your_google_client_secret_here
+
+# ============================
 # オプション: 商品検索（Amazon PA-API 5.0）
 # 取得: https://affiliate.amazon.co.jp/ → ツール → Product Advertising API
 # 詳細: docs/SETUP-AMAZON-PAAPI.md

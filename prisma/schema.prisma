@@ -22,10 +22,11 @@ model User {
   passwordHash String?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
-  agents       AgentExecution[]
-  projects     Project[]
-  books        Book[]
-  items        Item[]
+  agents          AgentExecution[]
+  projects        Project[]
+  books           Book[]
+  items           Item[]
+  gmailConnection GmailConnection?
 }
 
 enum ItemCategory {
@@ -182,4 +183,17 @@ model WebhookConfig {
   enabled   Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model GmailConnection {
+  id           String    @id @default(cuid())
+  userId       String    @unique
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken  String    @db.Text
+  refreshToken String?   @db.Text
+  expiresAt    DateTime?
+  lastSyncAt   DateTime?
+  email        String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 }

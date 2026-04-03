@@ -8,6 +8,7 @@ import { exportRouter } from './export';
 import { notificationRouter } from './notification';
 import { bookRouter } from './book';
 import { itemRouter } from './item';
+import { gmailRouter } from './gmail';
 
 export const appRouter = router({
   agent: agentRouter,
@@ -19,6 +20,7 @@ export const appRouter = router({
   notification: notificationRouter,
   book: bookRouter,
   item: itemRouter,
+  gmail: gmailRouter,
 });
 
 export type AppRouter = typeof appRouter;
