@@ -66,7 +66,7 @@ src/
 | tRPCルーター数 | 10 (agent, figma, linear, history, usage, export, notification, book, item, gmail) |
 | E2Eテスト数 | 56+ (全PASS) |
 | TypeScriptエラー | 0 |
-| Docker サービス | 4 (postgres, qdrant, go-backend, web) |
+| Docker サービス | 4 (postgres, valkey, go-backend, web) |
 | Feature モジュール | 4 (auth, books, purchases, dashboard) |
 
 ## 技術スタック

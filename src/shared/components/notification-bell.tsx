@@ -23,7 +23,7 @@ export function NotificationBell({ userId = 'default-user' }: NotificationBellPr
 
   const { data } = trpcReact.notification.listNotifications.useQuery(
     { userId, limit: 20 },
-    { refetchInterval: 15_000 },
+    { refetchInterval: 30_000, refetchOnWindowFocus: true },
   );
 
   useEffect(() => {

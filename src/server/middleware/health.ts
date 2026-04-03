@@ -15,9 +15,6 @@ export async function getHealthStatus(): Promise<HealthStatus> {
   // Database check
   checks.database = await checkDatabase();
 
-  // Qdrant check
-  checks.qdrant = await checkQdrant();
-
   // Anthropic API check
   checks.anthropic = checkAnthropicConfig();
 
@@ -42,22 +39,6 @@ async function checkDatabase(): Promise<{ status: string; latency?: number; erro
     return { status: 'ok', latency: Date.now() - start };
   } catch (error) {
     return { status: 'error', error: error instanceof Error ? error.message : 'unknown' };
-  }
-}
-
-async function checkQdrant(): Promise<{ status: string; latency?: number; error?: string }> {
-  const start = Date.now();
-  try {
-    const url = process.env.QDRANT_URL;
-    if (!url) return { status: 'unconfigured' };
-
-    const response = await fetch(`${url}/healthz`, { signal: AbortSignal.timeout(3000) });
-    return {
-      status: response.ok ? 'ok' : 'error',
-      latency: Date.now() - start,
-    };
-  } catch {
-    return { status: 'unreachable', latency: Date.now() - start };
   }
 }
 

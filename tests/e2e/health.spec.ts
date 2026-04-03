@@ -46,9 +46,8 @@ test.describe('/api/health endpoint', () => {
     expect(typeof body.checks).toBe('object');
     expect(body.checks).not.toBeNull();
 
-    // database, qdrant, anthropic の各チェック項目が存在すること
+    // database, anthropic の各チェック項目が存在すること
     expect(body.checks).toHaveProperty('database');
-    expect(body.checks).toHaveProperty('qdrant');
     expect(body.checks).toHaveProperty('anthropic');
   });
 
