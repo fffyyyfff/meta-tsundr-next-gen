@@ -119,36 +119,65 @@ export const bookRouter = router({
     .input(bookUpdateInput)
     .mutation(async ({ input, ctx }) => {
       const { id, ...data } = input;
-      return bookClient.updateBook({
-        id,
-        title: data.title,
-        author: data.author,
-        isbn: data.isbn,
-        status: data.status,
-        imageUrl: data.imageUrl,
-        notes: data.notes,
-        rating: data.rating ?? undefined,
-      }, ctx.token ?? undefined);
+      try {
+        return await bookClient.updateBook({
+          id,
+          title: data.title,
+          author: data.author,
+          isbn: data.isbn,
+          status: data.status,
+          imageUrl: data.imageUrl,
+          notes: data.notes,
+          rating: data.rating ?? undefined,
+        }, ctx.token ?? undefined);
+      } catch {
+        return prisma.book.update({
+          where: { id },
+          data: {
+            ...(data.title !== undefined && { title: data.title }),
+            ...(data.author !== undefined && { author: data.author }),
+            ...(data.isbn !== undefined && { isbn: data.isbn }),
+            ...(data.status !== undefined && { status: data.status as never }),
+            ...(data.imageUrl !== undefined && { imageUrl: data.imageUrl }),
+            ...(data.notes !== undefined && { notes: data.notes }),
+            ...(data.rating !== undefined && { rating: data.rating }),
+          },
+        });
+      }
     }),
 
   delete: publicProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ input, ctx }) => {
-      await bookClient.deleteBook(input.id, ctx.token ?? undefined);
+      try {
+        await bookClient.deleteBook(input.id, ctx.token ?? undefined);
+      } catch {
+        await prisma.book.update({ where: { id: input.id }, data: { deletedAt: new Date() } });
+      }
       return { success: true };
     }),
 
   restore: publicProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ input, ctx }) => {
-      // Restore = update with status change back; Go backend handles soft-delete restore
-      return bookClient.updateBook({ id: input.id }, ctx.token ?? undefined);
+      try {
+        return await bookClient.updateBook({ id: input.id }, ctx.token ?? undefined);
+      } catch {
+        return prisma.book.update({ where: { id: input.id }, data: { deletedAt: null } });
+      }
     }),
 
   changeStatus: publicProcedure
     .input(bookChangeStatusInput)
     .mutation(async ({ input, ctx }) => {
-      return bookClient.updateBookStatus(input.id, input.status, ctx.token ?? undefined);
+      try {
+        return await bookClient.updateBookStatus(input.id, input.status, ctx.token ?? undefined);
+      } catch {
+        const data: Record<string, unknown> = { status: input.status as never };
+        if (input.status === 'READING') data.startedAt = new Date();
+        if (input.status === 'FINISHED') data.finishedAt = new Date();
+        return prisma.book.update({ where: { id: input.id }, data });
+      }
     }),
 
   stats: publicProcedure.query(async ({ ctx }) => {
