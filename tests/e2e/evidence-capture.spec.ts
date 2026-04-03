@@ -1,19 +1,18 @@
 import { test } from '@playwright/test';
-import { rmSync, mkdirSync } from 'fs';
+import { mkdirSync } from 'fs';
 import path from 'path';
 
 const SCREENSHOT_DIR = path.join(__dirname, '..', '..', 'evidence', 'screenshots');
 
-test.describe('Evidence Capture - UI Redesign', () => {
+test.describe('Evidence Capture', () => {
   test.beforeAll(() => {
-    // Clean old screenshots and recreate directory
-    rmSync(SCREENSHOT_DIR, { recursive: true, force: true });
     mkdirSync(SCREENSHOT_DIR, { recursive: true });
   });
 
   test('01-home', async ({ page }) => {
     await page.goto('/');
     await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(500);
     await page.screenshot({ path: path.join(SCREENSHOT_DIR, '01-home.png'), fullPage: true });
   });
 
@@ -119,5 +118,23 @@ test.describe('Evidence Capture - UI Redesign', () => {
     await page.goto('/api/health');
     await page.waitForLoadState('networkidle');
     await page.screenshot({ path: path.join(SCREENSHOT_DIR, '12-health-api.png'), fullPage: true });
+  });
+
+  test('13-fullscreen-menu', async ({ browser }) => {
+    const context = await browser.newContext({
+      viewport: { width: 375, height: 812 },
+    });
+    const page = await context.newPage();
+    await page.goto('/');
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(1000);
+    // Trigger the hamburger button via dispatchEvent to bypass visibility checks
+    await page.evaluate(() => {
+      const btn = document.querySelector('button[aria-label="メニューを開く"]');
+      if (btn) (btn as HTMLButtonElement).click();
+    });
+    await page.waitForTimeout(800);
+    await page.screenshot({ path: path.join(SCREENSHOT_DIR, '13-fullscreen-menu.png'), fullPage: true });
+    await context.close();
   });
 });

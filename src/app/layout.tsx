@@ -21,6 +21,12 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Meta-tsundr Next Gen - AI Agent Platform",
   description: "Next-generation development platform with AI agents, Figma MCP, and automated testing",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Meta-tsundr",
+  },
 };
 
 export default function RootLayout({

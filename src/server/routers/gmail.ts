@@ -52,18 +52,14 @@ export const gmailRouter = router({
 
     try {
       const { syncPurchases } = await import('../services/gmail-orchestrator');
-      const result = await syncPurchases(userId, connection.accessToken, connection.refreshToken);
-
-      // Update lastSyncAt
-      await prisma.gmailConnection.update({
-        where: { userId },
-        data: { lastSyncAt: new Date() },
-      });
+      const result = await syncPurchases(userId);
 
       return {
         newItems: result.newItems,
         skipped: result.skipped,
-        errors: result.errors,
+        errors: result.errors > 0
+          ? [`${result.errors}件のメールでエラーが発生しました`]
+          : ([] as string[]),
       };
     } catch (e) {
       const message = e instanceof Error ? e.message : '同期中にエラーが発生しました';
