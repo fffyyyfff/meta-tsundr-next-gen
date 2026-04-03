@@ -1,3 +1,4 @@
+import { z } from 'zod';
 import { router, publicProcedure } from '../../trpc';
 import {
   itemListInput,
@@ -18,6 +19,10 @@ import { restoreHandler } from './restore.handler';
 import { changeStatusHandler } from './changeStatus.handler';
 import { statsHandler } from './stats.handler';
 import { searchProductHandler } from './searchProduct.handler';
+import { enrichImageHandler } from './enrichImage.handler';
+import { enrichAllImagesHandler } from './enrichAllImages.handler';
+
+const enrichImageInput = z.object({ id: z.string() });
 
 export const itemRouter = router({
   list: publicProcedure
@@ -54,4 +59,11 @@ export const itemRouter = router({
   searchProduct: publicProcedure
     .input(searchProductInput)
     .query(({ input }) => searchProductHandler({ input })),
+
+  enrichImage: publicProcedure
+    .input(enrichImageInput)
+    .mutation(({ input }) => enrichImageHandler({ input })),
+
+  enrichAllImages: publicProcedure
+    .mutation(({ ctx }) => enrichAllImagesHandler({ ctx })),
 });

@@ -42,6 +42,7 @@ import {
   ExternalLinkIcon,
   ChevronDownIcon,
   Loader2Icon,
+  ImageIcon,
 } from "lucide-react";
 
 type ItemStatus =
@@ -145,6 +146,12 @@ export default function PurchaseDetailPage({
     },
   });
 
+  const enrichImageMutation = trpcReact.item.enrichImage.useMutation({
+    onSuccess: () => {
+      utils.item.getById.invalidate({ id });
+    },
+  });
+
   const handleStatusChange = useCallback(
     (status: ItemStatus) => {
       changeStatusMutation.mutate({ id, status });
@@ -216,14 +223,29 @@ export default function PurchaseDetailPage({
                   style={{ width: 200, height: 280 }}
                 />
               ) : (
-                <div
-                  className="flex items-center justify-center rounded-lg bg-muted shadow-md"
-                  style={{ width: 200, height: 280 }}
-                >
-                  <CategoryIcon
-                    category={item.category}
-                    className="size-16 text-muted-foreground"
-                  />
+                <div className="flex flex-col items-center gap-2">
+                  <div
+                    className="flex items-center justify-center rounded-lg bg-muted shadow-md"
+                    style={{ width: 200, height: 280 }}
+                  >
+                    <CategoryIcon
+                      category={item.category}
+                      className="size-16 text-muted-foreground"
+                    />
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => enrichImageMutation.mutate({ id })}
+                    disabled={enrichImageMutation.isPending}
+                  >
+                    {enrichImageMutation.isPending ? (
+                      <Loader2Icon className="mr-1 size-3 animate-spin" />
+                    ) : (
+                      <ImageIcon className="mr-1 size-3" />
+                    )}
+                    画像を検索
+                  </Button>
                 </div>
               )}
             </div>

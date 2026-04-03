@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { trpcReact } from '@/shared/lib/trpc-provider';
@@ -10,7 +10,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/shared/ui/tabs';
 import { Input } from '@/shared/ui/input';
 import { Button } from '@/shared/ui/button';
 import { Skeleton } from '@/shared/ui/skeleton';
-import { PlusIcon, SearchIcon, BarChart3Icon } from 'lucide-react';
+import { PlusIcon, SearchIcon, BarChart3Icon, ImageIcon, Loader2Icon, CheckCircleIcon } from 'lucide-react';
 import { PageHeader } from '@/shared/components/page-header';
 import { GmailConnect } from '@/features/purchases/components/gmail-connect';
 
@@ -78,6 +78,14 @@ export default function PurchasesPage() {
     onSuccess: () => utils.item.list.invalidate(),
   });
 
+  const [enrichResult, setEnrichResult] = useState<{ updated: number } | null>(null);
+  const enrichAllMutation = trpcReact.item.enrichAllImages.useMutation({
+    onSuccess: (data) => {
+      setEnrichResult({ updated: data.updated });
+      utils.item.list.invalidate();
+    },
+  });
+
   const handleStatusChange = useCallback(
     (id: string, status: ItemStatus) => {
       updateMutation.mutate({ id, status });
@@ -123,6 +131,18 @@ export default function PurchasesPage() {
         description={`あなたの購入記録 (${totalCount}件)`}
       >
         <GmailConnect />
+        <Button
+          variant="outline"
+          onClick={() => { setEnrichResult(null); enrichAllMutation.mutate(); }}
+          disabled={enrichAllMutation.isPending}
+        >
+          {enrichAllMutation.isPending ? (
+            <Loader2Icon className="size-4 mr-1 animate-spin" />
+          ) : (
+            <ImageIcon className="size-4 mr-1" />
+          )}
+          画像を補完
+        </Button>
         <Button variant="outline" render={<Link href="/purchases/stats" />}>
           <BarChart3Icon className="size-4 mr-1" />
           統計
@@ -132,6 +152,13 @@ export default function PurchasesPage() {
           追加
         </Button>
       </PageHeader>
+
+      {enrichResult && (
+        <p className="flex items-center gap-1 text-sm text-emerald-600 dark:text-emerald-400">
+          <CheckCircleIcon className="size-4" />
+          {enrichResult.updated}件の画像を更新しました
+        </p>
+      )}
 
       {/* Filters */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
