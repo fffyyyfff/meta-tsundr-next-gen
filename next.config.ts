@@ -26,6 +26,7 @@ const pwaConfig = withPWA({
 
 const nextConfig: NextConfig = {
   output: "standalone",
+  turbopack: {},
   images: {
     remotePatterns: [
       {
