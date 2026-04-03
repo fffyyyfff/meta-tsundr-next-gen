@@ -1,10 +1,10 @@
 'use client';
 
 import Link from 'next/link';
-import { trpcReact } from '@/lib/trpc-provider';
-import { StatCard, StatusPieChart, MonthlyBarChart } from '@/components/reading-stats';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Button } from '@/components/ui/button';
+import { trpcReact } from '@/shared/lib/trpc-provider';
+import { StatCard, StatusPieChart, MonthlyBarChart } from '@/features/books/components/reading-stats';
+import { Skeleton } from '@/shared/ui/skeleton';
+import { Button } from '@/shared/ui/button';
 import { ArrowLeftIcon } from 'lucide-react';
 
 const MONTHLY_GOAL = 5;

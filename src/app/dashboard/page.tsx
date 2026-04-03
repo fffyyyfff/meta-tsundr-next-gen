@@ -1,8 +1,8 @@
-import { AgentExecutor } from '@/components/agent-executor';
-import { AgentResults } from '@/components/agent-results';
-import { Dashboard } from '@/components/dashboard';
-import { WorkflowRunner } from '@/components/workflow-runner';
-import { PageHeader } from '@/components/page-header';
+import { AgentExecutor } from '@/features/dashboard/components/agent-executor';
+import { AgentResults } from '@/features/dashboard/components/agent-results';
+import { Dashboard } from '@/features/dashboard/components/dashboard';
+import { WorkflowRunner } from '@/features/dashboard/components/workflow-runner';
+import { PageHeader } from '@/shared/components/page-header';
 
 export default function DashboardPage() {
   return (

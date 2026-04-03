@@ -1,6 +1,6 @@
 import { router, publicProcedure } from '../trpc';
 import { z } from 'zod';
-import { prisma } from '../../lib/prisma';
+import { prisma } from '@/shared/lib/prisma';
 
 export const historyRouter = router({
   listExecutions: publicProcedure

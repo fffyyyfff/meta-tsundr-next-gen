@@ -3,16 +3,16 @@
 import { useCallback, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { trpcReact } from '@/lib/trpc-provider';
-import { useItemStore } from '@/stores/itemStore';
-import { ItemCard } from '@/components/item-card';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Skeleton } from '@/components/ui/skeleton';
+import { trpcReact } from '@/shared/lib/trpc-provider';
+import { useItemStore } from '@/features/purchases/stores/itemStore';
+import { ItemCard } from '@/features/purchases/components/item-card';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/shared/ui/tabs';
+import { Input } from '@/shared/ui/input';
+import { Button } from '@/shared/ui/button';
+import { Skeleton } from '@/shared/ui/skeleton';
 import { PlusIcon, SearchIcon, BarChart3Icon } from 'lucide-react';
-import { PageHeader } from '@/components/page-header';
-import { GmailConnect } from '@/components/gmail-connect';
+import { PageHeader } from '@/shared/components/page-header';
+import { GmailConnect } from '@/features/purchases/components/gmail-connect';
 
 type ItemCategory = 'BOOK' | 'ELECTRONICS' | 'DAILY_GOODS' | 'FOOD' | 'CLOTHING' | 'HOBBY' | 'OTHER';
 type ItemStatus = 'WISHLIST' | 'PURCHASED' | 'IN_USE' | 'COMPLETED' | 'RETURNED';

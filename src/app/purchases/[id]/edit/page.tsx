@@ -3,10 +3,10 @@
 import { use } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { trpcReact } from '@/lib/trpc-provider';
-import { ItemForm } from '@/components/item-form';
-import { Button } from '@/components/ui/button';
-import { Skeleton } from '@/components/ui/skeleton';
+import { trpcReact } from '@/shared/lib/trpc-provider';
+import { ItemForm } from '@/features/purchases/components/item-form';
+import { Button } from '@/shared/ui/button';
+import { Skeleton } from '@/shared/ui/skeleton';
 import { ArrowLeftIcon } from 'lucide-react';
 
 export default function EditPurchasePage({ params }: { params: Promise<{ id: string }> }) {

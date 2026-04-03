@@ -1,7 +1,7 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
+import { Button } from '@/shared/ui/button';
+import { Card } from '@/shared/ui/card';
 
 function GitHubIcon() {
   return (

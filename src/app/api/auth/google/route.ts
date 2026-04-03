@@ -4,7 +4,7 @@ import {
   getTokensFromCode,
   isConfigured,
 } from "@/server/services/gmail-auth";
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@/shared/lib/prisma";
 
 export async function GET(req: NextRequest) {
   const url = new URL(req.url);

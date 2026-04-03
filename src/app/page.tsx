@@ -1,8 +1,8 @@
 'use client';
 
 import { BookOpenIcon, BarChart3Icon, ShieldIcon, BookMarkedIcon, BookCheckIcon, Loader2Icon, PackageIcon, HeartIcon } from 'lucide-react';
-import { trpcReact } from '@/lib/trpc-provider';
-import { BentoGrid, BentoCard } from '@/components/bento-grid';
+import { trpcReact } from '@/shared/lib/trpc-provider';
+import { BentoGrid, BentoCard } from '@/shared/components/bento-grid';
 
 function ActivitySummary() {
   const { data, isLoading } = trpcReact.book.stats.useQuery(undefined, {

@@ -3,14 +3,14 @@
 import { use, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { trpcReact } from '@/lib/trpc-provider';
-import { BookCover } from '@/components/book-cover';
-import { BookStatusBadge } from '@/components/book-status-badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Skeleton } from '@/components/ui/skeleton';
+import { trpcReact } from '@/shared/lib/trpc-provider';
+import { BookCover } from '@/features/books/components/book-cover';
+import { BookStatusBadge } from '@/features/books/components/book-status-badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card';
+import { Button } from '@/shared/ui/button';
+import { Skeleton } from '@/shared/ui/skeleton';
 import { ArrowLeftIcon, PencilIcon, TrashIcon, BookOpenIcon, BookCheckIcon, BookMarkedIcon } from 'lucide-react';
-import { AiReview } from '@/components/ai-book-features';
+import { AiReview } from '@/features/books/components/ai-book-features';
 
 function StarDisplay({ rating }: { rating: number | null | undefined }) {
   if (!rating) return <span className="text-sm text-muted-foreground">未評価</span>;

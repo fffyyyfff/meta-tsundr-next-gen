@@ -2,16 +2,16 @@
 
 import { useCallback } from 'react';
 import Link from 'next/link';
-import { trpcReact } from '@/lib/trpc-provider';
-import { useBookStore } from '@/stores/bookStore';
-import { BookCard } from '@/components/book-card';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Skeleton } from '@/components/ui/skeleton';
+import { trpcReact } from '@/shared/lib/trpc-provider';
+import { useBookStore } from '@/features/books/stores/bookStore';
+import { BookCard } from '@/features/books/components/book-card';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/shared/ui/tabs';
+import { Input } from '@/shared/ui/input';
+import { Button } from '@/shared/ui/button';
+import { Skeleton } from '@/shared/ui/skeleton';
 import { PlusIcon, SearchIcon, BarChart3Icon } from 'lucide-react';
-import { AiRecommendation, AiReadingPlan } from '@/components/ai-book-features';
-import { PageHeader } from '@/components/page-header';
+import { AiRecommendation, AiReadingPlan } from '@/features/books/components/ai-book-features';
+import { PageHeader } from '@/shared/components/page-header';
 
 const TABS = [
   { value: 'all', label: '全て' },

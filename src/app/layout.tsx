@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { TRPCProvider } from "@/lib/trpc-provider";
-import { HeaderActions } from "@/components/header-actions";
-import { Sidebar } from "@/components/sidebar";
-import { SkipNav } from "@/components/skip-nav";
-import { KeyboardShortcutsHelp } from "@/components/keyboard-shortcuts-help";
-import { PageThemeProvider } from "@/components/page-theme-provider";
+import { TRPCProvider } from "@/shared/lib/trpc-provider";
+import { HeaderActions } from "@/shared/components/header-actions";
+import { Sidebar } from "@/shared/components/sidebar";
+import { SkipNav } from "@/shared/components/skip-nav";
+import { KeyboardShortcutsHelp } from "@/shared/components/keyboard-shortcuts-help";
+import { PageThemeProvider } from "@/shared/components/page-theme-provider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

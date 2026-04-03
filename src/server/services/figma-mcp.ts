@@ -192,7 +192,7 @@ export class FigmaMCPService {
   generateReactCode(component: FigmaComponent): string {
     const componentName = component.name.replace(/[^a-zA-Z0-9]/g, '');
     return `import React from 'react';
-import { cn } from '@/lib/utils';
+import { cn } from '@/shared/lib/utils';
 
 interface ${componentName}Props {
   className?: string;

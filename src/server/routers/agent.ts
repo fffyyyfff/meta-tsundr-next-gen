@@ -2,7 +2,7 @@ import { router, publicProcedure } from '../trpc';
 import { z } from 'zod';
 import { orchestrator } from '../agents/orchestrator';
 import type { AgentType } from '../agents/orchestrator';
-import { prisma } from '../../lib/prisma';
+import { prisma } from '@/shared/lib/prisma';
 
 export const agentRouter = router({
   executeTask: publicProcedure

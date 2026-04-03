@@ -1,4 +1,4 @@
-import { prisma } from "../../lib/prisma";
+import { prisma } from "@/shared/lib/prisma";
 import { refreshAccessToken } from "./gmail-auth";
 import { fetchPurchaseEmails } from "./gmail-sync";
 import { parseOrderEmail } from "./email-parser";

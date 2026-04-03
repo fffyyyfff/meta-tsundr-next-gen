@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { router, publicProcedure } from "../trpc";
-import { prisma } from "../../lib/prisma";
+import { prisma } from "@/shared/lib/prisma";
 
 const previewItemSchema = z.object({
   title: z.string(),

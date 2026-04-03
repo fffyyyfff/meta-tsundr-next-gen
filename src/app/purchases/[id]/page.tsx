@@ -4,13 +4,13 @@ import { use, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { trpcReact } from '@/lib/trpc-provider';
-import { CategoryIcon, getCategoryLabel } from '@/components/category-icon';
-import { ItemStatusBadge } from '@/components/item-status-badge';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Skeleton } from '@/components/ui/skeleton';
+import { trpcReact } from '@/shared/lib/trpc-provider';
+import { CategoryIcon, getCategoryLabel } from '@/features/purchases/components/category-icon';
+import { ItemStatusBadge } from '@/features/purchases/components/item-status-badge';
+import { Badge } from '@/shared/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card';
+import { Button } from '@/shared/ui/button';
+import { Skeleton } from '@/shared/ui/skeleton';
 import {
   ArrowLeftIcon,
   PencilIcon,

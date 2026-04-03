@@ -16,10 +16,10 @@ import {
   ResponsiveContainer,
   Legend,
 } from 'recharts';
-import { trpcReact } from '@/lib/trpc-provider';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Button } from '@/components/ui/button';
+import { trpcReact } from '@/shared/lib/trpc-provider';
+import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card';
+import { Skeleton } from '@/shared/ui/skeleton';
+import { Button } from '@/shared/ui/button';
 import {
   ArrowLeftIcon,
   BookOpenIcon,

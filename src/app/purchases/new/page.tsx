@@ -2,9 +2,9 @@
 
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { trpcReact } from '@/lib/trpc-provider';
-import { ItemForm } from '@/components/item-form';
-import { Button } from '@/components/ui/button';
+import { trpcReact } from '@/shared/lib/trpc-provider';
+import { ItemForm } from '@/features/purchases/components/item-form';
+import { Button } from '@/shared/ui/button';
 import { ArrowLeftIcon } from 'lucide-react';
 
 export default function NewPurchasePage() {

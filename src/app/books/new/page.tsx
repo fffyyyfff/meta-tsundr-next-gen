@@ -2,9 +2,9 @@
 
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { trpcReact } from '@/lib/trpc-provider';
-import { BookForm } from '@/components/book-form';
-import { Button } from '@/components/ui/button';
+import { trpcReact } from '@/shared/lib/trpc-provider';
+import { BookForm } from '@/features/books/components/book-form';
+import { Button } from '@/shared/ui/button';
 import { ArrowLeftIcon } from 'lucide-react';
 
 export default function NewBookPage() {

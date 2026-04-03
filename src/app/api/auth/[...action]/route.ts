@@ -3,7 +3,7 @@ import crypto from 'crypto';
 import { getOAuth2Config } from '@/server/middleware/auth';
 import { authService } from '@/server/middleware/auth';
 import { authClient } from '@/server/grpc-client';
-import { prisma } from '@/lib/prisma';
+import { prisma } from '@/shared/lib/prisma';
 
 function parseAction(params: string[]): { action: string; provider: string } | null {
   if (params.length === 2) {

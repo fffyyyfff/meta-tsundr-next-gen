@@ -1,4 +1,4 @@
-import { prisma } from '../../lib/prisma';
+import { prisma } from '@/shared/lib/prisma';
 
 export interface UsageRecord {
   timestamp: Date;
