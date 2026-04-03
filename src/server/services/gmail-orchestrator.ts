@@ -95,15 +95,28 @@ export async function syncPurchases(userId: string): Promise<SyncResult> {
   let skipped = 0;
   let errors = 0;
 
+  console.log(`[Gmail Sync] Found ${emails.length} emails to process`);
+
   for (const email of emails) {
     try {
       const source = detectSource(email.from);
-      const parsed = await parseOrderEmail(email.bodyHtml, source);
+      console.log(`[Gmail Sync] Processing: "${email.subject}" from=${source} bodyLength=${email.bodyHtml.length}`);
 
-      if (!parsed) {
+      if (email.bodyHtml.length < 20) {
+        console.log(`[Gmail Sync] Skipping: body too short`);
         errors++;
         continue;
       }
+
+      const parsed = await parseOrderEmail(email.bodyHtml, source);
+
+      if (!parsed) {
+        console.log(`[Gmail Sync] Failed to parse email: "${email.subject}"`);
+        errors++;
+        continue;
+      }
+
+      console.log(`[Gmail Sync] Parsed: ${parsed.items.length} items, order=${parsed.orderNumber}`);
 
       for (const orderItem of parsed.items) {
         // Check for duplicates via externalId (orderNumber)
@@ -147,7 +160,8 @@ export async function syncPurchases(userId: string): Promise<SyncResult> {
 
         newItems++;
       }
-    } catch {
+    } catch (err) {
+      console.error(`[Gmail Sync] Error processing "${email.subject}":`, err instanceof Error ? err.message : err);
       errors++;
     }
   }
