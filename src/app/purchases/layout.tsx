@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { PackageIcon, BarChart3Icon } from 'lucide-react';
+import { PackageIcon } from 'lucide-react';
 
 const NAV_ITEMS: { href: string; label: string; icon: typeof PackageIcon; exact?: boolean }[] = [
   { href: '/purchases', label: '一覧', icon: PackageIcon, exact: true },
