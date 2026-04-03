@@ -36,7 +36,7 @@ export function GmailConnect() {
   // Not connected
   if (!status?.connected) {
     return (
-      <Button variant="outline" size="sm" render={<a href="/api/auth/google" />}>
+      <Button variant="outline" size="sm" render={<a href="/api/gmail/callback" />}>
         <GmailIcon className="size-4 mr-1" />
         Gmail連携
       </Button>
