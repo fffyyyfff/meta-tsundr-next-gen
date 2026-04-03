@@ -1,9 +1,29 @@
-import { router, publicProcedure } from '../trpc';
-import { prisma } from '../../lib/prisma';
+import { z } from "zod";
+import { router, publicProcedure } from "../trpc";
+import { prisma } from "../../lib/prisma";
+
+const previewItemSchema = z.object({
+  title: z.string(),
+  price: z.number(),
+  source: z.enum(["amazon", "rakuten"]),
+  orderNumber: z.string(),
+  orderDate: z.string(),
+  category: z.enum([
+    "BOOK",
+    "ELECTRONICS",
+    "DAILY_GOODS",
+    "FOOD",
+    "CLOTHING",
+    "HOBBY",
+    "OTHER",
+  ]),
+  quantity: z.number(),
+  gmailMessageId: z.string(),
+});
 
 export const gmailRouter = router({
   getStatus: publicProcedure.query(async ({ ctx }) => {
-    const userId = ctx.userId ?? 'dev-user';
+    const userId = ctx.userId ?? "dev-user";
 
     try {
       const connection = await prisma.gmailConnection.findUnique({
@@ -26,7 +46,7 @@ export const gmailRouter = router({
   }),
 
   disconnect: publicProcedure.mutation(async ({ ctx }) => {
-    const userId = ctx.userId ?? 'dev-user';
+    const userId = ctx.userId ?? "dev-user";
 
     try {
       await prisma.gmailConnection.delete({
@@ -39,31 +59,57 @@ export const gmailRouter = router({
     return { success: true };
   }),
 
-  sync: publicProcedure.mutation(async ({ ctx }) => {
-    const userId = ctx.userId ?? 'dev-user';
+  preview: publicProcedure.mutation(async ({ ctx }) => {
+    const userId = ctx.userId ?? "dev-user";
 
     const connection = await prisma.gmailConnection.findUnique({
       where: { userId },
     });
 
     if (!connection) {
-      return { newItems: 0, skipped: 0, errors: ['Gmail未連携です。先にGmailを連携してください。'] };
+      return {
+        items: [],
+        totalFound: 0,
+        errors: 1,
+        errorMessage: "Gmail未連携です。先にGmailを連携してください。",
+      };
     }
 
     try {
-      const { syncPurchases } = await import('../services/gmail-orchestrator');
-      const result = await syncPurchases(userId);
+      const { previewPurchases } = await import(
+        "../services/gmail-orchestrator"
+      );
+      const result = await previewPurchases(userId);
 
       return {
-        newItems: result.newItems,
-        skipped: result.skipped,
-        errors: result.errors > 0
-          ? [`${result.errors}件のメールでエラーが発生しました`]
-          : ([] as string[]),
+        items: result.items,
+        totalFound: result.totalFound,
+        errors: result.errors,
+        errorMessage: null,
       };
     } catch (e) {
-      const message = e instanceof Error ? e.message : '同期中にエラーが発生しました';
-      return { newItems: 0, skipped: 0, errors: [message] };
+      const message =
+        e instanceof Error ? e.message : "プレビュー中にエラーが発生しました";
+      return { items: [], totalFound: 0, errors: 1, errorMessage: message };
     }
   }),
+
+  confirm: publicProcedure
+    .input(z.object({ items: z.array(previewItemSchema) }))
+    .mutation(async ({ ctx, input }) => {
+      const userId = ctx.userId ?? "dev-user";
+
+      try {
+        const { confirmPurchases } = await import(
+          "../services/gmail-orchestrator"
+        );
+        const result = await confirmPurchases(userId, input.items);
+
+        return { saved: result.saved, error: null };
+      } catch (e) {
+        const message =
+          e instanceof Error ? e.message : "保存中にエラーが発生しました";
+        return { saved: 0, error: message };
+      }
+    }),
 });

@@ -4,10 +4,25 @@ import { fetchPurchaseEmails } from "./gmail-sync";
 import { parseOrderEmail } from "./email-parser";
 import { ItemCategory } from "../../generated/prisma/client";
 
-interface SyncResult {
-  newItems: number;
-  skipped: number;
+export interface PreviewItem {
+  title: string;
+  price: number;
+  source: "amazon" | "rakuten";
+  orderNumber: string;
+  orderDate: string;
+  category: ItemCategory;
+  quantity: number;
+  gmailMessageId: string;
+}
+
+interface PreviewResult {
+  items: PreviewItem[];
+  totalFound: number;
   errors: number;
+}
+
+interface ConfirmResult {
+  saved: number;
 }
 
 function detectSource(from: string): "amazon" | "rakuten" {
@@ -52,7 +67,7 @@ function inferCategory(title: string): ItemCategory {
   return "OTHER";
 }
 
-export async function syncPurchases(userId: string): Promise<SyncResult> {
+async function ensureAccessToken(userId: string): Promise<string> {
   const connection = await prisma.gmailConnection.findUnique({
     where: { userId },
   });
@@ -63,8 +78,10 @@ export async function syncPurchases(userId: string): Promise<SyncResult> {
 
   let accessToken = connection.accessToken;
 
-  // Refresh token if expired or about to expire (within 5 minutes)
-  if (connection.expiresAt && connection.expiresAt <= new Date(Date.now() + 5 * 60 * 1000)) {
+  if (
+    connection.expiresAt &&
+    connection.expiresAt <= new Date(Date.now() + 5 * 60 * 1000)
+  ) {
     if (!connection.refreshToken) {
       throw new Error("Access token expired and no refresh token available");
     }
@@ -85,25 +102,36 @@ export async function syncPurchases(userId: string): Promise<SyncResult> {
     });
   }
 
-  // Use lastSyncAt if available, otherwise fetch last 30 days
-  const syncSince = connection.lastSyncAt
-    ?? new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+  return accessToken;
+}
+
+export async function previewPurchases(
+  userId: string
+): Promise<PreviewResult> {
+  const connection = await prisma.gmailConnection.findUnique({
+    where: { userId },
+  });
+
+  if (!connection) {
+    throw new Error("Gmail connection not found for user");
+  }
+
+  const accessToken = await ensureAccessToken(userId);
+
+  const syncSince =
+    connection.lastSyncAt ??
+    new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
 
   const emails = await fetchPurchaseEmails(accessToken, syncSince);
 
-  let newItems = 0;
-  let skipped = 0;
+  const items: PreviewItem[] = [];
   let errors = 0;
-
-  console.log(`[Gmail Sync] Found ${emails.length} emails to process`);
 
   for (const email of emails) {
     try {
       const source = detectSource(email.from);
-      console.log(`[Gmail Sync] Processing: "${email.subject}" from=${source} bodyLength=${email.bodyHtml.length}`);
 
       if (email.bodyHtml.length < 20) {
-        console.log(`[Gmail Sync] Skipping: body too short`);
         errors++;
         continue;
       }
@@ -111,15 +139,12 @@ export async function syncPurchases(userId: string): Promise<SyncResult> {
       const parsed = await parseOrderEmail(email.bodyHtml, source);
 
       if (!parsed) {
-        console.log(`[Gmail Sync] Failed to parse email: "${email.subject}"`);
         errors++;
         continue;
       }
 
-      console.log(`[Gmail Sync] Parsed: ${parsed.items.length} items, order=${parsed.orderNumber}`);
-
       for (const orderItem of parsed.items) {
-        // Check for duplicates via externalId (orderNumber)
+        // Check for existing duplicates
         const existing = await prisma.item.findFirst({
           where: {
             userId,
@@ -129,41 +154,60 @@ export async function syncPurchases(userId: string): Promise<SyncResult> {
           },
         });
 
-        if (existing) {
-          skipped++;
-          continue;
-        }
+        if (existing) continue;
 
-        const purchaseDate = parsed.orderDate
-          ? new Date(parsed.orderDate)
-          : undefined;
-
-        await prisma.item.create({
-          data: {
-            userId,
-            category: inferCategory(orderItem.title),
-            title: orderItem.title,
-            price: orderItem.price,
-            externalId: parsed.orderNumber,
-            source,
-            status: "PURCHASED",
-            purchaseDate: purchaseDate && !isNaN(purchaseDate.getTime())
-              ? purchaseDate
-              : undefined,
-            metadata: {
-              gmailMessageId: email.messageId,
-              quantity: orderItem.quantity,
-              orderNumber: parsed.orderNumber,
-            },
-          },
+        items.push({
+          title: orderItem.title,
+          price: orderItem.price,
+          source,
+          orderNumber: parsed.orderNumber,
+          orderDate: parsed.orderDate,
+          category: inferCategory(orderItem.title),
+          quantity: orderItem.quantity,
+          gmailMessageId: email.messageId,
         });
-
-        newItems++;
       }
-    } catch (err) {
-      console.error(`[Gmail Sync] Error processing "${email.subject}":`, err instanceof Error ? err.message : err);
+    } catch {
       errors++;
     }
+  }
+
+  return { items, totalFound: emails.length, errors };
+}
+
+export async function confirmPurchases(
+  userId: string,
+  items: PreviewItem[]
+): Promise<ConfirmResult> {
+  let saved = 0;
+
+  for (const item of items) {
+    const purchaseDate = item.orderDate
+      ? new Date(item.orderDate)
+      : undefined;
+
+    await prisma.item.create({
+      data: {
+        userId,
+        category: item.category,
+        title: item.title,
+        price: item.price,
+        externalId: item.orderNumber,
+        source: item.source,
+        status: "PURCHASED",
+        purchaseDate:
+          purchaseDate && !isNaN(purchaseDate.getTime())
+            ? purchaseDate
+            : undefined,
+        metadata: {
+          gmailMessageId: item.gmailMessageId,
+          quantity: item.quantity,
+          orderNumber: item.orderNumber,
+        },
+      },
+    });
+
+    saved++;
   }
 
   // Update lastSyncAt
@@ -172,5 +216,5 @@ export async function syncPurchases(userId: string): Promise<SyncResult> {
     data: { lastSyncAt: new Date() },
   });
 
-  return { newItems, skipped, errors };
+  return { saved };
 }
