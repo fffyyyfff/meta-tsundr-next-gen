@@ -1,27 +1,80 @@
 # Evidence Report - Meta-tsundr Next Gen
 
-**日付**: 2026-04-03
+**日付**: 2026-04-04
 **プロジェクト**: meta-tsundr-next-gen
-**レポート種別**: Gmail連携追加後 全機能証跡
+**レポート種別**: アーキテクチャリファクタリング後 全機能証跡
+
+## アーキテクチャ
+
+### 設計パターン: Bulletproof React + Cal.com Pattern
+
+フラットな `src/components/` + `src/stores/` 構成から、**Feature-Sliced Design** に移行。
+各機能ドメインを `features/` 配下に自己完結させ、横断的関心事は `shared/` に集約。
+
+```
+src/
+├── features/                    # 機能ドメイン (Bulletproof React)
+│   ├── auth/
+│   │   ├── components/          # auth-guard.tsx
+│   │   ├── stores/              # authStore.ts
+│   │   └── index.ts             # barrel export
+│   ├── books/
+│   │   ├── components/          # book-card, book-cover, book-form,
+│   │   │                        # book-status-badge, isbn-lookup,
+│   │   │                        # ai-book-features, reading-stats
+│   │   ├── stores/              # bookStore.ts
+│   │   └── index.ts
+│   ├── purchases/
+│   │   ├── components/          # item-card, item-form, item-status-badge,
+│   │   │                        # category-icon, gmail-connect, gmail-icon
+│   │   ├── stores/              # itemStore.ts
+│   │   └── index.ts
+│   └── dashboard/
+│       ├── components/          # agent-executor, agent-results, agent-comparison,
+│       │                        # workflow-runner, agent-dashboard, stats-chart,
+│       │                        # token-usage, usage-monitor, template-selector,
+│       │                        # template-editor, favorites-list, export-button,
+│       │                        # dashboard
+│       ├── stores/              # agentStore, templateStore, favoritesStore, designStore
+│       └── index.ts
+├── shared/                      # 横断的関心事 (Cal.com pattern)
+│   ├── components/              # sidebar, header-actions, page-header,
+│   │                            # bento-grid, error-boundary, toast, etc.
+│   ├── ui/                      # shadcn/ui (button, card, input, etc.)
+│   ├── stores/                  # notificationStore, themeStore
+│   ├── hooks/                   # useAgentStream, useDebounce, useKeyboardShortcut, usePagination
+│   └── lib/                     # prisma, trpc, trpc-provider, utils
+├── server/                      # バックエンドロジック
+│   ├── routers/                 # tRPC routers (agent, book, item, gmail, etc.)
+│   ├── services/                # gmail-orchestrator, notification, usage-tracker, figma-mcp
+│   ├── agents/                  # AI agent definitions
+│   ├── grpc-client/             # Go gRPC client
+│   └── middleware/              # auth, rate-limit
+├── app/                         # Next.js App Router (pages + API routes)
+├── generated/                   # Prisma generated client
+└── types/                       # 共通型定義
+```
 
 ## プロジェクト統計
 
 | 項目 | 値 |
 |---|---|
-| ソースファイル数 (src/) | 161 |
-| 総行数 (TS/TSX) | 35,282 |
-| Gitコミット数 | 88 |
+| ソースファイル数 (src/) | 168 |
+| 総行数 (TS/TSX) | 35,931 |
+| Gitコミット数 | 98 |
 | ページ数 | 11 |
 | tRPCルーター数 | 10 (agent, figma, linear, history, usage, export, notification, book, item, gmail) |
 | E2Eテスト数 | 56+ (全PASS) |
 | TypeScriptエラー | 0 |
 | Docker サービス | 4 (postgres, qdrant, go-backend, web) |
+| Feature モジュール | 4 (auth, books, purchases, dashboard) |
 
 ## 技術スタック
 
 | カテゴリ | 技術 |
 |---|---|
 | フロントエンド | Next.js 16, React 19, TypeScript, Tailwind CSS v4, shadcn/ui |
+| アーキテクチャ | Bulletproof React + Cal.com Pattern (Feature-Sliced Design) |
 | 状態管理/API | tRPC, Prisma, Zustand |
 | チャート | Recharts |
 | バックエンド (Go) | gRPC, GORM, マルチDB対応 (Postgres/MySQL/SQLite/SQLServer) |
@@ -132,9 +185,10 @@
 | テスト種別 | 結果 | 詳細 |
 |---|---|---|
 | TypeCheck (tsc --noEmit) | PASS | 0 errors |
-| E2Eスクリーンショット | PASS | 13枚全撮影完了 (8.2s) |
+| Next.js Build | PASS | 16 routes (11 static + 5 dynamic) |
+| E2Eスクリーンショット | PASS | 13枚全撮影完了 (16.6s) |
 | E2E + Unit全体 | PASS | 56+ tests |
-| CI (GitHub Actions) | PASS | lint-and-typecheck + test |
+| CI (GitHub Actions) | 修正済 | Dockerfile: prisma generated client コピー追加 |
 
 ## ファイル構成
 

@@ -16,6 +16,7 @@ RUN npx prisma generate
 FROM base AS builder
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
+COPY --from=deps /app/src/generated ./src/generated
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN npm run build
 
