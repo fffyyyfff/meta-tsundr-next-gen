@@ -20,7 +20,7 @@ export async function parseOrderEmail(
 
   const client = new Anthropic();
   const msg = await client.messages.create({
-    model: "claude-sonnet-4-5-20250514",
+    model: "claude-sonnet-4-6",
     max_tokens: 1024,
     system:
       "ECサイトの注文確認メールから購入情報を抽出。必ずJSON形式で返す。",

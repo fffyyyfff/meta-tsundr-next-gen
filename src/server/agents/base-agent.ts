@@ -56,7 +56,7 @@ export abstract class BaseAgent {
     const message = await withRetry(
       () =>
         this.anthropic.messages.create({
-          model: this.config.model || 'claude-sonnet-4-5-20250514',
+          model: this.config.model || 'claude-sonnet-4-6',
           max_tokens: this.config.maxTokens || 2048,
           system: this.config.systemPrompt,
           messages: [{ role: 'user', content: userMessage }],
