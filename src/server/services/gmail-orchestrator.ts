@@ -6,10 +6,10 @@ import { ItemCategory } from "../../generated/prisma/client";
 
 export interface PreviewItem {
   title: string;
-  price: number;
+  price: number | null;
   source: "amazon" | "rakuten";
-  orderNumber: string;
-  orderDate: string;
+  orderNumber: string | null;
+  orderDate: string | null;
   category: ItemCategory;
   quantity: number;
   gmailMessageId: string;
