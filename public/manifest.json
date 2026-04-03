@@ -1,4 +1,5 @@
 {
+  "id": "/",
   "name": "Meta-tsundr",
   "short_name": "Meta-tsundr",
   "description": "積読管理 & 購入管理アプリ",
@@ -9,5 +10,19 @@
   "icons": [
     { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" },
     { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ],
+  "screenshots": [
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "form_factor": "wide"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "form_factor": "narrow"
+    }
   ]
 }

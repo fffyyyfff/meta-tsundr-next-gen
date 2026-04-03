@@ -38,6 +38,12 @@ export function PageThemeProvider({ children }: { children: React.ReactNode }) {
         document.documentElement.classList.remove('dark');
       }
     } catch {}
+
+    // Register Service Worker
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').catch(() => {});
+    }
+
     setMounted(true);
   }, []);
 
