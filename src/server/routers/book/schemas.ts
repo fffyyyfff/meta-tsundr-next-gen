@@ -36,3 +36,19 @@ export const bookChangeStatusInput = z.object({
   id: z.string(),
   status: BookStatusEnum,
 });
+
+export const bookGetByIdInput = z.object({ id: z.string() });
+
+export const bookDeleteInput = z.object({ id: z.string() });
+
+export const bookRestoreInput = z.object({ id: z.string() });
+
+export const bookLookupIsbnInput = z.object({ isbn: z.string().min(10).max(13) });
+
+export const bookGenerateReviewInput = z.object({ bookId: z.string() });
+
+export const bookSearchExternalInput = z.object({
+  title: z.string().min(1).max(200),
+  availability: z.string().optional(),
+  sort: z.string().optional(),
+});

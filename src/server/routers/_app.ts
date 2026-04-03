@@ -6,9 +6,9 @@ import { historyRouter } from './history';
 import { usageRouter } from './usage';
 import { exportRouter } from './export';
 import { notificationRouter } from './notification';
-import { bookRouter } from './book';
-import { itemRouter } from './item';
-import { gmailRouter } from './gmail';
+import { bookRouter } from './book/_router';
+import { itemRouter } from './item/_router';
+import { gmailRouter } from './gmail/_router';
 
 export const appRouter = router({
   agent: agentRouter,

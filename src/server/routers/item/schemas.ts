@@ -66,3 +66,14 @@ export const itemChangeStatusInput = z.object({
   id: z.string(),
   status: ItemStatusEnum,
 });
+
+export const searchProductInput = z.object({
+  keyword: z.string().min(1).max(200),
+  source: z.enum(['amazon', 'rakuten', 'auto']).default('auto'),
+});
+
+export const getByIdInput = z.object({ id: z.string() });
+
+export const deleteInput = z.object({ id: z.string() });
+
+export const restoreInput = z.object({ id: z.string() });
