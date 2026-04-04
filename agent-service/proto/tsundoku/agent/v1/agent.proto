@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+package tsundoku.agent.v1;
+
+option go_package = "github.com/fffyyyfff/meta-tsundr-next-gen/backend/gen/agent/v1";
+
+service AgentService {
+  rpc ExecuteAgent(ExecuteAgentRequest) returns (ExecuteAgentResponse);
+}
+
+enum AgentType {
+  AGENT_TYPE_UNSPECIFIED = 0;
+  AGENT_TYPE_BOOK_RECOMMEND = 1;
+  AGENT_TYPE_BOOK_REVIEW = 2;
+  AGENT_TYPE_READING_PLAN = 3;
+  AGENT_TYPE_RECEIPT_OCR = 4;
+}
+
+message ExecuteAgentRequest {
+  AgentType agent_type = 1;
+  string prompt = 2;
+  string user_id = 3;
+  map<string, string> context = 4;
+}
+
+message ExecuteAgentResponse {
+  bool success = 1;
+  string result = 2;
+  string error = 3;
+  int32 input_tokens = 4;
+  int32 output_tokens = 5;
+}

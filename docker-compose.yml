@@ -67,6 +67,21 @@ services:
       timeout: 10s
       retries: 3
 
+  agent-service:
+    build:
+      context: ./agent-service
+    ports:
+      - "50052:50052"
+    environment:
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
+      GRPC_PORT: "50052"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import grpc; ch=grpc.insecure_channel('localhost:50052'); grpc.channel_ready_future(ch).result(timeout=5)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
   web:
     build:
       context: .
