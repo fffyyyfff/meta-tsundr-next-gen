@@ -1,28 +1,29 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
-const mockCreate = vi.fn();
+const mockMessagesCreate = vi.fn();
 
+// Mock the receipt-parser module's dependency
 vi.mock('@anthropic-ai/sdk', () => ({
-  __esModule: true,
-  default: vi.fn().mockImplementation(() => ({
-    messages: { create: mockCreate },
-  })),
+  default: class Anthropic {
+    messages = { create: mockMessagesCreate };
+  },
 }));
 
+// Import after mock is registered
 import { parseReceipt } from '@/server/services/receipt-parser';
-import type { ParsedReceipt } from '@/server/services/receipt-parser';
 
 describe('parseReceipt', () => {
-  const originalEnv = process.env.ANTHROPIC_API_KEY;
+  let savedApiKey: string | undefined;
 
   beforeEach(() => {
     vi.clearAllMocks();
+    savedApiKey = process.env.ANTHROPIC_API_KEY;
     process.env.ANTHROPIC_API_KEY = 'test-key';
   });
 
   afterEach(() => {
-    if (originalEnv !== undefined) {
-      process.env.ANTHROPIC_API_KEY = originalEnv;
+    if (savedApiKey !== undefined) {
+      process.env.ANTHROPIC_API_KEY = savedApiKey;
     } else {
       delete process.env.ANTHROPIC_API_KEY;
     }
@@ -30,15 +31,13 @@ describe('parseReceipt', () => {
 
   it('returns null when ANTHROPIC_API_KEY not set', async () => {
     delete process.env.ANTHROPIC_API_KEY;
-
     const result = await parseReceipt('base64data', 'image/jpeg');
-
     expect(result).toBeNull();
-    expect(mockCreate).not.toHaveBeenCalled();
+    expect(mockMessagesCreate).not.toHaveBeenCalled();
   });
 
   it('parses valid receipt response', async () => {
-    const receipt: ParsedReceipt = {
+    const receipt = {
       storeName: 'セブンイレブン',
       items: [
         { title: 'おにぎり', price: 150, quantity: 2 },
@@ -49,12 +48,11 @@ describe('parseReceipt', () => {
       paymentMethod: '現金',
     };
 
-    mockCreate.mockResolvedValue({
-      content: [{ type: 'text', text: JSON.stringify(receipt) }],
+    mockMessagesCreate.mockResolvedValue({
+      content: [{ type: 'text' as const, text: JSON.stringify(receipt) }],
     });
 
     const result = await parseReceipt('base64data', 'image/jpeg');
-
     expect(result).toEqual(receipt);
     expect(result?.storeName).toBe('セブンイレブン');
     expect(result?.items).toHaveLength(2);
@@ -62,22 +60,20 @@ describe('parseReceipt', () => {
   });
 
   it('handles malformed JSON response', async () => {
-    mockCreate.mockResolvedValue({
-      content: [{ type: 'text', text: 'This is not valid JSON at all' }],
+    mockMessagesCreate.mockResolvedValue({
+      content: [{ type: 'text' as const, text: 'This is not valid JSON at all' }],
     });
 
     const result = await parseReceipt('base64data', 'image/jpeg');
-
     expect(result).toBeNull();
   });
 
   it('returns null when content type is not text', async () => {
-    mockCreate.mockResolvedValue({
-      content: [{ type: 'tool_use', id: 'x', name: 'tool', input: {} }],
+    mockMessagesCreate.mockResolvedValue({
+      content: [{ type: 'tool_use' as const, id: 'x', name: 'tool', input: {} }],
     });
 
     const result = await parseReceipt('base64data', 'image/png');
-
     expect(result).toBeNull();
   });
 });
