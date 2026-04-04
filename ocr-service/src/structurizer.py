@@ -32,20 +32,29 @@ def structurize(ocr_lines: list[OcrLine]) -> dict[str, Any] | None:
 
     client = anthropic.Anthropic(api_key=api_key)
     msg = client.messages.create(
-        model="claude-haiku-4-5-20251001",
+        model=os.environ.get("OCR_MODEL", "claude-sonnet-4-6"),
         max_tokens=1024,
         system=(
-            "レシートOCR結果から購入情報をJSON形式で抽出するアシスタントです。"
-            "JSON以外のテキストは一切返さないでください。"
-            "価格は税込の数値（カンマなし）、日付はYYYY-MM-DD形式で返してください。"
+            "レシートOCR結果から購入情報をJSON形式で抽出するアシスタントです。\n"
+            "重要なルール:\n"
+            "1. JSON以外のテキストは一切返さないでください\n"
+            "2. 価格は税込の数値（カンマなし）\n"
+            "3. 日付はYYYY-MM-DD形式\n"
+            "4. OCRの誤認識を文脈から推測して補正してください。例:\n"
+            "   - 'ガイト'→'ガイド', 'エーシ'→'エージェント'\n"
+            "   - 半角カナ・濁点抜け・文字化けを正しい日本語に補正\n"
+            "   - ISBNコード(978...)が近くにある場合、それを元に正確な書籍名を推測\n"
+            "5. 商品名は完全な正式名称で出力（省略しない）\n"
+            "6. カテゴリが書籍の場合、ISBN番号もmetadataに含めてください"
         ),
         messages=[
             {
                 "role": "user",
                 "content": (
-                    f"以下のレシートOCRテキストから購入情報を抽出してください:\n\n"
-                    f"{text}\n\n"
-                    f'JSON形式: {{"storeName":"店舗名","items":[{{"title":"商品名",'
+                    f"以下のレシートOCRテキストから購入情報を抽出してください。\n"
+                    f"OCRの文字認識誤りがある可能性があるので、文脈から正しい商品名を推測して補正してください。\n\n"
+                    f"--- OCRテキスト ---\n{text}\n--- ここまで ---\n\n"
+                    f'JSON形式: {{"storeName":"店舗名","items":[{{"title":"正確な商品名（OCR誤認識を補正）",'
                     f'"price":数値,"quantity":数値}}],"totalAmount":合計金額数値,'
                     f'"purchaseDate":"YYYY-MM-DD"}}'
                 ),
