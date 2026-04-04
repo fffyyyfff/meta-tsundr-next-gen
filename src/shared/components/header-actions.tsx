@@ -3,6 +3,7 @@
 import { useState, useCallback } from "react";
 import { NotificationBell } from "@/shared/components/notification-bell";
 import { ThemeToggle } from "@/shared/components/theme-toggle";
+import { LanguageToggle } from "@/shared/components/language-toggle";
 import { FullscreenMenu } from "@/shared/components/fullscreen-menu";
 
 export function HeaderActions() {
@@ -15,6 +16,7 @@ export function HeaderActions() {
       <div className="flex items-center gap-1">
         <NotificationBell />
         <ThemeToggle />
+        <LanguageToggle />
         <button
           onClick={() => setMenuOpen((prev) => !prev)}
           className="relative ml-1 flex size-9 flex-col items-center justify-center gap-[5px] rounded-md transition-colors hover:bg-accent"

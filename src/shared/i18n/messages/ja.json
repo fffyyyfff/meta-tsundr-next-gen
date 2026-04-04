@@ -1,0 +1,50 @@
+{
+  "nav": {
+    "home": "ホーム",
+    "books": "積読管理",
+    "purchases": "購入管理",
+    "stats": "統計",
+    "wishlist": "ウィッシュリスト",
+    "dashboard": "AIダッシュボード",
+    "purchaseStats": "購入統計",
+    "bookStats": "読書統計"
+  },
+  "books": {
+    "title": "積読管理",
+    "addBook": "書籍を追加",
+    "status": {
+      "unread": "積読",
+      "reading": "読書中",
+      "finished": "読了",
+      "onHold": "中断",
+      "dropped": "中止"
+    },
+    "search": "タイトル・著者で検索...",
+    "noBooks": "まだ書籍が登録されていません",
+    "stats": "統計",
+    "share": "共有"
+  },
+  "purchases": {
+    "title": "購入管理",
+    "addItem": "追加",
+    "sync": "同期",
+    "scan": "レシート",
+    "voice": "音声",
+    "enrichImages": "画像を補完",
+    "priceCheck": "価格チェック",
+    "search": "タイトル・メーカーで検索...",
+    "noItems": "まだアイテムが登録されていません"
+  },
+  "common": {
+    "save": "保存",
+    "cancel": "キャンセル",
+    "delete": "削除",
+    "edit": "編集",
+    "search": "検索",
+    "back": "戻る",
+    "loading": "読み込み中...",
+    "noResults": "結果がありません",
+    "confirm": "確認",
+    "close": "閉じる"
+  }
+}

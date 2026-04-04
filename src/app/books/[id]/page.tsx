@@ -12,6 +12,7 @@ import { Button } from '@/shared/ui/button';
 import { Skeleton } from '@/shared/ui/skeleton';
 import { ArrowLeftIcon, PencilIcon, TrashIcon, BookOpenIcon, BookCheckIcon, BookMarkedIcon, ShareIcon } from 'lucide-react';
 import { AiReview } from '@/features/books/components/ai-book-features';
+import { ReadingTimer } from '@/features/books/components/reading-timer';
 
 function StarDisplay({ rating }: { rating: number | null | undefined }) {
   if (!rating) return <span className="text-sm text-muted-foreground">未評価</span>;
@@ -191,6 +192,9 @@ export default function BookDetailPage({ params }: { params: Promise<{ id: strin
           </div>
         </CardContent>
       </Card>
+
+      {/* Reading Timer */}
+      {book.status === 'READING' && <ReadingTimer bookId={book.id} />}
 
       {/* AI Review */}
       <AiReview bookId={book.id} />

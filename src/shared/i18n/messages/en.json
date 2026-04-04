@@ -1,0 +1,50 @@
+{
+  "nav": {
+    "home": "Home",
+    "books": "Reading List",
+    "purchases": "Purchases",
+    "stats": "Statistics",
+    "wishlist": "Wishlist",
+    "dashboard": "AI Dashboard",
+    "purchaseStats": "Purchase Stats",
+    "bookStats": "Reading Stats"
+  },
+  "books": {
+    "title": "Reading List",
+    "addBook": "Add Book",
+    "status": {
+      "unread": "Unread",
+      "reading": "Reading",
+      "finished": "Finished",
+      "onHold": "On Hold",
+      "dropped": "Dropped"
+    },
+    "search": "Search by title or author...",
+    "noBooks": "No books registered yet",
+    "stats": "Statistics",
+    "share": "Share"
+  },
+  "purchases": {
+    "title": "Purchases",
+    "addItem": "Add",
+    "sync": "Sync",
+    "scan": "Receipt",
+    "voice": "Voice",
+    "enrichImages": "Enrich Images",
+    "priceCheck": "Price Check",
+    "search": "Search by title or brand...",
+    "noItems": "No items registered yet"
+  },
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "search": "Search",
+    "back": "Back",
+    "loading": "Loading...",
+    "noResults": "No results",
+    "confirm": "Confirm",
+    "close": "Close"
+  }
+}

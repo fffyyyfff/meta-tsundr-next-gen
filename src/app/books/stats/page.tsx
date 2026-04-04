@@ -1,8 +1,10 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { trpcReact } from '@/shared/lib/trpc-provider';
 import { StatCard, StatusPieChart, MonthlyBarChart } from '@/features/books/components/reading-stats';
+import { getReadingTimeStats, formatTime } from '@/features/books/components/reading-timer';
 import { Skeleton } from '@/shared/ui/skeleton';
 import { Button } from '@/shared/ui/button';
 import { ArrowLeftIcon } from 'lucide-react';
@@ -12,6 +14,17 @@ const MONTHLY_GOAL = 5;
 export default function BookStatsPage() {
   const statsQuery = trpcReact.book.stats.useQuery();
   const analyticsQuery = trpcReact.book.readingAnalytics.useQuery();
+
+  const [readingTime, setReadingTime] = useState<{
+    todaySeconds: number;
+    weekSeconds: number;
+    monthSeconds: number;
+    totalSeconds: number;
+  } | null>(null);
+
+  useEffect(() => {
+    setReadingTime(getReadingTimeStats());
+  }, []);
 
   const isLoading = statsQuery.isLoading || analyticsQuery.isLoading;
 
@@ -57,6 +70,19 @@ export default function BookStatsPage() {
           一覧に戻る
         </Button>
       </div>
+
+      {/* Reading time */}
+      {readingTime && (
+        <div className="space-y-2">
+          <h2 className="text-sm font-medium text-muted-foreground">読書時間</h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <StatCard label="今日" value={formatTime(readingTime.todaySeconds)} />
+            <StatCard label="今週" value={formatTime(readingTime.weekSeconds)} />
+            <StatCard label="今月" value={formatTime(readingTime.monthSeconds)} />
+            <StatCard label="累計" value={formatTime(readingTime.totalSeconds)} />
+          </div>
+        </div>
+      )}
 
       {/* Summary cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

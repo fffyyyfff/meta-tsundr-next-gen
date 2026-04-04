@@ -8,6 +8,7 @@ import { SkipNav } from "@/shared/components/skip-nav";
 import { KeyboardShortcutsHelp } from "@/shared/components/keyboard-shortcuts-help";
 import { PageThemeProvider } from "@/shared/components/page-theme-provider";
 import { SentryInit } from "@/shared/components/sentry-init";
+import { I18nProvider } from "@/shared/i18n/provider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -45,17 +46,19 @@ export default function RootLayout({
         <SkipNav />
         <TRPCProvider>
           <PageThemeProvider>
-            <SentryInit />
-            <Sidebar />
-            <div className="flex flex-1 flex-col min-w-0">
-              <header className="flex items-center justify-end border-b border-border px-6 py-3 md:pl-4" role="banner">
-                <HeaderActions />
-              </header>
-              <main id="main-content" className="flex-1">
-                {children}
-              </main>
-            </div>
-            <KeyboardShortcutsHelp />
+            <I18nProvider>
+              <SentryInit />
+              <Sidebar />
+              <div className="flex flex-1 flex-col min-w-0">
+                <header className="flex items-center justify-end border-b border-border px-6 py-3 md:pl-4" role="banner">
+                  <HeaderActions />
+                </header>
+                <main id="main-content" className="flex-1">
+                  {children}
+                </main>
+              </div>
+              <KeyboardShortcutsHelp />
+            </I18nProvider>
           </PageThemeProvider>
         </TRPCProvider>
       </body>
