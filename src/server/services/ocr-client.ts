@@ -1,3 +1,6 @@
+import { createLogger } from "@/shared/lib/logger";
+
+const log = createLogger("ocr-client");
 const OCR_SERVICE_URL = process.env.OCR_SERVICE_URL || "http://localhost:8100";
 
 interface OcrResult {
@@ -19,7 +22,7 @@ export async function scanWithOcr(
     const formData = new FormData();
     formData.append("image", blob, `receipt.${ext}`);
 
-    console.log(`[OCR Client] Sending to ${OCR_SERVICE_URL}/api/ocr/scan, size=${buffer.length}`);
+    log.info("Sending scan request", { url: `${OCR_SERVICE_URL}/api/ocr/scan`, size: buffer.length });
 
     const response = await fetch(`${OCR_SERVICE_URL}/api/ocr/scan`, {
       method: "POST",
@@ -27,19 +30,16 @@ export async function scanWithOcr(
       signal: AbortSignal.timeout(60_000),
     });
 
-    console.log(`[OCR Client] Response status: ${response.status}`);
-
     if (!response.ok) {
-      const text = await response.text().catch(() => '');
-      console.error(`[OCR Client] Error response: ${text}`);
+      log.warn("OCR service returned error", { status: response.status });
       return null;
     }
 
     const data = (await response.json()) as OcrResult;
-    console.log(`[OCR Client] Success: ${data.items?.length ?? 0} items`);
+    log.info("Scan completed", { itemCount: data.items?.length ?? 0 });
     return data;
   } catch (err) {
-    console.error(`[OCR Client] Error:`, err instanceof Error ? err.message : err);
+    log.error("Scan failed", { error: err instanceof Error ? err.message : String(err) });
     return null;
   }
 }
