@@ -2,7 +2,7 @@
 
 **日付**: 2026-04-05
 **プロジェクト**: meta-tsundr-next-gen
-**レポート種別**: 全機能証跡レポート (再キャプチャ)
+**レポート種別**: 全機能証跡レポート (再キャプチャ v2)
 
 ---
 
@@ -10,12 +10,12 @@
 
 | 項目 | 値 |
 |---|---|
-| ソースファイル数 (src/) | 205 |
-| TypeScript/TSXファイル数 | 202 |
-| 総行数 (TS/TSX) | 37,955 |
+| ソースファイル数 (src/) | 214 |
+| TypeScript/TSXファイル数 | 215 |
+| 総行数 (TS/TSX) | 38,357 |
 | ページ数 | 14 |
-| APIルート数 | 7 (health, trpc, auth, google-auth, gmail-callback, agent-stream, test-error) |
-| Gitコミット数 | 130 |
+| APIルート数 | 8 (health, trpc, auth, google-auth, gmail-callback, agent-stream, test-error, og/book) |
+| Gitコミット数 | 135 |
 | TypeScriptエラー | 0 |
 | Feature モジュール | 4 (auth, books, purchases, dashboard) |
 
@@ -45,6 +45,7 @@
 - ステータス管理 (UNREAD/READING/FINISHED)
 - 読書統計ダッシュボード (Recharts PieChart/BarChart)
 - AI書籍機能（おすすめ/書評/読書計画）
+- SNS共有カード（OGP画像生成 + X共有 + URLコピー + 画像DL）
 - Redisキャッシュ対応
 
 ### 購入管理 (Purchases/Items)
@@ -56,7 +57,7 @@
 - 購入統計ダッシュボード（カテゴリ別、月別、ソース別）
 - 画像自動エンリッチメント（商品画像の自動取得・補完）
 - レシートスキャン（AI解析 / OCR解析 切替）
-- 音声入力による商品登録
+- 音声入力登録 (Web Speech API + Claude AI intent parsing)
 - ソフトデリート/リストア
 - Redisキャッシュ対応
 
@@ -72,6 +73,7 @@
 ### レシートスキャン / OCR
 - AI解析モード: Claude Visionによる高精度解析
 - OCR解析モード: PaddleOCR + Haikuによる高速解析
+- OCR service (PaddleOCR microservice)
 - モード切替UI（タブ形式）
 - セキュリティポリシー準拠（メモリ処理のみ、クレカ番号マスキング）
 
@@ -176,16 +178,18 @@
 | テスト種別 | 結果 | 詳細 |
 |---|---|---|
 | TypeCheck (tsc --noEmit) | PASS | 0 errors |
-| E2Eスクリーンショット | PASS | 13枚全撮影完了 (10.0s) |
+| E2Eスクリーンショット | PASS | 13枚全撮影完了 (11.9s) |
 | Playwright テスト | 13 passed | 0 failed |
 
 ---
 
 ## 最近の変更点
 
+- **SNS共有カード (OGP)**: next/og ImageResponseによるOGP画像生成、X共有・URLコピー・画像DL対応の共有ダイアログ
+- **音声入力登録**: Web Speech API + Claude AI intent parsingによる音声→テキスト→商品情報抽出→自動登録
+- **OCR service**: PaddleOCR microservice連携
 - **Sentry統合**: @sentry/nextjsによるエラーモニタリング追加、ErrorBoundaryからの自動送信
 - **Python Agent gRPC**: 書籍レコメンド・書評生成エージェント（Claude Haiku）、Proto定義
-- **音声入力機能**: Web Speech APIによる音声→テキスト→Claude AIで商品情報抽出→自動登録
 - **レシートOCR統合**: AI解析/OCR解析モード切替UI、PaddleOCRサービス連携
 - **画像エンリッチメント機能**: 購入商品の画像を外部APIから自動取得・補完する機能を追加
 - **ハンドラー分離リファクタリング**: Cal.com pattern に基づきルーターからハンドラーを分離
