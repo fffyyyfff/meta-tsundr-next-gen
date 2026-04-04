@@ -19,7 +19,7 @@ def get_ocr() -> PaddleOCR:
     """Lazy-initialize PaddleOCR with Japanese language support."""
     global _ocr
     if _ocr is None:
-        _ocr = PaddleOCR(lang="japan", use_gpu=False)
+        _ocr = PaddleOCR(lang="japan")
     return _ocr
 
 
