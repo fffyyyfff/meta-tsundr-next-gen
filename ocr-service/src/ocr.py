@@ -47,11 +47,36 @@ def extract_text(image_bytes: bytes) -> list[OcrLine]:
     result = get_ocr().ocr(img_array)
 
     lines: list[OcrLine] = []
-    if result and result[0]:
-        for line in result[0]:
-            text = line[1][0]
-            confidence = float(line[1][1])
-            if confidence > 0.3:  # Filter low-confidence results
-                lines.append({"text": text, "confidence": confidence})
+    if result:
+        for page in result:
+            if not page:
+                continue
+            for line in page:
+                try:
+                    # PaddleOCR returns various formats depending on version
+                    if isinstance(line, dict):
+                        # New format: {"text": ..., "score": ...}
+                        text = str(line.get("text", line.get("rec_text", "")))
+                        confidence = float(line.get("score", line.get("rec_score", 0.0)))
+                    elif isinstance(line, (list, tuple)) and len(line) >= 2:
+                        rec = line[1]
+                        if isinstance(rec, (list, tuple)) and len(rec) >= 2:
+                            text = str(rec[0])
+                            confidence = float(rec[1])
+                        elif isinstance(rec, str):
+                            text = rec
+                            confidence = 1.0
+                        elif isinstance(rec, dict):
+                            text = str(rec.get("text", rec.get("rec_text", "")))
+                            confidence = float(rec.get("score", rec.get("rec_score", 0.0)))
+                        else:
+                            continue
+                    else:
+                        continue
+
+                    if text and confidence > 0.3:
+                        lines.append({"text": text, "confidence": confidence})
+                except (IndexError, TypeError, ValueError):
+                    continue
 
     return lines
