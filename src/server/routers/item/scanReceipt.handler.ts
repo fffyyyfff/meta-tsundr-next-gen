@@ -1,8 +1,10 @@
 import { parseReceipt } from "../../services/receipt-parser";
+import { scanWithOcr } from "../../services/ocr-client";
 
 interface ScanReceiptInput {
   image: string;
   mimeType: string;
+  mode?: "ai" | "ocr";
 }
 
 const CATEGORY_KEYWORDS: Record<string, string[]> = {
@@ -28,6 +30,38 @@ export async function scanReceiptHandler({
 }: {
   input: ScanReceiptInput;
 }) {
+  const mode = input.mode ?? "ai";
+
+  if (mode === "ocr") {
+    const ocrResult = await scanWithOcr(input.image, input.mimeType);
+
+    if (!ocrResult) {
+      return {
+        storeName: null,
+        items: [],
+        totalAmount: 0,
+        purchaseDate: null,
+        error: "OCRサービスに接続できません。docker compose up ocr-service を実行してください。",
+      };
+    }
+
+    const items = ocrResult.items.map((item) => ({
+      title: item.title,
+      price: item.price,
+      quantity: item.quantity,
+      category: inferCategory(item.title),
+    }));
+
+    return {
+      storeName: ocrResult.storeName,
+      items,
+      totalAmount: ocrResult.totalAmount,
+      purchaseDate: ocrResult.purchaseDate,
+      error: null,
+    };
+  }
+
+  // mode === "ai"
   const parsed = await parseReceipt(input.image, input.mimeType);
 
   if (!parsed) {

@@ -27,6 +27,7 @@ const enrichImageInput = z.object({ id: z.string() });
 const scanReceiptInput = z.object({
   image: z.string(),
   mimeType: z.enum(['image/jpeg', 'image/png', 'image/webp']),
+  mode: z.enum(['ai', 'ocr']).default('ai'),
 });
 
 export const itemRouter = router({

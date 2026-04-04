@@ -83,11 +83,17 @@ tasks:
     cmds:
       - go test ./...
 
+  # === OCR ===
+  ocr:run:
+    desc: OCRサービス起動（PaddleOCR + Haiku）
+    cmds:
+      - docker compose up -d ocr-service
+
   # === Docker ===
   docker:up:
-    desc: Docker Compose でインフラ起動（PostgreSQL + Qdrant）
+    desc: Docker Compose でインフラ起動（PostgreSQL + Valkey）
     cmds:
-      - docker compose up -d postgres qdrant
+      - docker compose up -d postgres valkey
 
   docker:up:go:
     desc: Docker Compose PostgreSQL + Go バックエンド起動

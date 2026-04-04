@@ -20,6 +20,8 @@ import {
   Loader2Icon,
   CheckCircleIcon,
   XIcon,
+  SparklesIcon,
+  ScanLineIcon,
 } from "lucide-react";
 
 type ItemCategory =
@@ -51,6 +53,8 @@ function getCategoryLabel(cat: string): string {
   return labels[cat] ?? cat;
 }
 
+type ScanMode = "ai" | "ocr";
+
 export function ReceiptScanner() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
@@ -58,6 +62,7 @@ export function ReceiptScanner() {
   const [imageBase64, setImageBase64] = useState<string | null>(null);
   const [imageMimeType, setImageMimeType] = useState<string>("image/jpeg");
   const [isDragging, setIsDragging] = useState(false);
+  const [scanMode, setScanMode] = useState<ScanMode>("ai");
 
   const [scannedItems, setScannedItems] = useState<ScannedItem[]>([]);
   const [storeName, setStoreName] = useState<string | null>(null);
@@ -134,8 +139,9 @@ export function ReceiptScanner() {
     scanMutation.mutate({
       image: imageBase64,
       mimeType: imageMimeType as "image/jpeg" | "image/png" | "image/webp",
+      mode: scanMode,
     });
-  }, [imageBase64, imageMimeType, scanMutation]);
+  }, [imageBase64, imageMimeType, scanMode, scanMutation]);
 
   const handleClear = useCallback(() => {
     setImagePreview(null);
@@ -196,6 +202,37 @@ export function ReceiptScanner() {
 
   return (
     <div className="space-y-6">
+      {/* Scan mode selector */}
+      <div className="flex gap-2 rounded-lg bg-muted p-1">
+        <button
+          onClick={() => setScanMode("ai")}
+          className={`flex flex-1 items-center justify-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
+            scanMode === "ai"
+              ? "bg-background text-foreground shadow-sm"
+              : "text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          <SparklesIcon className="size-4" />
+          AI解析
+        </button>
+        <button
+          onClick={() => setScanMode("ocr")}
+          className={`flex flex-1 items-center justify-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
+            scanMode === "ocr"
+              ? "bg-background text-foreground shadow-sm"
+              : "text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          <ScanLineIcon className="size-4" />
+          OCR解析
+        </button>
+      </div>
+      <p className="text-center text-xs text-muted-foreground">
+        {scanMode === "ai"
+          ? "Claude Vision で高精度解析（有料・3〜10秒）"
+          : "PaddleOCR で高速解析（無料・要 Docker）"}
+      </p>
+
       {/* Upload area */}
       {!imagePreview ? (
         <div
@@ -288,9 +325,16 @@ export function ReceiptScanner() {
             </div>
 
             {scanMutation.data?.error && (
-              <p className="mt-4 text-center text-sm text-destructive">
-                {scanMutation.data.error}
-              </p>
+              <div className="mt-4 text-center">
+                <p className="text-sm text-destructive">
+                  {scanMutation.data.error}
+                </p>
+                {scanMode === "ocr" && scanMutation.data.error.includes("OCR") && (
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    docker compose up ocr-service を実行してください
+                  </p>
+                )}
+              </div>
             )}
 
             {scanMutation.isSuccess &&

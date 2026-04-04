@@ -55,6 +55,21 @@ services:
       retries: 5
       start_period: 10s
 
+  ocr-service:
+    build:
+      context: ./ocr-service
+      dockerfile: Dockerfile
+    ports:
+      - "8100:8100"
+    environment:
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8100/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
   web:
     build:
       context: .
