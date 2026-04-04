@@ -46,6 +46,19 @@ def extract_text(image_bytes: bytes) -> list[OcrLine]:
     img_array = np.array(img)
     result = get_ocr().ocr(img_array)
 
+    # Debug: log raw result structure
+    print(f"[OCR Debug] result type: {type(result)}")
+    if result:
+        print(f"[OCR Debug] result length: {len(result)}")
+        if len(result) > 0:
+            first = result[0]
+            print(f"[OCR Debug] first element type: {type(first)}")
+            if first and len(first) > 0:
+                print(f"[OCR Debug] first item type: {type(first[0])}")
+                print(f"[OCR Debug] first item: {str(first[0])[:200]}")
+    else:
+        print(f"[OCR Debug] result is falsy: {result}")
+
     lines: list[OcrLine] = []
     if result:
         for page in result:
