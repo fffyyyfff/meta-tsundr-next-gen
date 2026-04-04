@@ -52,11 +52,13 @@ export default function PurchasesPage() {
     setActiveCategory, setActiveStatus, setSearchQuery, setSortBy, setSortOrder,
   } = useItemStore();
 
-  // Apply URL params on mount
+  // Apply URL params on mount — reset if no status param
   useEffect(() => {
     const urlStatus = searchParams.get('status');
     if (urlStatus && STATUS_FILTERS.some((f) => f.value === urlStatus)) {
       setActiveStatus(urlStatus as ItemStatus);
+    } else {
+      setActiveStatus(null);
     }
   }, [searchParams, setActiveStatus]);
 
