@@ -47,6 +47,10 @@ async def scan_receipt(image: UploadFile):
     # OCR extraction (in-memory, no disk write)
     lines = extract_text(data)
 
+    print(f"[OCR] Extracted {len(lines)} lines")
+    for i, line in enumerate(lines[:5]):
+        print(f"[OCR] Line {i}: {line['text']} (conf: {line['confidence']:.2f})")
+
     if not lines:
         return {
             "storeName": None,
@@ -60,6 +64,8 @@ async def scan_receipt(image: UploadFile):
 
     # Structurize with Claude Haiku
     result = structurize(lines)
+
+    print(f"[OCR] Structurize result: {result}")
 
     ocr_text = "\n".join(line["text"] for line in lines)
 
