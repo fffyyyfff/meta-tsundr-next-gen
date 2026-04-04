@@ -1,13 +1,13 @@
 """PaddleOCR wrapper for receipt text extraction."""
 
 import io
+import logging
 import os
+import tempfile
 from typing import TypedDict
 
-import numpy as np
-from PIL import Image, ImageEnhance
-
 _ocr = None
+logger = logging.getLogger(__name__)
 
 
 class OcrLine(TypedDict):
@@ -16,75 +16,76 @@ class OcrLine(TypedDict):
 
 
 def get_ocr():
-    """Lazy-initialize PaddleOCR."""
+    """Lazy-initialize PaddleOCR with Japanese support."""
     global _ocr
     if _ocr is None:
         from paddleocr import PaddleOCR
 
-        # PP-OCRv5 has native multilingual support (ja/en/zh in single model)
-        # No lang or ocr_version needed - v5 handles all languages
         _ocr = PaddleOCR(
-            use_doc_orientation_classify=False,
-            use_doc_unwarping=False,
-            use_textline_orientation=False,
+            use_angle_cls=True,
+            lang="japan",
+            use_gpu=False,
         )
     return _ocr
 
 
 def extract_text(image_bytes: bytes) -> list[OcrLine]:
-    """Extract text lines from receipt image using PaddleOCR v3+ predict() API."""
-    img = Image.open(io.BytesIO(image_bytes))
+    """Extract text lines from receipt image.
 
-    if img.mode != "RGB":
-        img = img.convert("RGB")
-
-    # Enhance contrast for thermal paper receipts
-    enhancer = ImageEnhance.Contrast(img)
-    img = enhancer.enhance(1.5)
-    enhancer = ImageEnhance.Sharpness(img)
-    img = enhancer.enhance(1.3)
-
-    # Save to temp file (PaddleOCR v3+ predict() works best with file path)
-    import tempfile
-
-    with tempfile.NamedTemporaryFile(suffix=".jpg", delete=False) as tmp:
-        img.save(tmp, format="JPEG", quality=95)
-        tmp_path = tmp.name
-
+    Returns list of {text, confidence} dicts.
+    Returns empty list on any failure.
+    """
     try:
-        result = get_ocr().predict(input=tmp_path)
+        from PIL import Image, ImageEnhance
 
-        lines: list[OcrLine] = []
+        img = Image.open(io.BytesIO(image_bytes))
 
-        for res in result:
-            # PaddleOCR v3+ returns objects with rec_texts and rec_scores attributes
-            rec_texts = getattr(res, "rec_texts", None)
-            rec_scores = getattr(res, "rec_scores", None)
+        if img.mode != "RGB":
+            img = img.convert("RGB")
 
-            if rec_texts and rec_scores:
-                for text, score in zip(rec_texts, rec_scores):
-                    score_val = float(score)
-                    if text and score_val > 0.3:
-                        lines.append({"text": str(text), "confidence": score_val})
-                continue
+        # Enhance contrast for thermal paper receipts
+        enhancer = ImageEnhance.Contrast(img)
+        img = enhancer.enhance(1.5)
+        enhancer = ImageEnhance.Sharpness(img)
+        img = enhancer.enhance(1.3)
 
-            # Fallback: try dict-like access
-            if isinstance(res, dict):
-                texts = res.get("rec_texts", res.get("rec_text", []))
-                scores = res.get("rec_scores", res.get("rec_score", []))
-                if isinstance(texts, str):
-                    texts = [texts]
-                    scores = [scores]
-                for text, score in zip(texts, scores):
-                    score_val = float(score)
-                    if text and score_val > 0.3:
-                        lines.append({"text": str(text), "confidence": score_val})
+        # Save to temp file for PaddleOCR
+        with tempfile.NamedTemporaryFile(suffix=".jpg", delete=False) as tmp:
+            img.save(tmp, format="JPEG", quality=95)
+            tmp_path = tmp.name
 
-        print(f"[OCR] Extracted {len(lines)} lines from image")
-        for i, line in enumerate(lines[:5]):
-            print(f"[OCR] Line {i}: {line['text'][:50]} (conf: {line['confidence']:.2f})")
+        try:
+            result = get_ocr().ocr(tmp_path, cls=True)
 
-        return lines
+            lines: list[OcrLine] = []
 
-    finally:
-        os.unlink(tmp_path)
+            if not result or not result[0]:
+                return lines
+
+            for line_info in result[0]:
+                # PaddleOCR ocr() returns [[box, (text, confidence)], ...]
+                if len(line_info) >= 2:
+                    text_info = line_info[1]
+                    if isinstance(text_info, (list, tuple)) and len(text_info) >= 2:
+                        text = str(text_info[0])
+                        confidence = float(text_info[1])
+                        if text and confidence > 0.3:
+                            lines.append({"text": text, "confidence": confidence})
+
+            logger.info("[OCR] Extracted %d lines from image", len(lines))
+            for i, line in enumerate(lines[:5]):
+                logger.info(
+                    "[OCR] Line %d: %s (conf: %.2f)",
+                    i,
+                    line["text"][:50],
+                    line["confidence"],
+                )
+
+            return lines
+
+        finally:
+            os.unlink(tmp_path)
+
+    except Exception:
+        logger.exception("[OCR] Failed to extract text")
+        return []

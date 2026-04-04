@@ -32,7 +32,7 @@ def structurize(ocr_lines: list[OcrLine]) -> dict[str, Any] | None:
 
     client = anthropic.Anthropic(api_key=api_key)
     msg = client.messages.create(
-        model=os.environ.get("OCR_MODEL", "claude-sonnet-4-6"),
+        model=os.environ.get("OCR_MODEL", "claude-haiku-4-5-20251001"),
         max_tokens=1024,
         system=(
             "レシートOCR結果から購入情報をJSON形式で抽出するアシスタントです。\n"

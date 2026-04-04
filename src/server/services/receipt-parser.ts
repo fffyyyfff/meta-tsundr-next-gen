@@ -16,7 +16,62 @@ export interface ParsedReceipt {
 
 type ImageMediaType = "image/jpeg" | "image/png" | "image/gif" | "image/webp";
 
-export async function parseReceipt(
+const OCR_SERVICE_URL =
+  process.env.OCR_SERVICE_URL || "http://localhost:8100";
+
+/**
+ * Parse receipt using PaddleOCR microservice (primary method).
+ * Converts base64 image to multipart form data and sends to OCR service.
+ */
+export async function parseReceiptWithOcr(
+  imageBase64: string,
+  mimeType: string
+): Promise<ParsedReceipt | null> {
+  try {
+    const buffer = Buffer.from(imageBase64, "base64");
+    const ext = mimeType.split("/")[1] || "jpeg";
+    const blob = new Blob([buffer], { type: mimeType });
+
+    const formData = new FormData();
+    formData.append("image", blob, `receipt.${ext}`);
+
+    const response = await fetch(`${OCR_SERVICE_URL}/api/ocr/scan`, {
+      method: "POST",
+      body: formData,
+      signal: AbortSignal.timeout(60_000),
+    });
+
+    if (!response.ok) {
+      return null;
+    }
+
+    const data = (await response.json()) as {
+      storeName: string | null;
+      items: ParsedReceiptItem[];
+      totalAmount: number;
+      purchaseDate: string | null;
+      error: string | null;
+    };
+
+    if (data.error || !data.storeName) {
+      return null;
+    }
+
+    return {
+      storeName: data.storeName,
+      items: data.items,
+      totalAmount: data.totalAmount,
+      purchaseDate: data.purchaseDate ?? "",
+    };
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Parse receipt using Claude Vision API (fallback method).
+ */
+async function parseReceiptWithVision(
   imageBase64: string,
   mimeType: string
 ): Promise<ParsedReceipt | null> {
@@ -57,4 +112,19 @@ export async function parseReceipt(
   } catch {
     return null;
   }
+}
+
+/**
+ * Parse receipt: tries OCR service first, falls back to Claude Vision.
+ */
+export async function parseReceipt(
+  imageBase64: string,
+  mimeType: string
+): Promise<ParsedReceipt | null> {
+  // Primary: PaddleOCR microservice
+  const ocrResult = await parseReceiptWithOcr(imageBase64, mimeType);
+  if (ocrResult) return ocrResult;
+
+  // Fallback: Claude Vision API
+  return parseReceiptWithVision(imageBase64, mimeType);
 }

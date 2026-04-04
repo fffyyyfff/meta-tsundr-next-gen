@@ -36,6 +36,7 @@ export function BookCover({ title, imageUrl, width = 96, height = 128, className
         alt={`${title} の表紙`}
         width={width}
         height={height}
+        sizes={`(max-width: 768px) ${width}px, ${width}px`}
         className={`rounded-md object-cover ${className ?? ''}`}
         loading="eager"
         style={{ width, height }}

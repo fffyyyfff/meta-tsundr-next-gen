@@ -95,6 +95,7 @@ export function ItemCard({ item, onStatusChange, onDelete }: ItemCardProps) {
               alt={item.title}
               width={64}
               height={96}
+              sizes="(max-width: 768px) 64px, 64px"
               className="rounded-md object-cover"
               style={{ width: 64, height: 96 }}
             />

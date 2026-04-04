@@ -1,8 +1,22 @@
-import { AgentExecutor } from '@/features/dashboard/components/agent-executor';
-import { AgentResults } from '@/features/dashboard/components/agent-results';
-import { Dashboard } from '@/features/dashboard/components/dashboard';
-import { WorkflowRunner } from '@/features/dashboard/components/workflow-runner';
+import dynamic from 'next/dynamic';
 import { PageHeader } from '@/shared/components/page-header';
+
+const AgentExecutor = dynamic(
+  () => import('@/features/dashboard/components/agent-executor').then(m => m.AgentExecutor),
+  { ssr: false },
+);
+const AgentResults = dynamic(
+  () => import('@/features/dashboard/components/agent-results').then(m => m.AgentResults),
+  { ssr: false },
+);
+const Dashboard = dynamic(
+  () => import('@/features/dashboard/components/dashboard').then(m => m.Dashboard),
+  { ssr: false },
+);
+const WorkflowRunner = dynamic(
+  () => import('@/features/dashboard/components/workflow-runner').then(m => m.WorkflowRunner),
+  { ssr: false },
+);
 
 export default function DashboardPage() {
   return (

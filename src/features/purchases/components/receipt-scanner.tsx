@@ -6,14 +6,32 @@ import { trpcReact } from "@/shared/lib/trpc-provider";
 import { Button } from "@/shared/ui/button";
 import { Card, CardContent } from "@/shared/ui/card";
 import { Checkbox } from "@/shared/ui/checkbox";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/shared/ui/dialog";
+import dynamic from "next/dynamic";
+
+const LazyDialog = dynamic(
+  () => import("@/shared/ui/dialog").then((m) => ({ default: m.Dialog })),
+  { ssr: false },
+);
+const LazyDialogContent = dynamic(
+  () => import("@/shared/ui/dialog").then((m) => ({ default: m.DialogContent })),
+  { ssr: false },
+);
+const LazyDialogDescription = dynamic(
+  () => import("@/shared/ui/dialog").then((m) => ({ default: m.DialogDescription })),
+  { ssr: false },
+);
+const LazyDialogFooter = dynamic(
+  () => import("@/shared/ui/dialog").then((m) => ({ default: m.DialogFooter })),
+  { ssr: false },
+);
+const LazyDialogHeader = dynamic(
+  () => import("@/shared/ui/dialog").then((m) => ({ default: m.DialogHeader })),
+  { ssr: false },
+);
+const LazyDialogTitle = dynamic(
+  () => import("@/shared/ui/dialog").then((m) => ({ default: m.DialogTitle })),
+  { ssr: false },
+);
 import {
   CameraIcon,
   UploadIcon,
@@ -357,20 +375,20 @@ export function ReceiptScanner() {
       )}
 
       {/* Results dialog */}
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-h-[80vh] max-w-lg overflow-hidden">
-          <DialogHeader>
-            <DialogTitle>
+      <LazyDialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <LazyDialogContent className="max-h-[80vh] max-w-lg overflow-hidden">
+          <LazyDialogHeader>
+            <LazyDialogTitle>
               {scannedItems.length}件の商品を検出
-            </DialogTitle>
-            <DialogDescription>
+            </LazyDialogTitle>
+            <LazyDialogDescription>
               {storeName && <span className="font-medium">{storeName}</span>}
               {storeName && purchaseDate && " ・ "}
               {purchaseDate && <span>{purchaseDate}</span>}
               {(storeName || purchaseDate) && <br />}
               登録するアイテムを選択してください
-            </DialogDescription>
-          </DialogHeader>
+            </LazyDialogDescription>
+          </LazyDialogHeader>
 
           <div className="flex items-center gap-2 border-b pb-2">
             <Button variant="ghost" size="sm" onClick={selectAll}>
@@ -415,7 +433,7 @@ export function ReceiptScanner() {
             ))}
           </div>
 
-          <DialogFooter>
+          <LazyDialogFooter>
             <Button
               variant="outline"
               onClick={() => setDialogOpen(false)}
@@ -438,9 +456,9 @@ export function ReceiptScanner() {
                 `${selectedIndices.size}件を追加する`
               )}
             </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+          </LazyDialogFooter>
+        </LazyDialogContent>
+      </LazyDialog>
     </div>
   );
 }
