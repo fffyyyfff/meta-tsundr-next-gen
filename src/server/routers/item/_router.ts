@@ -21,8 +21,13 @@ import { statsHandler } from './stats.handler';
 import { searchProductHandler } from './searchProduct.handler';
 import { enrichImageHandler } from './enrichImage.handler';
 import { enrichAllImagesHandler } from './enrichAllImages.handler';
+import { scanReceiptHandler } from './scanReceipt.handler';
 
 const enrichImageInput = z.object({ id: z.string() });
+const scanReceiptInput = z.object({
+  image: z.string(),
+  mimeType: z.enum(['image/jpeg', 'image/png', 'image/webp']),
+});
 
 export const itemRouter = router({
   list: publicProcedure
@@ -66,4 +71,8 @@ export const itemRouter = router({
 
   enrichAllImages: publicProcedure
     .mutation(({ ctx }) => enrichAllImagesHandler({ ctx })),
+
+  scanReceipt: publicProcedure
+    .input(scanReceiptInput)
+    .mutation(({ input }) => scanReceiptHandler({ input })),
 });

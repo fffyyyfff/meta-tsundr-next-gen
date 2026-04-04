@@ -10,7 +10,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/shared/ui/tabs';
 import { Input } from '@/shared/ui/input';
 import { Button } from '@/shared/ui/button';
 import { Skeleton } from '@/shared/ui/skeleton';
-import { PlusIcon, SearchIcon, BarChart3Icon, ImageIcon, Loader2Icon, CheckCircleIcon } from 'lucide-react';
+import { PlusIcon, SearchIcon, BarChart3Icon, ImageIcon, Loader2Icon, CheckCircleIcon, CameraIcon } from 'lucide-react';
 import { PageHeader } from '@/shared/components/page-header';
 import { GmailConnect } from '@/features/purchases/components/gmail-connect';
 
@@ -142,6 +142,10 @@ export default function PurchasesPage() {
             <ImageIcon className="size-4 mr-1" />
           )}
           画像を補完
+        </Button>
+        <Button variant="outline" render={<Link href="/purchases/scan" />}>
+          <CameraIcon className="size-4 mr-1" />
+          レシート
         </Button>
         <Button variant="outline" render={<Link href="/purchases/stats" />}>
           <BarChart3Icon className="size-4 mr-1" />
