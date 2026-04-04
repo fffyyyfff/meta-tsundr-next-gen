@@ -15,9 +15,12 @@ RUN pip install --no-cache-dir .
 # Copy application code
 COPY src/ src/
 
-# Non-root user
-RUN adduser --system --uid 1001 ocr
+# Non-root user with proper home directory for PaddleOCR cache
+RUN useradd --create-home --uid 1001 ocr
 USER ocr
+
+# Set home for PaddleOCR/PaddleX cache
+ENV HOME=/home/ocr
 
 EXPOSE 8100
 
