@@ -21,6 +21,8 @@ export default defineConfig({
         'src/hooks/**',
         'src/server/services/retry.ts',
         'src/server/services/usage-tracker.ts',
+        'src/server/routers/**',
+        'src/server/services/**',
       ],
       reporter: ['text', 'lcov'],
     },

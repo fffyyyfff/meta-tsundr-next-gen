@@ -7,6 +7,7 @@ import { Sidebar } from "@/shared/components/sidebar";
 import { SkipNav } from "@/shared/components/skip-nav";
 import { KeyboardShortcutsHelp } from "@/shared/components/keyboard-shortcuts-help";
 import { PageThemeProvider } from "@/shared/components/page-theme-provider";
+import { SentryInit } from "@/shared/components/sentry-init";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -44,6 +45,7 @@ export default function RootLayout({
         <SkipNav />
         <TRPCProvider>
           <PageThemeProvider>
+            <SentryInit />
             <Sidebar />
             <div className="flex flex-1 flex-col min-w-0">
               <header className="flex items-center justify-end border-b border-border px-6 py-3 md:pl-4" role="banner">

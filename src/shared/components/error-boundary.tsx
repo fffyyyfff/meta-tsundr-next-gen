@@ -4,6 +4,7 @@ import { Component } from 'react';
 import type { ErrorInfo, ReactNode } from 'react';
 import { Button } from '@/shared/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/shared/ui/card';
+import { Sentry } from '@/shared/lib/sentry';
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -26,9 +27,8 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
-    console.error('[ErrorBoundary]', error.message, {
-      stack: error.stack,
-      componentStack: errorInfo.componentStack,
+    Sentry.captureException(error, {
+      extra: { componentStack: errorInfo.componentStack },
     });
   }
 

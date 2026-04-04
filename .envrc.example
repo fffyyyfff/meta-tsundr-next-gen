@@ -65,6 +65,7 @@ export CACHE_PROVIDER=valkey
 export REDIS_URL=redis://localhost:6379
 
 export DATABASE_URL="postgresql://meta_tsundr:meta_tsundr_dev@localhost:5432/meta_tsundr"
+export SENTRY_DSN=your_sentry_dsn_here
 export GRPC_BACKEND_URL=http://localhost:50051
 export OCR_SERVICE_URL=http://localhost:8100
 export JWT_SECRET=dev-secret-at-least-32-characters-long
