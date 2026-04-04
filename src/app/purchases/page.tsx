@@ -10,9 +10,10 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/shared/ui/tabs';
 import { Input } from '@/shared/ui/input';
 import { Button } from '@/shared/ui/button';
 import { Skeleton } from '@/shared/ui/skeleton';
-import { PlusIcon, SearchIcon, BarChart3Icon, ImageIcon, Loader2Icon, CheckCircleIcon, CameraIcon } from 'lucide-react';
+import { PlusIcon, SearchIcon, BarChart3Icon, ImageIcon, Loader2Icon, CheckCircleIcon, CameraIcon, MicIcon } from 'lucide-react';
 import { PageHeader } from '@/shared/components/page-header';
 import { GmailConnect } from '@/features/purchases/components/gmail-connect';
+import { VoiceInput } from '@/features/purchases/components/voice-input';
 
 type ItemCategory = 'BOOK' | 'ELECTRONICS' | 'DAILY_GOODS' | 'FOOD' | 'CLOTHING' | 'HOBBY' | 'OTHER';
 type ItemStatus = 'WISHLIST' | 'PURCHASED' | 'IN_USE' | 'COMPLETED' | 'RETURNED';
@@ -86,6 +87,8 @@ export default function PurchasesPage() {
     },
   });
 
+  const [voiceOpen, setVoiceOpen] = useState(false);
+
   const handleStatusChange = useCallback(
     (id: string, status: ItemStatus) => {
       updateMutation.mutate({ id, status });
@@ -142,6 +145,10 @@ export default function PurchasesPage() {
             <ImageIcon className="size-4 mr-1" />
           )}
           画像を補完
+        </Button>
+        <Button variant="outline" onClick={() => setVoiceOpen(true)}>
+          <MicIcon className="size-4 mr-1" />
+          音声
         </Button>
         <Button variant="outline" render={<Link href="/purchases/scan" />}>
           <CameraIcon className="size-4 mr-1" />
@@ -266,6 +273,8 @@ export default function PurchasesPage() {
           </TabsContent>
         ))}
       </Tabs>
+
+      <VoiceInput open={voiceOpen} onOpenChange={setVoiceOpen} />
     </div>
   );
 }
