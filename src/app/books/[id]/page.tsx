@@ -1,15 +1,16 @@
 'use client';
 
-import { use, useCallback } from 'react';
+import { use, useCallback, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { trpcReact } from '@/shared/lib/trpc-provider';
 import { BookCover } from '@/features/books/components/book-cover';
 import { BookStatusBadge } from '@/features/books/components/book-status-badge';
+import { ShareCard } from '@/features/books/components/share-card';
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card';
 import { Button } from '@/shared/ui/button';
 import { Skeleton } from '@/shared/ui/skeleton';
-import { ArrowLeftIcon, PencilIcon, TrashIcon, BookOpenIcon, BookCheckIcon, BookMarkedIcon } from 'lucide-react';
+import { ArrowLeftIcon, PencilIcon, TrashIcon, BookOpenIcon, BookCheckIcon, BookMarkedIcon, ShareIcon } from 'lucide-react';
 import { AiReview } from '@/features/books/components/ai-book-features';
 
 function StarDisplay({ rating }: { rating: number | null | undefined }) {
@@ -33,6 +34,8 @@ function formatDate(date: string | Date | null | undefined): string {
 export default function BookDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const router = useRouter();
+
+  const [shareOpen, setShareOpen] = useState(false);
 
   const bookQuery = trpcReact.book.getById.useQuery({ id });
   const utils = trpcReact.useUtils();
@@ -198,11 +201,22 @@ export default function BookDetailPage({ params }: { params: Promise<{ id: strin
           <PencilIcon className="size-4 mr-1" />
           編集
         </Button>
+        <Button variant="outline" onClick={() => setShareOpen(true)}>
+          <ShareIcon className="size-4 mr-1" />
+          共有
+        </Button>
         <Button variant="destructive" onClick={handleDelete} disabled={deleteMutation.isPending}>
           <TrashIcon className="size-4 mr-1" />
           削除
         </Button>
       </div>
+
+      <ShareCard
+        bookId={book.id}
+        bookTitle={book.title}
+        open={shareOpen}
+        onOpenChange={setShareOpen}
+      />
     </div>
   );
 }
