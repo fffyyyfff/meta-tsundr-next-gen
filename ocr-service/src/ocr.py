@@ -22,7 +22,8 @@ def get_ocr():
         from paddleocr import PaddleOCR
 
         _ocr = PaddleOCR(
-            lang="ja",
+            lang="japan",
+            ocr_version="PP-OCRv4",
             use_doc_orientation_classify=False,
             use_doc_unwarping=False,
             use_textline_orientation=False,
