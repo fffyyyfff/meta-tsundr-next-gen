@@ -19,17 +19,27 @@ export async function scanWithOcr(
     const formData = new FormData();
     formData.append("image", blob, `receipt.${ext}`);
 
+    console.log(`[OCR Client] Sending to ${OCR_SERVICE_URL}/api/ocr/scan, size=${buffer.length}`);
+
     const response = await fetch(`${OCR_SERVICE_URL}/api/ocr/scan`, {
       method: "POST",
       body: formData,
-      signal: AbortSignal.timeout(30_000),
+      signal: AbortSignal.timeout(60_000),
     });
 
-    if (!response.ok) return null;
+    console.log(`[OCR Client] Response status: ${response.status}`);
+
+    if (!response.ok) {
+      const text = await response.text().catch(() => '');
+      console.error(`[OCR Client] Error response: ${text}`);
+      return null;
+    }
 
     const data = (await response.json()) as OcrResult;
+    console.log(`[OCR Client] Success: ${data.items?.length ?? 0} items`);
     return data;
-  } catch {
+  } catch (err) {
+    console.error(`[OCR Client] Error:`, err instanceof Error ? err.message : err);
     return null;
   }
 }
