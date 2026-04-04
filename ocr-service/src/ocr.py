@@ -21,9 +21,9 @@ def get_ocr():
     if _ocr is None:
         from paddleocr import PaddleOCR
 
+        # PP-OCRv5 has native multilingual support (ja/en/zh in single model)
+        # No lang or ocr_version needed - v5 handles all languages
         _ocr = PaddleOCR(
-            lang="japan",
-            ocr_version="PP-OCRv4",
             use_doc_orientation_classify=False,
             use_doc_unwarping=False,
             use_textline_orientation=False,
