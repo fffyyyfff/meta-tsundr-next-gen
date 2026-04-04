@@ -69,8 +69,34 @@ test.describe('Books', () => {
     await statsLink.click();
     await page.waitForURL('/books/stats');
 
-    // Verify we navigated to stats and the nav shows stats active
     const statsNav = page.locator('nav[aria-label="書籍ナビゲーション"] a', { hasText: '統計' });
     await expect(statsNav).toBeVisible();
+  });
+
+  test('should switch status tabs', async ({ page }) => {
+    await page.goto('/books');
+    await page.waitForLoadState('networkidle');
+
+    const unreadTab = page.getByRole('tab', { name: '積読' });
+    await unreadTab.click();
+    await expect(unreadTab).toHaveAttribute('aria-selected', 'true');
+
+    const readingTab = page.getByRole('tab', { name: '読書中' });
+    await readingTab.click();
+    await expect(readingTab).toHaveAttribute('aria-selected', 'true');
+
+    const finishedTab = page.getByRole('tab', { name: '読了' });
+    await finishedTab.click();
+    await expect(finishedTab).toHaveAttribute('aria-selected', 'true');
+  });
+
+  test('should have search input', async ({ page }) => {
+    await page.goto('/books');
+    await page.waitForLoadState('networkidle');
+
+    const searchInput = page.getByPlaceholder('タイトル・著者で検索');
+    await expect(searchInput).toBeVisible();
+    await searchInput.fill('テスト');
+    await expect(searchInput).toHaveValue('テスト');
   });
 });

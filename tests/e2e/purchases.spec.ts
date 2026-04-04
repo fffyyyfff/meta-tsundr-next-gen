@@ -89,4 +89,43 @@ test.describe('Purchases', () => {
     const sortSelect = page.locator('select[aria-label="並び替え"]');
     await expect(sortSelect).toBeVisible();
   });
+
+  test('should switch category tabs', async ({ page }) => {
+    await page.goto('/purchases');
+    await page.waitForLoadState('networkidle');
+
+    const foodTab = page.getByRole('tab', { name: '食品' });
+    await foodTab.click();
+    await expect(foodTab).toHaveAttribute('aria-selected', 'true');
+
+    const allTab = page.getByRole('tab', { name: '全て' });
+    await allTab.click();
+    await expect(allTab).toHaveAttribute('aria-selected', 'true');
+  });
+
+  test('should display receipt scan page', async ({ page }) => {
+    await page.goto('/purchases/scan');
+    await page.waitForLoadState('networkidle');
+
+    await expect(page.getByRole('heading', { name: 'レシート読み取り' })).toBeVisible();
+    await expect(page.getByText('AI解析')).toBeVisible();
+    await expect(page.getByText('OCR解析')).toBeVisible();
+  });
+
+  test('should show price check button on wishlist', async ({ page }) => {
+    await page.goto('/purchases?status=WISHLIST');
+    await page.waitForLoadState('networkidle');
+
+    await expect(page.getByText('価格チェック')).toBeVisible();
+  });
+
+  test('should have search input', async ({ page }) => {
+    await page.goto('/purchases');
+    await page.waitForLoadState('networkidle');
+
+    const searchInput = page.getByPlaceholder('タイトル・メーカーで検索');
+    await expect(searchInput).toBeVisible();
+    await searchInput.fill('テスト');
+    await expect(searchInput).toHaveValue('テスト');
+  });
 });
