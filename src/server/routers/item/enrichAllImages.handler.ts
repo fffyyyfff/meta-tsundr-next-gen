@@ -1,5 +1,6 @@
 import { prisma } from "@/shared/lib/prisma";
 import { searchByKeyword } from "../../services/rakuten-ichiba";
+import { invalidateCache } from "../../services/cached-queries";
 
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -49,6 +50,11 @@ export async function enrichAllImagesHandler({
 
     // Rate limit: 1 second between API calls
     await sleep(1000);
+  }
+
+  // Invalidate list cache so images appear immediately
+  if (updated > 0) {
+    await invalidateCache("items:*");
   }
 
   return { updated, failed, skipped };

@@ -1,5 +1,6 @@
 import { prisma } from "@/shared/lib/prisma";
 import { searchByKeyword } from "../../services/rakuten-ichiba";
+import { invalidateCache } from "../../services/cached-queries";
 import { TRPCError } from "@trpc/server";
 
 interface EnrichImageInput {
@@ -36,6 +37,8 @@ export async function enrichImageHandler({
     where: { id: input.id },
     data: { imageUrl },
   });
+
+  await invalidateCache("items:*");
 
   return { updated: true, imageUrl };
 }
