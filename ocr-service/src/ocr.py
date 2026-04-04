@@ -44,7 +44,7 @@ def extract_text(image_bytes: bytes) -> list[OcrLine]:
     img = enhancer.enhance(1.3)
 
     img_array = np.array(img)
-    result = get_ocr().ocr(img_array, cls=True)
+    result = get_ocr().ocr(img_array)
 
     lines: list[OcrLine] = []
     if result and result[0]:
