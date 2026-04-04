@@ -17,7 +17,7 @@ export async function scanWithOcr(
     const blob = new Blob([buffer], { type: mimeType });
 
     const formData = new FormData();
-    formData.append("file", blob, `receipt.${ext}`);
+    formData.append("image", blob, `receipt.${ext}`);
 
     const response = await fetch(`${OCR_SERVICE_URL}/api/ocr/scan`, {
       method: "POST",
