@@ -10,7 +10,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/shared/ui/tabs';
 import { Input } from '@/shared/ui/input';
 import { Button } from '@/shared/ui/button';
 import { Skeleton } from '@/shared/ui/skeleton';
-import { PlusIcon, SearchIcon, BarChart3Icon, ImageIcon, Loader2Icon, CheckCircleIcon, CameraIcon, MicIcon } from 'lucide-react';
+import { PlusIcon, SearchIcon, BarChart3Icon, ImageIcon, Loader2Icon, CheckCircleIcon, CameraIcon, MicIcon, TrendingDownIcon } from 'lucide-react';
 import { PageHeader } from '@/shared/components/page-header';
 import { GmailConnect } from '@/features/purchases/components/gmail-connect';
 import { VoiceInput } from '@/features/purchases/components/voice-input';
@@ -88,6 +88,13 @@ export default function PurchasesPage() {
   });
 
   const [voiceOpen, setVoiceOpen] = useState(false);
+  const [priceResult, setPriceResult] = useState<{ checked: number; drops: number } | null>(null);
+  const checkPricesMutation = trpcReact.item.checkPrices.useMutation({
+    onSuccess: (data) => {
+      setPriceResult({ checked: data.checked, drops: data.priceDrops.length });
+      utils.item.list.invalidate();
+    },
+  });
 
   const handleStatusChange = useCallback(
     (id: string, status: ItemStatus) => {
@@ -146,6 +153,20 @@ export default function PurchasesPage() {
           )}
           画像を補完
         </Button>
+        {activeStatus === 'WISHLIST' && (
+          <Button
+            variant="outline"
+            onClick={() => { setPriceResult(null); checkPricesMutation.mutate({}); }}
+            disabled={checkPricesMutation.isPending}
+          >
+            {checkPricesMutation.isPending ? (
+              <Loader2Icon className="size-4 mr-1 animate-spin" />
+            ) : (
+              <TrendingDownIcon className="size-4 mr-1" />
+            )}
+            価格チェック
+          </Button>
+        )}
         <Button variant="outline" onClick={() => setVoiceOpen(true)}>
           <MicIcon className="size-4 mr-1" />
           音声
@@ -168,6 +189,16 @@ export default function PurchasesPage() {
         <p className="flex items-center gap-1 text-sm text-emerald-600 dark:text-emerald-400">
           <CheckCircleIcon className="size-4" />
           {enrichResult.updated}件の画像を更新しました
+        </p>
+      )}
+
+      {priceResult && (
+        <p className="flex items-center gap-1 text-sm text-emerald-600 dark:text-emerald-400">
+          <CheckCircleIcon className="size-4" />
+          {priceResult.checked}件チェック完了
+          {priceResult.drops > 0
+            ? ` — ${priceResult.drops}件の値下げを検出しました`
+            : ' — 値下げはありませんでした'}
         </p>
       )}
 

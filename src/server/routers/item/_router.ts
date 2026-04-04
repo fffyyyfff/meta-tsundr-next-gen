@@ -23,6 +23,7 @@ import { enrichImageHandler } from './enrichImage.handler';
 import { enrichAllImagesHandler } from './enrichAllImages.handler';
 import { scanReceiptHandler } from './scanReceipt.handler';
 import { voiceRegisterHandler } from './voiceRegister.handler';
+import { checkPricesHandler } from './checkPrices.handler';
 
 const enrichImageInput = z.object({ id: z.string() });
 const scanReceiptInput = z.object({
@@ -81,4 +82,8 @@ export const itemRouter = router({
   voiceRegister: publicProcedure
     .input(z.object({ transcript: z.string().min(1) }))
     .mutation(({ input }) => voiceRegisterHandler({ input })),
+
+  checkPrices: publicProcedure
+    .input(z.object({ userId: z.string().optional() }))
+    .mutation(({ input }) => checkPricesHandler({ input })),
 });
