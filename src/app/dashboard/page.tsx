@@ -1,3 +1,5 @@
+'use client';
+
 import dynamic from 'next/dynamic';
 import { PageHeader } from '@/shared/components/page-header';
 
