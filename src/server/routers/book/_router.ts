@@ -10,6 +10,8 @@ import {
   bookLookupIsbnInput,
   bookGenerateReviewInput,
   bookSearchExternalInput,
+  seriesSearchInput,
+  seriesBulkAddInput,
 } from './schemas';
 import { listHandler } from './list.handler';
 import { getByIdHandler } from './getById.handler';
@@ -28,6 +30,8 @@ import {
 } from './ai.handler';
 import { notionSyncHandler } from './notionSync.handler';
 import { notionCreateNoteHandler, notionCreateNoteInput } from './notionCreateNote.handler';
+import { seriesSearchHandler } from './seriesSearch.handler';
+import { seriesBulkAddHandler } from './seriesBulkAdd.handler';
 
 export const bookRouter = router({
   list: publicProcedure
@@ -89,4 +93,12 @@ export const bookRouter = router({
   createNotionNote: publicProcedure
     .input(notionCreateNoteInput)
     .mutation(({ input }) => notionCreateNoteHandler({ input })),
+
+  seriesSearch: publicProcedure
+    .input(seriesSearchInput)
+    .query(({ input }) => seriesSearchHandler({ input })),
+
+  seriesBulkAdd: publicProcedure
+    .input(seriesBulkAddInput)
+    .mutation(({ input, ctx }) => seriesBulkAddHandler({ input, ctx })),
 });

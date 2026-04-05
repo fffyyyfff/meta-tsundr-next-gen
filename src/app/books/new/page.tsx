@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { trpcReact } from '@/shared/lib/trpc-provider';
 import { BookForm } from '@/features/books/components/book-form';
 import { Button } from '@/shared/ui/button';
-import { ArrowLeftIcon } from 'lucide-react';
+import { ArrowLeftIcon, LayersIcon } from 'lucide-react';
 
 export default function NewBookPage() {
   const router = useRouter();
@@ -22,6 +22,17 @@ export default function NewBookPage() {
         <ArrowLeftIcon className="size-4 mr-1" />
         書籍一覧に戻る
       </Button>
+
+      <div className="rounded-md border border-dashed p-3 text-sm text-muted-foreground">
+        <p>
+          シリーズをまとめて追加する場合は
+          <Button variant="link" size="sm" className="px-1" render={<Link href="/books" />}>
+            <LayersIcon className="size-3.5 mr-0.5" />
+            一括登録
+          </Button>
+          をご利用ください
+        </p>
+      </div>
 
       <BookForm
         onSubmit={(data) => {

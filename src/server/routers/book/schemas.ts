@@ -52,3 +52,21 @@ export const bookSearchExternalInput = z.object({
   availability: z.string().optional(),
   sort: z.string().optional(),
 });
+
+export const seriesSearchInput = z.object({
+  title: z.string().min(1).max(200),
+});
+
+export const seriesBulkAddInput = z.object({
+  series: z.string().min(1).max(500),
+  author: z.string().min(1).max(300),
+  volumes: z.array(
+    z.object({
+      number: z.number().int().min(0),
+      title: z.string().min(1).max(500),
+      isbn: z.string().max(13),
+      imageUrl: z.string().nullable(),
+    }),
+  ),
+  status: BookStatusEnum,
+});

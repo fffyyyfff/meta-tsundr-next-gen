@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import Link from 'next/link';
 import { trpcReact } from '@/shared/lib/trpc-provider';
 import { useBookStore } from '@/features/books/stores/bookStore';
@@ -9,9 +9,10 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/shared/ui/tabs';
 import { Input } from '@/shared/ui/input';
 import { Button } from '@/shared/ui/button';
 import { Skeleton } from '@/shared/ui/skeleton';
-import { PlusIcon, SearchIcon, BarChart3Icon } from 'lucide-react';
+import { PlusIcon, SearchIcon, BarChart3Icon, LayersIcon } from 'lucide-react';
 import { AiRecommendation, AiReadingPlan } from '@/features/books/components/ai-book-features';
 import { PageHeader } from '@/shared/components/page-header';
+import { SeriesBulkAdd } from '@/features/books/components/series-bulk-add';
 
 const TABS = [
   { value: 'all', label: '全て' },
@@ -28,6 +29,7 @@ const SORT_OPTIONS = [
 ] as const;
 
 export default function BooksPage() {
+  const [seriesOpen, setSeriesOpen] = useState(false);
   const { activeFilter, searchQuery, sortBy, sortOrder, setActiveFilter, setSearchQuery, setSortBy, setSortOrder } = useBookStore();
 
   const queryInput = {
@@ -80,6 +82,10 @@ export default function BooksPage() {
         title="積読管理"
         description={`あなたの読書記録 (${totalCount}冊)`}
       >
+        <Button variant="outline" onClick={() => setSeriesOpen(true)}>
+          <LayersIcon className="size-4 mr-1" />
+          シリーズ一括
+        </Button>
         <Button variant="outline" render={<Link href="/books/stats" />}>
           <BarChart3Icon className="size-4 mr-1" />
           統計
@@ -176,6 +182,8 @@ export default function BooksPage() {
         <AiRecommendation />
         <AiReadingPlan />
       </div>
+
+      <SeriesBulkAdd open={seriesOpen} onOpenChange={setSeriesOpen} />
     </div>
   );
 }
