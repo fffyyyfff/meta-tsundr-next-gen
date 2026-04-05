@@ -56,6 +56,20 @@ export AMAZON_SECRET_KEY=your_amazon_secret_key_here
 export AMAZON_PARTNER_TAG=your_partner_tag-22
 
 # ============================
+# オプション: Notion連携（読書ノート自動作成）
+# 取得: https://www.notion.so/my-integrations
+# 詳細: docs/SETUP-NOTION.md
+# ============================
+export NOTION_API_KEY=your_notion_api_key_here
+export NOTION_DATABASE_ID=your_notion_database_id_here
+
+# ============================
+# オプション: Slack通知（Incoming Webhook）
+# 取得: Slack → Apps → Incoming Webhooks
+# ============================
+export SLACK_WEBHOOK_URL=
+
+# ============================
 # インフラ（デフォルト値で動作）
 # ============================
 # ============================

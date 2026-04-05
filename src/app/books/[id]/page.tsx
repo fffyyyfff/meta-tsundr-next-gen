@@ -10,7 +10,7 @@ import { ShareCard } from '@/features/books/components/share-card';
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card';
 import { Button } from '@/shared/ui/button';
 import { Skeleton } from '@/shared/ui/skeleton';
-import { ArrowLeftIcon, PencilIcon, TrashIcon, BookOpenIcon, BookCheckIcon, BookMarkedIcon, ShareIcon } from 'lucide-react';
+import { ArrowLeftIcon, PencilIcon, TrashIcon, BookOpenIcon, BookCheckIcon, BookMarkedIcon, ShareIcon, ExternalLinkIcon, Loader2Icon } from 'lucide-react';
 import { AiReview } from '@/features/books/components/ai-book-features';
 import { ReadingTimer } from '@/features/books/components/reading-timer';
 
@@ -37,6 +37,7 @@ export default function BookDetailPage({ params }: { params: Promise<{ id: strin
   const router = useRouter();
 
   const [shareOpen, setShareOpen] = useState(false);
+  const [notionUrl, setNotionUrl] = useState<string | null>(null);
 
   const bookQuery = trpcReact.book.getById.useQuery({ id });
   const utils = trpcReact.useUtils();
@@ -44,6 +45,14 @@ export default function BookDetailPage({ params }: { params: Promise<{ id: strin
   const updateMutation = trpcReact.book.update.useMutation({
     onSuccess: () => {
       utils.book.getById.invalidate({ id });
+    },
+  });
+
+  const notionMutation = trpcReact.book.createNotionNote.useMutation({
+    onSuccess: (data) => {
+      if (data.success && data.url) {
+        setNotionUrl(data.url);
+      }
     },
   });
 
@@ -198,6 +207,50 @@ export default function BookDetailPage({ params }: { params: Promise<{ id: strin
 
       {/* AI Review */}
       <AiReview bookId={book.id} />
+
+      {/* Notion integration */}
+      {book.status === 'FINISHED' && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-sm">Notion連携</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {notionUrl ? (
+              <a
+                href={notionUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
+              >
+                <ExternalLinkIcon className="size-4" />
+                Notionで読書ノートを開く
+              </a>
+            ) : (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => notionMutation.mutate({ bookId: book.id })}
+                disabled={notionMutation.isPending}
+              >
+                {notionMutation.isPending ? (
+                  <>
+                    <Loader2Icon className="size-4 mr-1 animate-spin" />
+                    作成中...
+                  </>
+                ) : (
+                  <>
+                    <ExternalLinkIcon className="size-4 mr-1" />
+                    Notionにノート作成
+                  </>
+                )}
+              </Button>
+            )}
+            {notionMutation.data?.error && (
+              <p className="mt-2 text-xs text-destructive">{notionMutation.data.error}</p>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       {/* Actions */}
       <div className="flex gap-2">

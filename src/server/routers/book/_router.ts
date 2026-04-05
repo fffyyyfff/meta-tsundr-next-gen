@@ -26,6 +26,8 @@ import {
   generateReviewHandler,
   createReadingPlanHandler,
 } from './ai.handler';
+import { notionSyncHandler } from './notionSync.handler';
+import { notionCreateNoteHandler, notionCreateNoteInput } from './notionCreateNote.handler';
 
 export const bookRouter = router({
   list: publicProcedure
@@ -79,4 +81,12 @@ export const bookRouter = router({
   searchExternal: publicProcedure
     .input(bookSearchExternalInput)
     .query(({ input }) => searchExternalHandler({ input })),
+
+  syncToNotion: publicProcedure.mutation(({ ctx }) =>
+    notionSyncHandler({ ctx }),
+  ),
+
+  createNotionNote: publicProcedure
+    .input(notionCreateNoteInput)
+    .mutation(({ input }) => notionCreateNoteHandler({ input })),
 });

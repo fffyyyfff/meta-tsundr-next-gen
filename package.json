@@ -30,6 +30,7 @@
     "@connectrpc/connect": "^2.1.1",
     "@connectrpc/connect-node": "^2.1.1",
     "@hookform/resolvers": "^5.2.2",
+    "@notionhq/client": "^5.16.0",
     "@prisma/client": "^6.19.2",
     "@qdrant/js-client-rest": "^1.17.0",
     "@sentry/nextjs": "^10.47.0",
